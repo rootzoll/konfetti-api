@@ -110,14 +110,14 @@ public class NotifierBackgroundTask {
     		
         	// statistics
         	long timeSinceStartupInSeconds = (System.currentTimeMillis() - lastProcessingStart) / 1000l;
-			log.info("Ended NotifierBackgroundTask loop in " + timeSinceStartupInSeconds + " seconds.");
+//			log.info("Ended NotifierBackgroundTask loop in " + timeSinceStartupInSeconds + " seconds.");
 
 		} catch (Exception e) {
 			log.error("EXCEPTION on NotifierBackgroundTask loop: ", e);
 			e.printStackTrace();
     	}
 
-		log.info("");
+//		log.info("");
 
     }
     
@@ -133,7 +133,7 @@ public class NotifierBackgroundTask {
     	
     	// TODO: get just pending notifications form database (at the moment all that are not deleted)
     	List<Notification> pendingNotifications = notificationService.getAllPossiblePushNotifications();
-		log.info("--> PENDING NOTIFICATIONS: " + pendingNotifications.size());
+//		log.info("--> PENDING NOTIFICATIONS: " + pendingNotifications.size());
 
 		for (Notification notification : pendingNotifications) {
     		
