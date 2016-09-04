@@ -11,6 +11,7 @@ node {
     def branch = env.BRANCH_NAME
     def develop = 'develop'
     def production = 'master'
+    def testingDocker = 'catarata02_removeall_except_api'
     def dockerBranches = [develop, production]
 
     // ========================================================================
@@ -29,7 +30,7 @@ node {
     if (dockerBranches.contains(branch)) {
         echo "Building docker container for branch: ${branch}"
 
-        docker.withRegistry('http://localhost:5000') {
+        docker.withRegistry('https://index.docker.io/v1/', 'docker-credentials') {
 
             // ========================================================================
             stage 'Build Docker image'
@@ -40,10 +41,10 @@ node {
             // ========================================================================
             stage 'Tag and push image'
             // ========================================================================
-//            echo "tag image"
-//            dockerImg.tag()
-//            echo "push image"
-//            dockerImg.push()
+            echo "tag image"
+            dockerImg.tag()
+            echo "push image"
+            dockerImg.push()
 
             if (production.equals(branch)) {
                 // ========================================================================
