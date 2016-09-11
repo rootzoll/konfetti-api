@@ -30,7 +30,7 @@ node {
     if (dockerBranches.contains(branch)) {
         echo "Building docker container for branch: ${branch}"
 
-        docker.withRegistry('https://hub.docker.com', 'docker-credentials') {
+        docker.withRegistry('https://docker.io', 'docker-credentials') {
 
             def dockerImg;
             // ========================================================================
