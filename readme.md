@@ -3,13 +3,19 @@
 (if mvnw is not working for you, install maven and replace mvnw with mvn)
 
 Build package 
-./mvnw clean package
+`./mvnw clean package`
  
 Build docker image
-docker build --tag konfetti/backend .
+`docker build --tag konfetti/backend .`
 
 Run service with docker-compose in console
-docker-compose up
+`docker-compose up`
+
+maybe you need to stop & delete old containers before compose-up is working (`docker ps -a` and then `docker stop [ID]` then `docker rm [ID]`) ... if docker-compose up worked you sould see the logs from both containers (backend and DB)
+
+To check if konfetti docker server is running call in your browser: http://localhost:9000/actuator/info
+
+## More info on managing docker
 
 Run service with docker-compose as a daemon
 docker-compose up -d
