@@ -15,6 +15,8 @@ maybe you need to stop & delete old containers before compose-up is working (`do
 
 To check if konfetti docker server is running call in your browser: http://localhost:9000/actuator/info
 
+On the first time making a docker-compose up it could be that be startup fails and you dont get a response on localhost:9000 - then stop docker containers with CTRL+C and make again a `docker-compose up` - this time it should work.
+
 ## More info on managing docker
 
 Run service with docker-compose as a daemon
