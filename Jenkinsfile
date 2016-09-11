@@ -23,7 +23,7 @@ node {
     // ========================================================================
     stage 'Tests'
     // ========================================================================
-    sh "./mvnw package -DskipTests"
+    sh "./mvnw verify"
     step([$class: 'JUnitResultArchiver', testResults: '**/target/*-reports/TEST*.xml'])
 
     echo "Git Branch : ${branch}"
