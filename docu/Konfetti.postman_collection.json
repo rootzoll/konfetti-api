@@ -1,0 +1,187 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Konfetti",
+		"_postman_id": "59273075-4a71-d234-76f7-ce7ec34359e1",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Account",
+			"description": "",
+			"item": [
+				{
+					"name": "Get Accounts",
+					"request": {
+						"url": "{{protocol}}://{{host}}:{{port}}/konfetti/api/account",
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-CLIENT-ID",
+								"value": "1",
+								"description": ""
+							},
+							{
+								"key": "X-CLIENT-SECRET",
+								"value": "ASDF",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Party",
+			"description": "",
+			"item": [
+				{
+					"name": "Get Party",
+					"request": {
+						"url": "{{protocol}}://{{host}}:{{port}}/konfetti/api/party?lat=52.52&lon=13.13",
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-CLIENT-ID",
+								"value": "1",
+								"description": ""
+							},
+							{
+								"key": "X-CLIENT-SECRET",
+								"value": "ASDF",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Dashboard",
+					"request": {
+						"url": "{{protocol}}://{{host}}:{{port}}/konfetti/api/party/dashboard",
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-CLIENT-ID",
+								"value": "1",
+								"description": ""
+							},
+							{
+								"key": "X-CLIENT-SECRET",
+								"value": "ASDF",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Parties",
+					"request": {
+						"url": "{{protocol}}://{{host}}:{{port}}/konfetti/api/party/1?lastTS=300",
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-CLIENT-ID",
+								"value": "1",
+								"description": ""
+							},
+							{
+								"key": "X-CLIENT-SECRET",
+								"value": "ASDF",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get account",
+			"request": {
+				"url": "http://localhost:9000/konfetti/api/account",
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Health",
+			"request": {
+				"url": "{{protocol}}://{{host}}:{{port}}/actuator/health",
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CLIENT-ID",
+						"value": "1",
+						"description": ""
+					},
+					{
+						"key": "X-CLIENT-SECRET",
+						"value": "ASDF",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Info",
+			"request": {
+				"url": "{{protocol}}://{{host}}:{{port}}/actuator/info",
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-CLIENT-ID",
+						"value": "1",
+						"description": ""
+					},
+					{
+						"key": "X-CLIENT-SECRET",
+						"value": "ASDF",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
