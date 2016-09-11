@@ -18,12 +18,12 @@ node {
     stage 'Compile'
     // ========================================================================
     checkout scm
-    sh "./mvnw compile"
+    sh "./mvnw clean compile"
 
     // ========================================================================
     stage 'Tests'
     // ========================================================================
-    sh "./mvnw verify"
+    sh "./mvnw package -DskipTests"
     step([$class: 'JUnitResultArchiver', testResults: '**/target/*-reports/TEST*.xml'])
 
     echo "Git Branch : ${branch}"
