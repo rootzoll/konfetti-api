@@ -1,7 +1,7 @@
 node {
     // container and image names
     def containerName = 'konfettiBackend'
-    def imageName = 'konfetti/backend'
+    def imageName = 'konfetti/api'
 
     // docker run parameters
     def runPorts = '8080:8080'

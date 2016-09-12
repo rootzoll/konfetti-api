@@ -10,7 +10,7 @@ volumes:
 
 services:
   konfettiBackend:
-    image: konfetti/backend
+    image: konfetti/api
     container_name: konfettiBackend
     ports:
       - "9000:9000"

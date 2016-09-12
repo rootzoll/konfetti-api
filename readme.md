@@ -6,7 +6,7 @@ Build package
 `./mvnw clean package`
  
 Build docker image
-`docker build --tag konfetti/backend .`
+`docker build --tag konfetti/api .`
 
 Run service with docker-compose in console
 `docker-compose up`
