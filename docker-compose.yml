@@ -9,9 +9,9 @@ volumes:
     external: false
 
 services:
-  konfettiBackend:
+  konfettiApi:
     image: konfetti/api
-    container_name: konfettiBackend
+    container_name: konfettiApi
     ports:
       - "9000:9000"
     networks:
@@ -20,10 +20,20 @@ services:
       - database
 #    volumes:
 #      - /srv/konfetti/logs:/logs
-    env_file:
-      - /srv/konfetti/config/test.env
+#    env_file:
+#      - /srv/konfetti/config/test.env
     environment:
       SPRING_PROFILES_ACTIVE: docker
+
+  konfettiAdmin:
+    image: konfetti/admin
+    container_name: konfettiAdmin
+    ports:
+      - "80:80"
+    networks:
+      - productionNetwork
+    depends_on:
+      - konfettiApi
 
   database:
     image: mysql:5.7.12
