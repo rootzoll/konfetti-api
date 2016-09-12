@@ -18,6 +18,10 @@ services:
       - productionNetwork
     depends_on:
       - database
+#    volumes:
+#      - /srv/konfetti/logs:/logs
+    env_file:
+      - /srv/konfetti/config/test.env
     environment:
       SPRING_PROFILES_ACTIVE: docker
 

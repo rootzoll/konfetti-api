@@ -11,8 +11,7 @@ node {
     def branch = env.BRANCH_NAME
     def develop = 'develop'
     def production = 'master'
-    def testingDocker = 'catarata02_removeall_except_api'
-    def dockerBranches = [develop, production, testingDocker]
+    def dockerBranches = [develop, production]
 
     // ========================================================================
     stage 'Compile'
