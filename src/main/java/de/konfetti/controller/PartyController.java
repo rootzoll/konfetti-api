@@ -259,53 +259,56 @@ public class PartyController {
 		allParties = new ArrayList<Party>(resultParties);
 		resultParties.clear();
 
+		// TODO: fix this if it works again, at the moment no filtering by geo coordinates, does not work on server
+		resultParties = allParties;
 
-		if ((latStr.equals("0.0")) && (lonStr.equals("0.0"))) {
 
-			// return all parties when lat & lon not given
-			log.info("return all parties");
-
-			resultParties = allParties;
-
-		} else {
-
-			// filter parties when in reach of GPS
-
-			double lat = Double.parseDouble(latStr);
-			double lon = Double.parseDouble(lonStr);
-
-			log.info("filter parties on lat(" + lat + ") lon(" + lon + ")");
-
-			for (Party party : allParties) {
-
-				// calc distance in meters (and set on object)
-				double distanceMetersDouble = Helper.distInMeters(lat, lon, party.getLat(), party.getLon());
-				long distanceMetersLong = Math.round(distanceMetersDouble);
-				if (distanceMetersLong > Integer.MAX_VALUE) distanceMetersLong = Integer.MAX_VALUE;
-				int distanceMeters = (int) distanceMetersLong;
-
-				log.info("party(" + party.getId() + ") with meterrange(" + party.getMeters() + ") has distance to user of meters(" + distanceMeters + ")");
-
-				// check if user GPS is within party area or party is global
-				log.warn("TODO: Fix this geo filter later ... now just show every party");
-				if ((distanceMeters <= party.getMeters()) || (party.getMeters() == 0)) {
-
-					log.info("--> IN");
-
-					// use meters field to set distance for user perspective
-					party.setMeters(distanceMeters);
-
-					// add to result list
-					resultParties.add(party);
-				} else {
-
-					log.info("--> OUT");
-
-				}
-
-			}
-
-		}
+//		if ((latStr.equals("0.0")) && (lonStr.equals("0.0"))) {
+//
+//			// return all parties when lat & lon not given
+//			log.info("return all parties");
+//
+//			resultParties = allParties;
+//
+//		} else {
+//
+//			// filter parties when in reach of GPS
+//
+//			double lat = Double.parseDouble(latStr);
+//			double lon = Double.parseDouble(lonStr);
+//
+//			log.info("filter parties on lat(" + lat + ") lon(" + lon + ")");
+//
+//			for (Party party : allParties) {
+//
+//				// calc distance in meters (and set on object)
+//				double distanceMetersDouble = Helper.distInMeters(lat, lon, party.getLat(), party.getLon());
+//				long distanceMetersLong = Math.round(distanceMetersDouble);
+//				if (distanceMetersLong > Integer.MAX_VALUE) distanceMetersLong = Integer.MAX_VALUE;
+//				int distanceMeters = (int) distanceMetersLong;
+//
+//				log.info("party(" + party.getId() + ") with meterrange(" + party.getMeters() + ") has distance to user of meters(" + distanceMeters + ")");
+//
+//				// check if user GPS is within party area or party is global
+//				log.warn("TODO: Fix this geo filter later ... now just show every party");
+//				if ((distanceMeters <= party.getMeters()) || (party.getMeters() == 0)) {
+//
+//					log.info("--> IN");
+//
+//					// use meters field to set distance for user perspective
+//					party.setMeters(distanceMeters);
+//
+//					// add to result list
+//					resultParties.add(party);
+//				} else {
+//
+//					log.info("--> OUT");
+//
+//				}
+//
+//			}
+//
+//		}
 
 		// try to personalize when client/user info is in header
 		try {
