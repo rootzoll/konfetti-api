@@ -4,8 +4,11 @@ import de.konfetti.data.Client;
 import de.konfetti.service.ClientService;
 import de.konfetti.utils.Helper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.net.util.SubnetUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.InetAddress;
+
 
 @Slf4j
 public class ControllerSecurityHelper {
@@ -19,11 +22,12 @@ public class ControllerSecurityHelper {
 	
 	// 1. IP-Security
 	private static boolean enforceCheckIP = true;
-	private static String[] allowedIPs = {"127.0.0.1","0:0:0:0:0:0:0:1"};
-	
+
 	// 2. PASSWORD-Security
 	private static boolean enforcePassword = false;
 	private static String  allowedPassword = null;
+
+	private static String allowedSubnet = "127.0.0.0/16";
 
 	
 	private static void doInit() {
@@ -66,16 +70,17 @@ public class ControllerSecurityHelper {
 		if (enforceCheckIP) {
 
 			// get IP from request
-			String requestingIP = req.getRemoteAddr(); 
-			
-			// check if requested IP is within allowed IPs
+			String requestingIP = req.getRemoteAddr();
+
+			InetAddress inetAddress = InetAddress.getByName(requestingIP);
+			SubnetUtils subnetUtils = new SubnetUtils(allowedSubnet);
+
+			// check if requested IP is within allowed subnet
 			boolean correctIP = false;
-			for (String allowedIP : allowedIPs) {
-				if ((allowedIP!=null) && (allowedIP.equals(requestingIP))) {
-					correctIP = true;
-					break;
-				}
+			if (inetAddress.isLoopbackAddress() || subnetUtils.getInfo().isInRange(requestingIP)){
+				correctIP = true;
 			}
+
 			if (!correctIP) throw new Exception("ControllerSecurityHelper: Requesting IP("+requestingIP+") is not allowed for ADMIN-LEVEL SECURITY");
 		}
 		
