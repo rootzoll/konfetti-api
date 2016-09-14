@@ -25,11 +25,21 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
 
+  konfettiApp:
+    image: konfetti/app
+    container_name: konfettiApp
+    ports:
+      - "80:80"
+    networks:
+      - productionNetwork
+    depends_on:
+      - konfettiApi
+
   konfettiAdmin:
     image: konfetti/admin
     container_name: konfettiAdmin
     ports:
-      - "80:80"
+      - "8080:80"
     networks:
       - productionNetwork
     depends_on:
