@@ -21,7 +21,7 @@ services:
     volumes:
       - /konfetti/logs:/logs
     env_file:
-      - /konfetti/config/test.env
+      - /konfetti/config/api.env
     environment:
       SPRING_PROFILES_ACTIVE: docker
 
