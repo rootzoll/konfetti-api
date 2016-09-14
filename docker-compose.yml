@@ -18,10 +18,10 @@ services:
       - productionNetwork
     depends_on:
       - database
-#    volumes:
-#      - /srv/konfetti/logs:/logs
-#    env_file:
-#      - /srv/konfetti/config/test.env
+    volumes:
+      - /konfetti/logs:/logs
+    env_file:
+      - /konfetti/config/test.env
     environment:
       SPRING_PROFILES_ACTIVE: docker
 
@@ -59,3 +59,5 @@ services:
       MYSQL_PASSWORD: konfetti
     volumes:
       - konfettiDb:/var/lib/mysql
+#    env_file:
+#      - /konfetti/config/database.env
