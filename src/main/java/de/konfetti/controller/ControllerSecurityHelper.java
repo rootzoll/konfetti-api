@@ -2,18 +2,21 @@ package de.konfetti.controller;
 
 import de.konfetti.data.Client;
 import de.konfetti.service.ClientService;
-import de.konfetti.utils.Helper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.util.SubnetUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 
-
+@Configuration
+@Component
 @Slf4j
 public class ControllerSecurityHelper {
 
-	private static boolean doneInit = false;
+	private boolean doneInit = false;
 	
 	/*
 	 * ADMIN-LEVEL
@@ -21,33 +24,36 @@ public class ControllerSecurityHelper {
 	 */
 	
 	// 1. IP-Security
-	private static boolean enforceCheckIP = true;
+	@Value("${konfetti.admin.check.ip}")
+	private boolean checkIp = true;
+
+	@Value("${konfetti.admin.allowedSubnet}")
+	private String allowedSubnet = "127.0.0.0/16";
 
 	// 2. PASSWORD-Security
-	private static boolean enforcePassword = false;
-	private static String  allowedPassword = null;
+	@Value("${konfetti.admin.check.password}")
+	private boolean checkPassword = false;
 
-	private static String allowedSubnet = "127.0.0.0/16";
+	@Value("${konfetti.admin.password}")
+	private String adminPassword = null;
 
-	
-	private static void doInit() {
+	private void doInit() {
 
 		log.info("Doing INIT ControllerSecurityHelper ...");
 		
 		// try to load password from properties file
-		allowedPassword = Helper.getPropValues("konfetti.adminPassword");
-		if (allowedPassword!=null) {
-			allowedPassword = allowedPassword.trim();
-			if (allowedPassword.length()<4) {
+		if (adminPassword !=null) {
+			adminPassword = adminPassword.trim();
+			if (adminPassword.length()<4) {
 				log.warn("PASSWORD IN PROPERTIES FILE IS TOO SHORT -> PLEASE CHOOSE LONGER ONE");
 			}
-			if (allowedPassword.length()==0) allowedPassword = null;
+			if (adminPassword.length()==0) adminPassword = null;
 		}
 		
 		// make settings based on password
-		if (allowedPassword!=null) {
-			enforcePassword = true;
-			enforceCheckIP = false;
+		if (adminPassword !=null) {
+			checkPassword = true;
+			checkIp = false;
 			log.info("- OK ADMIN ACCESS PER PASSWORD ACTIVATED (see config file) - IP SECURITY OFF");
 		} else {
 			log.info("(no ADMIN PASSWORD set in PROPERTIES FILE)");
@@ -57,18 +63,17 @@ public class ControllerSecurityHelper {
 	}
 	
 	// if throws an Exception ==> security check failed
-	public static void checkAdminLevelSecurity(HttpServletRequest req) throws Exception {
+	public void checkAdminLevelSecurity(HttpServletRequest req) throws Exception {
 		
 		if (!doneInit) doInit();
 		
 		// detect no security
-		if ((!enforceCheckIP) && (!enforcePassword)) {
+		if ((!checkIp) && (!checkPassword)) {
 			throw new Exception("ControllerSecurityHelper: MISSING ADMIN LEVEL SECURITY - BLOCKING");
 		}
 		
 		// check IP security
-		if (enforceCheckIP) {
-
+		if (checkIp) {
 			// get IP from request
 			String requestingIP = req.getRemoteAddr();
 
@@ -85,7 +90,7 @@ public class ControllerSecurityHelper {
 		}
 		
 		// check PASSWORD security
-		if (enforcePassword) {
+		if (checkPassword) {
 			
 			// TODO: ACTIVATE ON RELEASE
 			// when password is used - HTTPS is mandatory
@@ -96,7 +101,7 @@ public class ControllerSecurityHelper {
 			if (requestingPassword==null) throw new Exception("ControllerSecurityHelper: Missing X-ADMIN-PASSWORD header field on HTTP request for ADMIN-LEVEL SECURITY from IP("+req.getRemoteAddr()+")");
 			
 			// check if given password is valid
-			boolean correctPassword = ((allowedPassword!=null) && (allowedPassword.equals(requestingPassword)));
+			boolean correctPassword = ((adminPassword !=null) && (adminPassword.equals(requestingPassword)));
 			if (!correctPassword) {
 				try {
 					Thread.sleep(300);
@@ -108,7 +113,7 @@ public class ControllerSecurityHelper {
 		
 	}
 		
-	public static Client getClientFromRequestWhileCheckAuth(HttpServletRequest req, ClientService clientService) throws Exception {
+	public Client getClientFromRequestWhileCheckAuth(HttpServletRequest req, ClientService clientService) throws Exception {
 		
 		if (!doneInit) doInit();
 		

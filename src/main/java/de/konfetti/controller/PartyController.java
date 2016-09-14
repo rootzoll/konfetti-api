@@ -52,6 +52,9 @@ public class PartyController {
 	private final KonfettiTransactionService konfettiTransactionService;
 
 	@Autowired
+	private ControllerSecurityHelper controllerSecurityHelper;
+
+	@Autowired
 	private SimpMessagingTemplate webSocket;
 
 	@Autowired
@@ -87,7 +90,7 @@ public class PartyController {
 	@RequestMapping(value = "/dashboard", method = RequestMethod.GET)
 	public DashBoardInfo getDashBaordInfo(HttpServletRequest request) throws Exception {
 
-		ControllerSecurityHelper.checkAdminLevelSecurity(request);
+		controllerSecurityHelper.checkAdminLevelSecurity(request);
 		DashBoardInfo info = new DashBoardInfo();
 
 		info.numberOfUsers = userService.getNumberOfActiveUsers();
@@ -101,7 +104,7 @@ public class PartyController {
 	@CrossOrigin(origins = "*")
 	@RequestMapping(method = RequestMethod.POST)
 	public Party createParty(@RequestBody @Valid final Party party, HttpServletRequest request) throws Exception {
-		ControllerSecurityHelper.checkAdminLevelSecurity(request);
+		controllerSecurityHelper.checkAdminLevelSecurity(request);
 		log.info("ADMIN: Creating PARTY(" + party.getId() + ")");
 		return partyService.create(party);
 	}
@@ -113,7 +116,7 @@ public class PartyController {
 	@CrossOrigin(origins = "*")
 	@RequestMapping(method = RequestMethod.PUT)
 	public Party updateParty(@RequestBody @Valid final Party party, HttpServletRequest request) throws Exception {
-		ControllerSecurityHelper.checkAdminLevelSecurity(request);
+		controllerSecurityHelper.checkAdminLevelSecurity(request);
 		log.info("ADMIN: Updating PARTY(" + party.getId() + ")");
 		return partyService.update(party);
 	}
@@ -121,7 +124,7 @@ public class PartyController {
 	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/{partyId}", method = RequestMethod.DELETE)
 	public boolean deleteParty(@PathVariable long partyId, HttpServletRequest request) throws Exception {
-		ControllerSecurityHelper.checkAdminLevelSecurity(request);
+		controllerSecurityHelper.checkAdminLevelSecurity(request);
 
     	/* real delete needs to delete also all connected data
         partyService.delete(partyId);
@@ -148,7 +151,7 @@ public class PartyController {
 		// if user/client is set by header -> add requests and notifications important to user
 		try {
 
-			Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(request, clientService);
+			Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(request, clientService);
 
 			if (client != null) {
 
@@ -263,57 +266,57 @@ public class PartyController {
 		resultParties = allParties;
 
 
-//		if ((latStr.equals("0.0")) && (lonStr.equals("0.0"))) {
-//
-//			// return all parties when lat & lon not given
-//			log.info("return all parties");
-//
-//			resultParties = allParties;
-//
-//		} else {
-//
-//			// filter parties when in reach of GPS
-//
-//			double lat = Double.parseDouble(latStr);
-//			double lon = Double.parseDouble(lonStr);
-//
-//			log.info("filter parties on lat(" + lat + ") lon(" + lon + ")");
-//
-//			for (Party party : allParties) {
-//
-//				// calc distance in meters (and set on object)
-//				double distanceMetersDouble = Helper.distInMeters(lat, lon, party.getLat(), party.getLon());
-//				long distanceMetersLong = Math.round(distanceMetersDouble);
-//				if (distanceMetersLong > Integer.MAX_VALUE) distanceMetersLong = Integer.MAX_VALUE;
-//				int distanceMeters = (int) distanceMetersLong;
-//
-//				log.info("party(" + party.getId() + ") with meterrange(" + party.getMeters() + ") has distance to user of meters(" + distanceMeters + ")");
-//
-//				// check if user GPS is within party area or party is global
-//				log.warn("TODO: Fix this geo filter later ... now just show every party");
-//				if ((distanceMeters <= party.getMeters()) || (party.getMeters() == 0)) {
-//
-//					log.info("--> IN");
-//
-//					// use meters field to set distance for user perspective
-//					party.setMeters(distanceMeters);
-//
-//					// add to result list
-//					resultParties.add(party);
-//				} else {
-//
-//					log.info("--> OUT");
-//
-//				}
-//
-//			}
-//
-//		}
+		if ((latStr.equals("0.0")) && (lonStr.equals("0.0"))) {
+
+			// return all parties when lat & lon not given
+			log.info("return all parties");
+
+			resultParties = allParties;
+
+		} else {
+
+			// filter parties when in reach of GPS
+
+			double lat = Double.parseDouble(latStr);
+			double lon = Double.parseDouble(lonStr);
+
+			log.info("filter parties on lat(" + lat + ") lon(" + lon + ")");
+
+			for (Party party : allParties) {
+
+				// calc distance in meters (and set on object)
+				double distanceMetersDouble = Helper.distInMeters(lat, lon, party.getLat(), party.getLon());
+				long distanceMetersLong = Math.round(distanceMetersDouble);
+				if (distanceMetersLong > Integer.MAX_VALUE) distanceMetersLong = Integer.MAX_VALUE;
+				int distanceMeters = (int) distanceMetersLong;
+
+				log.info("party(" + party.getId() + ") with meterrange(" + party.getMeters() + ") has distance to user of meters(" + distanceMeters + ")");
+
+				// check if user GPS is within party area or party is global
+				log.warn("TODO: Fix this geo filter later ... now just show every party");
+				if ((distanceMeters <= party.getMeters()) || (party.getMeters() == 0)) {
+
+					log.info("--> IN");
+
+					// use meters field to set distance for user perspective
+					party.setMeters(distanceMeters);
+
+					// add to result list
+					resultParties.add(party);
+				} else {
+
+					log.info("--> OUT");
+
+				}
+
+			}
+
+		}
 
 		// try to personalize when client/user info is in header
 		try {
 
-			Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(request, clientService);
+			Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(request, clientService);
 
 			if (client != null) {
 
@@ -419,7 +422,7 @@ public class PartyController {
 		if (httpRequest.getHeader("X-CLIENT-ID") != null) {
 
 			// A) check if user is owner of notification
-			Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+			Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
 			boolean userIsOwner = (noti.getUserId().equals(client.getUserId()));
 			if (!userIsOwner)
 				throw new Exception("cannot action notification(" + notiId + ") - user is not noti owner / client.userID(" + client.getUserId() + ") != notiUserId(" + noti.getUserId() + ")");
@@ -427,7 +430,7 @@ public class PartyController {
 		} else {
 
 			// B) check for trusted application with administrator privilege
-			ControllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
+			controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
 		}
 
     	/*
@@ -460,7 +463,7 @@ public class PartyController {
 		if (party == null) throw new Exception("party with id(" + partyId + ") not found");
 
 		// get user info
-		Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
 		if (client == null) throw new Exception("client not found");
 		User user = userService.findById(client.getUserId());
 		if (user == null) throw new Exception("user(" + client.getUserId() + ") not found");
@@ -557,7 +560,7 @@ public class PartyController {
 	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/{partyId}/request", method = RequestMethod.PUT)
 	public Request updateRequest(@PathVariable long partyId, @RequestBody @Valid Request request, HttpServletRequest httpRequest) throws Exception {
-		ControllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
+		controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
 		return requestService.update(request);
 	}
 
@@ -574,7 +577,7 @@ public class PartyController {
 
 			// A) client for user (party admin or reeuest author)
 
-			Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+			Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
 			User user = userService.findById(client.getUserId());
 
 			boolean userIsAuthor = (request.getUserId().equals(client.getUserId()));
@@ -588,7 +591,7 @@ public class PartyController {
 
 			// B) check for trusted application with administrator privilege
 
-			ControllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
+			controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
 		}
 
 		// delete any waiting notification finding a reviewer
@@ -617,7 +620,7 @@ public class PartyController {
 	@RequestMapping(value = "/{partyId}/request/{requestId}", method = RequestMethod.GET)
 	public Request getRequest(@PathVariable long partyId, @PathVariable long requestId, @RequestParam(value = "upvoteAmount", defaultValue = "0") Long upvoteAmount, HttpServletRequest httpRequest) throws Exception {
 
-		Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
 		log.info("PartyController getRequest(" + requestId + ") upvoteAmount(" + upvoteAmount + ") ...");
 
 		Request request = requestService.findById(requestId);
@@ -746,7 +749,7 @@ public class PartyController {
 
 				// A) client for user (party admin, reviewer or request author)
 
-				Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+				Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
 				User user = userService.findById(client.getUserId());
 
 				userIsAuthor = (request.getUserId().equals(client.getUserId()));
@@ -761,7 +764,7 @@ public class PartyController {
 
 				// B) check for trusted application with administrator privilege
 
-				ControllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
+				controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
 				userIsPartyAdmin = true;
 			}
 

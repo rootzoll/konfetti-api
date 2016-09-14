@@ -27,13 +27,14 @@ public class MediaItemController {
 
 	private final ClientService clientService;
 	private final MediaService mediaService;
-    //private final UserService userService;
+
+	@Autowired
+	private ControllerSecurityHelper controllerSecurityHelper;
 
     @Autowired
     public MediaItemController(final ClientService clientService, final MediaService mediaService, final UserService userService) {
         this.clientService = clientService;
         this.mediaService = mediaService;
-        //this.userService = userService;
     }
 
     //---------------------------------------------------
@@ -48,14 +49,14 @@ public class MediaItemController {
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
     		
     		// A) check that chat is just hosted by user
-    		Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+    		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     		if (client==null) throw new Exception("client is NULL");
         	template.setUserId(client.getUserId());
         	
     	} else {
     		
     		// B) check for trusted application with administrator privilege
-        	ControllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
+        	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
     	}
     	
     	// security override on template

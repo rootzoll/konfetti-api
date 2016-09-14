@@ -39,6 +39,9 @@ public class UserController {
     private String passwordSalt;
 
 	@Autowired
+	private ControllerSecurityHelper controllerSecurityHelper;
+
+	@Autowired
 	private EMailManager eMailManager;
     
     @Autowired
@@ -62,7 +65,7 @@ public class UserController {
     @CrossOrigin(origins = "*")
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
     public List<User> getAllUsers(HttpServletRequest httpRequest) throws Exception {
-    	ControllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
+    	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
         return userService.getAllUsers();
     }
     
@@ -146,7 +149,7 @@ public class UserController {
     		// A) check that user is himself
     		Client client;
     		try {
-    			client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+    			client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     		} catch (Exception e) {
 				log.warn("Exception on readUser (get client): " + e.getMessage());
 				user = new User();
@@ -166,7 +169,7 @@ public class UserController {
     	} else {
     		
     		// B) check for trusted application with administrator privilege
-        	ControllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
+        	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
     	}
     	
     	// keep password hash just on server side
@@ -260,7 +263,7 @@ public class UserController {
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
     		
     		// A) check that user is himself
-    		Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+    		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     		if (!client.getUserId().equals(user.getId())) throw new Exception("client("+client.getId()+") is not allowed to read user("+user.getId()+")");
     	
     		// B) check if email got changed
@@ -302,7 +305,7 @@ public class UserController {
     	} else {
     		
     		// B) check for trusted application with administrator privilege
-        	ControllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
+        	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
         	
         	// complete overwrite allowed
         	user = userInput;
@@ -349,7 +352,7 @@ public class UserController {
     	if (party==null) throw new Exception("party does not exist");
     		
         // get user from HTTP request
-        Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+        Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
         if (client==null) throw new Exception("invalid/missing client on request");
         User user = userService.findById(client.getUserId());
         if (user==null) throw new Exception("missing user with id("+client.getUserId()+")");
@@ -407,7 +410,7 @@ public class UserController {
     	if (party==null) throw new Exception("party does not exist");
     		
     	// check for trusted application with administrator privilege
-        ControllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
+        controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
 
         // generate codes
         List<String> codes = new ArrayList<String>();
@@ -437,7 +440,7 @@ public class UserController {
     	if (party==null) throw new Exception("party does not exist");
     		
     	// check for trusted application with administrator privilege
-        ControllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
+        controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
 
         // generate codes
         List<String> codes = new ArrayList<String>();
@@ -482,7 +485,7 @@ public class UserController {
      	address = address.toLowerCase();
 
      	// get user from HTTP request
-     	Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+     	Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
      	if (client==null) throw new Exception("invalid/missing client on request");
      	User user = userService.findById(client.getUserId());
      	if (user==null) throw new Exception("missing user with id("+client.getUserId()+")");
@@ -672,7 +675,7 @@ public class UserController {
 		if (!locale.equals("en")) log.warn("TODO: implement reedem code feedback in locale '" + locale + "'");
 
     	// get user from HTTP request
-    	Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+    	Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     	if (client==null) throw new Exception("invalid/missing client on request");
     	User user = userService.findById(client.getUserId());
     	if (user==null) throw new Exception("missing user with id("+client.getUserId()+")");

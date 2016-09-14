@@ -28,7 +28,10 @@ public class ChatController {
     private final ChatService chatService;
     private final MessageService messageService;
     private final RequestService requestService;
-    
+
+	@Autowired
+	private ControllerSecurityHelper controllerSecurityHelper;
+
     @Autowired
     private SimpMessagingTemplate webSocket;
 
@@ -69,7 +72,7 @@ public class ChatController {
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
 
     		// A) check that chat is just hosted by user
-    		Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+    		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     		boolean userIsHost = (template.getHostId().equals(client.getUserId()));
     		if (!userIsHost) throw new Exception("user cannot create chat for other users");
 
@@ -86,7 +89,7 @@ public class ChatController {
     	} else {
 
     		// B) check for trusted application with administrator privilege
-        	ControllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
+        	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
     	}
 
     	// security override on template
@@ -131,7 +134,7 @@ public class ChatController {
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
 
 			// A) check that user is host or member of chat
-    		Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+    		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     		boolean userIsHost = (chat.getHostId().equals(client.getUserId()));
     		boolean userIsMember = false;
     		for (Long memeberId : chat.getMembers()) {
@@ -168,7 +171,7 @@ public class ChatController {
 		} else {
 
 			// B) check for trusted application with administrator privilege
-        	ControllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
+        	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
     	}
 
 		return chat;
@@ -192,7 +195,7 @@ public class ChatController {
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
     		
     		// A) check that user is host or member of chat
-    		Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+    		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     		boolean userIsHost = (chat.getHostId().equals(client.getUserId()));
     		boolean userIsMember = false;
     		for (Long memeberId : chat.getMembers()) {
@@ -224,7 +227,7 @@ public class ChatController {
     	} else {
     		
     		// A) check for trusted application with administrator privilege
-        	ControllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
+        	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
     	}
     	
     	// security override on template
@@ -302,7 +305,7 @@ public class ChatController {
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
     		
     		// A) check that user is host or member of chat
-    		Client client = ControllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+    		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     		boolean userIsHost = (chat.getHostId().equals(client.getUserId()));
     		boolean userIsMember = false;
     		for (Long memeberId : chat.getMembers()) {
@@ -316,7 +319,7 @@ public class ChatController {
     	} else {
     		
     		// B) check for trusted application with administrator privilege
-        	ControllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
+        	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
     	}
     	
     	return message;
