@@ -6,10 +6,13 @@ import com.google.api.translate.Translate;
 import de.konfetti.data.mediaitem.LangData;
 import de.konfetti.data.mediaitem.MultiLang;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Set;
 
 
+@Configuration
 @Slf4j
 public class AutoTranslator {
 
@@ -21,6 +24,9 @@ public class AutoTranslator {
 	public static final String LANGCODE_ENGLISH = "en";
 	public static final String LANGCODE_ARABIC = "ar";
 	public static final String[] SUPPORTED_LANGCODES = {LANGCODE_GERMAN, LANGCODE_ENGLISH, LANGCODE_ARABIC};
+
+	@Value("${googletranslate.apikey}")
+	private static final String googleTranslatorApiKey = null;
 	
 	/*
 	 * SINGLETON
@@ -30,13 +36,12 @@ public class AutoTranslator {
 	
 	private AutoTranslator() {
 		
-		String ApiKey = Helper.getPropValues("googletranslate.apikey");
-		if (ApiKey==null) throw new RuntimeException("please set 'googletranslate.apikey' in 'application.properties'");
-		log.info("Got API-KEY: " + ApiKey);
+		if (googleTranslatorApiKey==null) throw new RuntimeException("please set 'googletranslate.apikey' in 'application.properties'");
+		log.info("Got API-KEY: " + googleTranslatorApiKey);
 		
 		// TODO: get API key from config not stored on GitHub
 		GoogleAPI.setHttpReferrer("http://www.konfettiapp.de/api");
-	    GoogleAPI.setKey(ApiKey);		
+	    GoogleAPI.setKey(googleTranslatorApiKey);
 	}
 	
 	public static AutoTranslator getInstance() {
