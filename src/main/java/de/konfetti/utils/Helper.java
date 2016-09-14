@@ -79,31 +79,5 @@ public class Helper {
                 result.add(item);
         return result.toArray(input);
     }
-    
-    // get a value from the property file
-	public static String getPropValues(String key) {
-		
-		// if in cache
-		if (prop!=null) return prop.getProperty(key);
-		
-		// load fresh
-		InputStream inputStream = null;
-		String value = null;
-		try {
-			Properties prop = new Properties();
-			inputStream = AutoTranslator.class.getClassLoader().getResourceAsStream("application.properties");
-			prop.load(inputStream);
-			value = prop.getProperty(key);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				inputStream.close();
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
 
-		}
-		return value;
-	}
 }

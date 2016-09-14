@@ -1,6 +1,8 @@
 package de.konfetti.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -9,6 +11,7 @@ import java.net.URL;
 /*
  * Use to send push notifications to apps.
  */
+@Configuration
 @Slf4j
 public class PushManager {
 
@@ -16,14 +19,12 @@ public class PushManager {
 	public static final int PLATFORM_IOS = 1; 
 	
 	private static PushManager singleton = null;
-	
-	private String appID;
-	private String basicAuth;
-	
-	private PushManager() {
-		this.appID = Helper.getPropValues("konfetti.pushID");
-		this.basicAuth = Helper.getPropValues("konfetti.pushAuth");		
-	}
+
+	@Value("${konfetti.pushID}")
+	private String pushId;
+
+	@Value("${konfetti.pushAuth}")
+	private String pushAuth;
 	
 	public static PushManager getInstance() {
 		if (singleton==null) singleton = new PushManager();
@@ -36,10 +37,10 @@ public class PushManager {
 	}
 		
 	public boolean isAvaliable() {
-		if (this.appID==null) return false;
-		if (this.appID.trim().length()==0) return false;
-		if (this.basicAuth==null) return false;
-		return this.basicAuth.trim().length() != 0;
+		if (this.pushId ==null) return false;
+		if (this.pushId.trim().length()==0) return false;
+		if (this.pushAuth ==null) return false;
+		return this.pushAuth.trim().length() != 0;
 	}
 
 	public boolean sendNotification(int platformUSEFINALS, String userPushID, String messageEnglish, String locale, String messageLocale, Long notificationID) {
@@ -50,26 +51,19 @@ public class PushManager {
 		}
 
 		try {
-
-			  /*
-			   * PREPARE JSON DATA
-			   */
-
+			// PREPARE JSON DATA
 			String additionalLanguage = "";
 			  if ((locale!=null) && (messageLocale!=null)) additionalLanguage = ", \""+locale+"\": \""+messageLocale+"\"";
-			  String json = "{\"app_id\": \""+this.appID+"\",\"include_player_ids\":[\""+userPushID+"\"],\"data\": {\"notification\": \""+notificationID+"\"},\"contents\": {\"en\": \""+messageEnglish+"\""+additionalLanguage+"}}";
+			  String json = "{\"app_id\": \""+this.pushId +"\",\"include_player_ids\":[\""+userPushID+"\"],\"data\": {\"notification\": \""+notificationID+"\"},\"contents\": {\"en\": \""+messageEnglish+"\""+additionalLanguage+"}}";
 
 
-			  /*
-			   * HTTP REQUEST --> ONESIGNAL REST API
-			   */
-
+			// HTTP REQUEST --> ONESIGNAL REST API
 			URL url = new URL("https://onesignal.com/api/v1/notifications");
 			  HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 			  httpCon.setDoInput(true);
 			  httpCon.setDoOutput(true);
 			  httpCon.setRequestProperty("Content-Type", "application/json");
-			  httpCon.setRequestProperty("Authorization", "Basic "+this.basicAuth);
+			  httpCon.setRequestProperty("Authorization", "Basic "+this.pushAuth);
 			  httpCon.setRequestMethod("POST");
 			  OutputStreamWriter out = new OutputStreamWriter(httpCon.getOutputStream());
 			  out.append(json);

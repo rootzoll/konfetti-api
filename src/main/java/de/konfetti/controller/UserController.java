@@ -11,11 +11,12 @@ import de.konfetti.utils.PushManager;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.Size;
 
 import java.net.URL;
 import java.net.URLEncoder;
@@ -35,8 +36,18 @@ public class UserController {
     private final AccountingService accountingService;
     private final PartyService partyService;
     private final CodeService codeService;
-    
+
+	@Value("${security.passwordsalt}")
     private String passwordSalt;
+
+	@Value("${spring.mail.host}")
+	private String mailHost;
+
+	@Value("${spring.mail.enabled}")
+	private Boolean mailEnabled;
+
+	@Value("${konfetti.api.cheatcodes.enabled}")
+	private Boolean cheatCodesEnabled;
 
 	@Autowired
 	private ControllerSecurityHelper controllerSecurityHelper;
@@ -53,8 +64,7 @@ public class UserController {
         this.partyService = partyService;
         this.codeService = codeService;
                 
-        this.passwordSalt = Helper.getPropValues("security.passwordsalt");
-        if ((this.passwordSalt==null) || (this.passwordSalt.trim().length()==0)) throw new RuntimeException("security.passwordsalt is not set in application.properties");
+        if ((this.passwordSalt==null) || (this.passwordSalt.trim().length()==0)) throw new RuntimeException("security.passwordsalt is not set in property file");
         this.passwordSalt  = this.passwordSalt.trim();
     }
     
@@ -331,19 +341,9 @@ public class UserController {
 								 @RequestParam(value = "locale", defaultValue = "en") String locale,
 								 HttpServletRequest httpRequest) throws Exception {
 
-    	String mailConf = Helper.getPropValues("spring.mail.host");
-    	if ((mailConf==null) || (mailConf.trim().length()==0)) {
-    		String runningProfile = Helper.getPropValues("spring.profiles.active");
-			log.info("Running Profile: " + runningProfile);
-			if ("test".equals(runningProfile)) {
-    			mailConf=null;
-				log.warn("running without mail config - see application.properties");
-			} else {
-				throw new Exception("eMail is not configured in application.properties - cannot generate/send coupons");
-			}
-    	}
+		checkEmailConfiguration();
 
-    	// validate inputs
+		// validate inputs
     	if (count<=0) throw new Exception("must be more than 0 coupons");
     	if (amount<=0) throw new Exception("must be more than 0 per coupon");
     	
@@ -385,15 +385,21 @@ public class UserController {
 
     	log.info("URL to generate Coupons: " + urlStr);
 
-        if ((mailConf!=null) && (!eMailManager.sendMail(email.trim(), "rest.user.coupons.subject", "Print out the PDF attached and spread the love :)", urlStr, user.getSpokenLangs()))) {
+        if ((mailEnabled) && (!eMailManager.sendMail(email.trim(), "rest.user.coupons.subject", "Print out the PDF attached and spread the love :)", urlStr, user.getSpokenLangs()))) {
     		throw new Exception("Was not able to send eMail with Coupons to " + user.getEMail());
     	}
 
     	return true;
     		
 	}
-    
-    @SuppressWarnings("deprecation")
+
+	private void checkEmailConfiguration() throws Exception {
+		if (StringUtils.isEmpty(mailHost) && mailEnabled) {
+            throw new Exception("eMail is not configured in properties file - cannot generate/send coupons");
+        }
+	}
+
+	@SuppressWarnings("deprecation")
 	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/coupons-admin/{partyId}", method = RequestMethod.GET, produces = "application/json")
 	public List<String> generateCodesAdmin(@PathVariable Long partyId,
@@ -466,16 +472,7 @@ public class UserController {
 		log.info("*** SEND KONFETTI *** partyId(" + partyId + ") amount(" + amount + ") to(" + address + ")");
 
     	// get eMail config
-     	String mailConf = Helper.getPropValues("spring.mail.host");
-     	if ((mailConf==null) || (mailConf.trim().length()==0)) {
-     		String runningProfile = Helper.getPropValues("spring.profiles.active");
-     		if ("test".equals(runningProfile)) {
-     			mailConf=null;
-				log.warn("running without mail config - see application.properties");
-			} else {
-				throw new Exception("eMail is not configured in application.properties - cannot generate/send coupons");
-			}
-     	}
+     	checkEmailConfiguration();
 
      	// check input data
      	if (amount<=0) throw new Exception("must be more than 0 per coupon");
@@ -560,7 +557,7 @@ public class UserController {
 			}
 
 			// send coupon by eMail
-	    	if ((mailConf!=null) && (eMailManager.sendMail(address, "rest.user.coupons.received", "Open app and redeem coupon code: '"+code.getCode(), null, user.getSpokenLangs()))) {
+	    	if ((mailEnabled) && (eMailManager.sendMail(address, "rest.user.coupons.received", "Open app and redeem coupon code: '"+code.getCode(), null, user.getSpokenLangs()))) {
 				log.info("- email with coupon send to: " + address);
 			} else {
 				accountingService.addBalanceToAccount(TransactionType.PAYBACK, accountName, amount);
@@ -613,7 +610,7 @@ public class UserController {
 			if (!sendNotification) {
 
 				// eMail
-    	    	if ((mailConf!=null) && (eMailManager.sendMail(address, "rest.user.coupons.received.party", "Open app and check party '"+party.getName()+"' :)", null, user.getSpokenLangs()))) {
+    	    	if ((mailEnabled) && (eMailManager.sendMail(address, "rest.user.coupons.received.party", "Open app and check party '"+party.getName()+"' :)", null, user.getSpokenLangs()))) {
 					log.info("- eMail with Info notification send to: " + address);
 				} else {
 					log.error("Was not able to send eMail with Notification about received konfetti to " + user.getEMail() + " - check address and server email config");
@@ -688,8 +685,7 @@ public class UserController {
     	Code coupon = this.codeService.redeemByCode(code);
 
 		// just if backend is running on in test mode allow cheat codes
-		if ("test".equals(Helper.getPropValues("spring.profiles.active"))) {
-
+		if (cheatCodesEnabled) {
 			// --> creating coupons that are not in the database for testing
 
 			// add 100 Konfetto #1

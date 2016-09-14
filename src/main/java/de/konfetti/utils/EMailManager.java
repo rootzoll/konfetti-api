@@ -3,6 +3,7 @@ package de.konfetti.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -27,6 +28,7 @@ import java.util.Locale;
  */
 @Slf4j
 @Service
+@Configuration
 public class EMailManager {
 
     @Autowired
@@ -37,6 +39,12 @@ public class EMailManager {
 
     @Value("${konfetti.replyToMailAddress}")
     private String replyToAddress;
+
+    @Value("${spring.mail.host}")
+    private String mailHost;
+
+    @Value("${spring.mail.port}")
+    private String mailPort;
 
     /**
      * Sending an eMail with and optional attachment.
@@ -94,7 +102,7 @@ public class EMailManager {
             log.warn("EMailManager - FAIL sending eMail to(" + toAddress + ") attachementURL(" + urlAttachment + "): " + e.getMessage());
             e.printStackTrace();
         } catch (Exception e) {
-            log.warn("EMailManager - FAIL sending eMail to(" + toAddress + ") attachementURL(" + urlAttachment + ") mailserver(" + Helper.getPropValues("spring.mail.host") + ":" + Helper.getPropValues("spring.mail.port") + "): " + e.getMessage());
+            log.warn("EMailManager - FAIL sending eMail to(" + toAddress + ") attachementURL(" + urlAttachment + ") mailserver(" + mailHost + ":" + mailPort + "): " + e.getMessage());
             e.printStackTrace();
         }
         return false;
