@@ -73,7 +73,25 @@ public class ControllerSecurityHelper {
 		}
 		
 		// check IP security
-		if (checkIp) {
+		if (checkPassword) {
+			// check PASSWORD security -> ip & password cannot be activated at the same time, password higher priority
+			// TODO: ACTIVATE ON RELEASE
+			// when password is used - HTTPS is mandatory
+			// if (!req.isSecure()) throw new Exception("ControllerSecurityHelper: HTTPS is needed when password security is used from IP("+req.getRemoteAddr()+")");
+
+			// get password from HTTP header
+			String requestingPassword = req.getHeader("X-ADMIN-PASSWORD");
+			if (requestingPassword==null) throw new Exception("ControllerSecurityHelper: Missing X-ADMIN-PASSWORD header field on HTTP request for ADMIN-LEVEL SECURITY from IP("+req.getRemoteAddr()+")");
+
+			// check if given password is valid
+			boolean correctPassword = ((adminPassword !=null) && (adminPassword.equals(requestingPassword)));
+			if (!correctPassword) {
+				try {
+					Thread.sleep(300);
+				} catch (Exception e) {}
+				throw new Exception("FAIL-PASSWORD: ControllerSecurityHelper: Requesting Password("+requestingPassword+") is not correct for ADMIN-LEVEL SECURITY from IP("+req.getRemoteAddr()+")");
+			}
+		} else {
 			// get IP from request
 			String requestingIP = req.getRemoteAddr();
 
@@ -87,28 +105,6 @@ public class ControllerSecurityHelper {
 			}
 
 			if (!correctIP) throw new Exception("ControllerSecurityHelper: Requesting IP("+requestingIP+") is not allowed for ADMIN-LEVEL SECURITY");
-		}
-		
-		// check PASSWORD security
-		if (checkPassword) {
-			
-			// TODO: ACTIVATE ON RELEASE
-			// when password is used - HTTPS is mandatory
-			// if (!req.isSecure()) throw new Exception("ControllerSecurityHelper: HTTPS is needed when password security is used from IP("+req.getRemoteAddr()+")");
-			
-			// get password from HTTP header
-			String requestingPassword = req.getHeader("X-ADMIN-PASSWORD"); 
-			if (requestingPassword==null) throw new Exception("ControllerSecurityHelper: Missing X-ADMIN-PASSWORD header field on HTTP request for ADMIN-LEVEL SECURITY from IP("+req.getRemoteAddr()+")");
-			
-			// check if given password is valid
-			boolean correctPassword = ((adminPassword !=null) && (adminPassword.equals(requestingPassword)));
-			if (!correctPassword) {
-				try {
-					Thread.sleep(300);
-				} catch (Exception e) {}
-				throw new Exception("FAIL-PASSWORD: ControllerSecurityHelper: Requesting Password("+requestingPassword+") is not correct for ADMIN-LEVEL SECURITY from IP("+req.getRemoteAddr()+")");
-			}
-			
 		}
 		
 	}
