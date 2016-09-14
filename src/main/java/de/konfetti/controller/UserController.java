@@ -82,7 +82,7 @@ public class UserController {
     		createWithCredentials = true;
     		
         	// if email is set - check if email exists on other account
-    		if (userService.findByMail(email)!=null) {
+    		if (userService.findByMail(email) != null) {
     			User errorUser = new User();
     			errorUser.setId(-1l);
     			return errorUser;

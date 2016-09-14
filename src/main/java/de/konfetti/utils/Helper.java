@@ -12,23 +12,23 @@ public class Helper {
 
 	private static Properties prop = null;
 	
-	
+
     // static helper function to hash password
     public static final String hashPassword(String salt, String pass) {
         try {
-        	
+
         	// get fresh instance
 			MessageDigest md5Digest = MessageDigest.getInstance("MD5");
-			
+
 			// hash to new string
-			return new String(md5Digest.digest((salt + pass).getBytes()));
-			
+			return Arrays.toString(md5Digest.digest((salt + pass).getBytes()));
+
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
     }
-	
+
     public static <T> T nonnull(T value) {
         if (value == null) {
             throwIAE();
