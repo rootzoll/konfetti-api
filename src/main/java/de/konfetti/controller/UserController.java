@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
@@ -63,10 +64,13 @@ public class UserController {
         this.accountingService = accountingService;
         this.partyService = partyService;
         this.codeService = codeService;
-                
-        if ((this.passwordSalt==null) || (this.passwordSalt.trim().length()==0)) throw new RuntimeException("security.passwordsalt is not set in property file");
-        this.passwordSalt  = this.passwordSalt.trim();
     }
+
+	@PostConstruct
+	public void init() {
+		if ((this.passwordSalt==null) || (this.passwordSalt.trim().length()==0)) throw new RuntimeException("security.passwordsalt is not set in property file");
+		this.passwordSalt  = this.passwordSalt.trim();
+	}
     
     //---------------------------------------------------
     // USER Controller

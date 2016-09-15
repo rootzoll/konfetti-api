@@ -55,6 +55,9 @@ public class PartyController {
 	private ControllerSecurityHelper controllerSecurityHelper;
 
 	@Autowired
+	private AutoTranslator autoTranslator;
+
+	@Autowired
 	private SimpMessagingTemplate webSocket;
 
 	@Autowired
@@ -500,7 +503,7 @@ public class PartyController {
 		userService.update(user);
 
 		// title --> multi language
-		MultiLang multiLang = AutoTranslator.getInstance().translate(langCode, request.getTitle());
+		MultiLang multiLang = autoTranslator.translate(langCode, request.getTitle());
 		String json = new ObjectMapper().writeValueAsString(multiLang);
 		log.info("request title --autotranslate--> " + json);
 		MediaItem mediaItem = new MediaItem();

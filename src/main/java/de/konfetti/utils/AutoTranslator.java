@@ -8,10 +8,13 @@ import de.konfetti.data.mediaitem.MultiLang;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.Set;
 
 
+@Service
 @Configuration
 @Slf4j
 public class AutoTranslator {
@@ -19,39 +22,24 @@ public class AutoTranslator {
 	/*
 	 * LANGUAGE CODES
 	 */
-	
-	public static final String LANGCODE_GERMAN = "de";
-	public static final String LANGCODE_ENGLISH = "en";
-	public static final String LANGCODE_ARABIC = "ar";
-	public static final String[] SUPPORTED_LANGCODES = {LANGCODE_GERMAN, LANGCODE_ENGLISH, LANGCODE_ARABIC};
+	// TODO make enums
+	public final String LANGCODE_GERMAN = "de";
+	public final String LANGCODE_ENGLISH = "en";
+	public final String LANGCODE_ARABIC = "ar";
+	public final String[] SUPPORTED_LANGCODES = {LANGCODE_GERMAN, LANGCODE_ENGLISH, LANGCODE_ARABIC};
 
 	@Value("${googletranslate.apikey}")
-	private static final String googleTranslatorApiKey = null;
-	
-	/*
-	 * SINGLETON
-	 */
-	
-	private static AutoTranslator singleton = null;
-	
-	private AutoTranslator() {
-		
+	private final String googleTranslatorApiKey = null;
+
+	@PostConstruct
+	public void init() {
 		if (googleTranslatorApiKey==null) throw new RuntimeException("please set 'googletranslate.apikey' in 'application.properties'");
 		log.info("Got API-KEY: " + googleTranslatorApiKey);
-		
+
 		// TODO: get API key from config not stored on GitHub
 		GoogleAPI.setHttpReferrer("http://www.konfettiapp.de/api");
-	    GoogleAPI.setKey(googleTranslatorApiKey);
+		GoogleAPI.setKey(googleTranslatorApiKey);
 	}
-	
-	public static AutoTranslator getInstance() {
-		if (singleton==null) singleton = new AutoTranslator();
-		return singleton;
-	}
-	
-	/*
-	 * METHODS
-	 */
 	
 	public MultiLang translate(String langCode, String text) throws Exception {
 		
@@ -92,7 +80,6 @@ public class AutoTranslator {
 	}
 	
 	public MultiLang reTranslate(MultiLang multiLang) throws Exception {
-		
 		// find orginal
 		String orgLangCode = null;
 		String orgText = null;
@@ -104,7 +91,6 @@ public class AutoTranslator {
 				orgText = langData.text;
 			}
 		}
-		
 		// exception if no original was found
 		if ((orgLangCode==null) || (orgText==null)) throw new Exception("no translator==0 found");
 		

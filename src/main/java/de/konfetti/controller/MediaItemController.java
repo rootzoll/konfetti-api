@@ -29,6 +29,9 @@ public class MediaItemController {
 	private final MediaService mediaService;
 
 	@Autowired
+	private AutoTranslator autoTranslator;
+
+	@Autowired
 	private ControllerSecurityHelper controllerSecurityHelper;
 
     @Autowired
@@ -78,7 +81,7 @@ public class MediaItemController {
 			log.info("Is MultiLang --> AUTOTRANSLATION");
 			try {
     			MultiLang multiLang = new ObjectMapper().readValue(template.getData(), MultiLang.class);
-    			multiLang = AutoTranslator.getInstance().reTranslate(multiLang);
+    			multiLang = autoTranslator.reTranslate(multiLang);
     			template.setData(new ObjectMapper().writeValueAsString(multiLang));
 				log.info(template.getData());
 			} catch (Exception e) {
