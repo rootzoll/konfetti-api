@@ -19,11 +19,11 @@ import java.util.Locale;
 
 /*
  * Use to send eMails.
- * 
+ *
  * To get Spring JavaMailSender user AutoWire in Component classes:
  * @Autowired
  * private JavaMailSender javaMailSender;
- * 
+ *
  * --> see application.properties file for configuration
  */
 @Slf4j

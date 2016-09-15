@@ -2,7 +2,6 @@ package de.konfetti.service;
 
 import de.konfetti.data.Account;
 import de.konfetti.data.AccountRepository;
-import de.konfetti.data.CodeRepository;
 import de.konfetti.data.KonfettiTransactionRepository;
 import org.junit.Before;
 import org.junit.Ignore;

@@ -25,17 +25,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <guava.version>16.0.1</guava.version>
         <!--Used for CrossOrigin-->
-        <spring.version>4.2.2.RELEASE</spring.version>
   	    <docker.image.prefix>konfettiapp</docker.image.prefix>
     </properties>
 
-    <!--<repositories>-->
-        <!--<repository>-->
-            <!--<id>my-local-repo</id>-->
-            <!--<url>file://${basedir}/lib</url>-->
-        <!--</repository>-->
-    <!--</repositories>-->
-    
     <dependencies>
     
         <!--Spring-->
@@ -109,11 +101,6 @@
             <version>${guava.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.takari.junit</groupId>
-            <artifactId>takari-cpsuite</artifactId>
-            <version>1.2.7</version>
-        </dependency>
 
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
@@ -134,12 +121,6 @@
         </dependency>
 
         <!-- Google Translate API -->
-        <dependency> 
-        	<groupId>org.json</groupId> 
-        	<artifactId>json</artifactId> 
-        	<version>20090211</version>
-       </dependency>
-        
   		<dependency>
     		<groupId>com.googlecode</groupId>
     		<artifactId>google-api-translate-java</artifactId>
@@ -158,6 +139,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
             <scope>test</scope>
         </dependency>
 
