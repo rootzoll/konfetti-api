@@ -45,6 +45,16 @@ services:
     depends_on:
       - konfettiApi
 
+  konfettiCouponGenerator:
+    image: konfetti/coupongenerator
+    container_name: konfettiCouponGenerator
+    ports:
+      - "2342:2342"
+    networks:
+      - productionNetwork
+    depends_on:
+      - konfettiApi
+
   database:
     image: mysql:5.7.12
     container_name: konfettiDb
