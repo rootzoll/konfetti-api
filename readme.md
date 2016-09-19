@@ -1,4 +1,14 @@
+
+
 # To start server with docker-compose
+
+## Prepare
+
+The config files for the docker backend are placed outside of the git directory and are a shared directory with docker. To setup this locally copy the `konfetti` folder from the git folder `docu` to your main hdd root directory. Then open your Docker `Preferences` and add under the `File Sharing` the entry `/konfetti`.
+
+Default username and password is `dev` ... but please make sure to change this for production ;)
+
+## Build and Start
 
 (if mvnw is not working for you, install maven and replace mvnw with mvn)
 
@@ -10,6 +20,8 @@ Build docker image
 
 Run service with docker-compose in console
 `docker-compose up`
+
+## Troubleshooting
 
 maybe you need to stop & delete old containers before compose-up is working (`docker ps -a` and then `docker stop [ID]` then `docker rm [ID]`) ... if docker-compose up worked you sould see the logs from both containers (backend and DB)
 
