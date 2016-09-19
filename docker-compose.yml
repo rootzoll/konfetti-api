@@ -29,7 +29,7 @@ services:
     image: konfetti/app
     container_name: konfettiApp
     ports:
-      - "80:80"
+      - "2001:80"
     networks:
       - productionNetwork
     depends_on:
