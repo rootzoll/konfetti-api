@@ -15,6 +15,7 @@ services:
     ports:
       - "9000:9000"
 #      - "8000:8000"
+#      - "8181:8181"
     networks:
       - productionNetwork
     depends_on:
