@@ -14,6 +14,8 @@ services:
     container_name: konfettiApi
     ports:
       - "9000:9000"
+#      - "8000:8000"
+#      - "8181:8181"
     networks:
       - productionNetwork
     depends_on:
@@ -52,6 +54,16 @@ services:
       - "2342:2342"
     networks:
       - productionNetwork
+
+  konfettiBootAdmin:
+    image: konfetti/spring-boot-admin
+    container_name: konfettiBootAdmin
+    ports:
+      - "8180:8180"
+    networks:
+      - productionNetwork
+    env_file:
+      - /konfetti/config/spring-boot-admin.env
 
   database:
     image: mysql:5.7.12

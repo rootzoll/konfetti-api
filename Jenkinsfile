@@ -1,11 +1,6 @@
 node {
     // container and image names
-    def containerName = 'konfettiBackend'
     def imageName = 'konfetti/api'
-
-    // docker run parameters
-    def runPorts = '8080:8080'
-    def runNetwork = 'konfettiNetwork'
 
     // branches to build docker image and publish
     def branch = env.BRANCH_NAME
