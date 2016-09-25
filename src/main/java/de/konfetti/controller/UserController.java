@@ -117,7 +117,7 @@ public class UserController {
 			log.info("Create new User with eMail(" + email + ") and passwordhash(" + passMD5 + ")");
 			// TODO --> email multi lang by lang set in user
 			try {
-	        	if (!eMailManager.sendMail(email, "Konfetti Account Created", "username: "+email+"\npass: "+pass+"\n\nkeep email or write password down", null, user.getSpokenLangs())) {
+	        	if (!eMailManager.sendMail(email, "rest.user.created.subject", "username: "+email+"\npass: "+pass+"\n\nkeep email or write password down", null, user.getSpokenLangs())) {
 					log.warn("was not able to send eMail on account creation to(" + email + ")");
 				}
 			} catch (Exception e) {
