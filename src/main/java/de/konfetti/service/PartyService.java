@@ -17,6 +17,8 @@ public interface PartyService {
 
     List<Party> getAllParties();
 
+    List<Party> findByVisibility(int visibility);
+
     Party findById(long partyId);
 
     Long getNumberOfParties();

@@ -253,20 +253,10 @@ public class PartyController {
 
 		// TODO: improve later by filter on GPS per search index
 
-		List<Party> allParties = partyService.getAllParties();
+		List<Party> foundParties = partyService.findByVisibility(Party.VISIBILITY_PUBLIC);
 		List<Party> resultParties = new ArrayList<Party>();
 
-		// keep only public parties
-		for (Party party : allParties) {
-			if (party.getVisibility()==Party.VISIBILITY_PUBLIC) {
-				resultParties.add(party);
-			}
-		}
-		allParties = new ArrayList<Party>(resultParties);
-		resultParties.clear();
-
 		// TODO: fix this if it works again, at the moment no filtering by geo coordinates, does not work on server
-		resultParties = allParties;
 
 
 //		if ((latStr.equals("0.0")) && (lonStr.equals("0.0"))) {
@@ -274,7 +264,7 @@ public class PartyController {
 			// return all parties when lat & lon not given
 			log.info("return all parties");
 
-			resultParties = allParties;
+			resultParties = foundParties;
 
 //		} else {
 //

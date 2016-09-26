@@ -12,4 +12,6 @@ public interface PartyRepository  extends JpaRepository<Party, Long> {
 
     List<Party> findByName(@Param("name") String name);
 
+    List<Party> findByVisibility(@Param("visiblity") int visibility);
+
 }

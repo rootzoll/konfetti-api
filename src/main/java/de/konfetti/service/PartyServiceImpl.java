@@ -77,6 +77,12 @@ public class PartyServiceImpl extends BaseService implements PartyService {
     }
 
     @Override
+    public List<Party> findByVisibility(int visibility) {
+        return partyRepository.findByVisibility(visibility);
+    }
+
+
+    @Override
     public Party findByName(String name) {
         return (Party) partyRepository.findByName(name);
     }

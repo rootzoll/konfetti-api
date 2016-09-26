@@ -13,6 +13,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.*;
 
 /**
@@ -70,6 +72,20 @@ public class PartyServiceImplTestIt {
         // assert that list is not existing anymore
         List<Party> lists = partyService.getAllParties();
         assertEquals("no list found", 0, lists.size());
+    }
+
+    @Test
+    public void testFindByVisibiity() throws Exception {
+        Party visibleParty = testHelper.getTestParty1();
+        visibleParty.setVisibility(0);
+        visibleParty = partyService.create(visibleParty);
+        Party invisibleParty = testHelper.getTestParty2();
+        invisibleParty.setVisibility(1);
+        invisibleParty = partyService.create(invisibleParty);
+
+        List<Party> visibleParties = partyRepository.findByVisibility(0);
+        assertThat("one visible Party found", visibleParties.size(), is(1));
+        assertThat("visible Party found", visibleParties.get(0), equalTo(visibleParty));
     }
 
 }
