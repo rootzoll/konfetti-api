@@ -70,3 +70,12 @@ test
 to test if the server is running correctly, call the URL http://localhost:9000/konfetti/api/account
 
 should return something like this "{"clientId":"1","secret":"3915478b-f51d-4306-ab3b-fa7762f4c6bc","userId":"1"}"
+
+# Swagger Api Documentation
+For dev profile the swagger api documentation is build, accessable by 
+
+Json:
+http://localhost:9000/v2/api-docs
+
+UI:
+http://localhost:9000/swagger-ui.html
