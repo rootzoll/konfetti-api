@@ -1,0 +1,19 @@
+{
+  "name": "konfetti-application",
+  "version": "0.0.0",
+  "description": "Description for konfettiApplication",
+  "private": true,
+  "cacheDirectories": [
+    "node_modules",
+    "src/main/resources/static/bower_components"
+  ],
+  "devDependencies": {
+    "bower": "1.7.9",
+    "gulp": "3.9.1",
+    "gulp-connect": "5.0.0",
+    "lodash": "4.15.0"
+  },
+  "engines": {
+    "node": "^4.3"
+  }
+}

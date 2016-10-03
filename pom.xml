@@ -27,6 +27,7 @@
         <!--Used for CrossOrigin-->
   	    <docker.image.prefix>konfettiapp</docker.image.prefix>
         <spring-cloud.version>Brixton.RELEASE</spring-cloud.version>
+        <bower.components.path>src/main/resources/static/bower_components</bower.components.path>
     </properties>
 
     <dependencyManagement>
@@ -216,6 +217,23 @@
 
     <build>
         <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${bower.components.path}</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>node_modules</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -245,6 +263,60 @@
                         </annotationProcessor>
                     </annotationProcessors>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>install node and npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <configuration>
+                            <nodeVersion>v4.5.0</nodeVersion>
+                            <npmVersion>3.10.6</npmVersion>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>install</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>bower install</id>
+                        <goals>
+                            <goal>bower</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>install --no-color</arguments>
+                        </configuration>
+                    </execution>
+                    <!--<execution>-->
+                    <!--<id>gulp build</id>-->
+                    <!--<goals>-->
+                    <!--<goal>gulp</goal>-->
+                    <!--</goals>-->
+                    <!--<configuration>-->
+                    <!--<arguments>build &#45;&#45;no-notification</arguments>-->
+                    <!--</configuration>-->
+                    <!--</execution>-->
+                    <!--<execution>-->
+                    <!--<id>gulp test</id>-->
+                    <!--<goals>-->
+                    <!--<goal>gulp</goal>-->
+                    <!--</goals>-->
+                    <!--<phase>test</phase>-->
+                    <!--<configuration>-->
+                    <!--<arguments>test &#45;&#45;no-notification</arguments>-->
+                    <!--</configuration>-->
+                    <!--</execution>-->
+                </executions>
             </plugin>
             <!--<plugin>-->
                 <!--<groupId>org.apache.maven.plugins</groupId>-->

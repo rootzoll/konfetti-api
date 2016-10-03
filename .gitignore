@@ -110,3 +110,7 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+
+node
+node_modules
+src/main/resources/static/bower_components
