@@ -2,6 +2,7 @@ package de.konfetti.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.konfetti.controller.vm.KeyAndPasswordVM;
 import de.konfetti.data.*;
 import de.konfetti.service.*;
 import de.konfetti.utils.AccountingTools;
@@ -220,8 +221,7 @@ public class UserController {
 			log.warn("LOGIN FAIL: given passwordMD5(" + passMD5 + ") is not passwordMD5 on user (" + user.getPassword() + ")");
 			throw new Exception("User and/or Passwort not valid.");
     	}
-   	
-    	
+
 		// update activity on user
 		if (!user.wasUserActiveInLastMinutes(1)) {
 			log.info("Updating ActivityTS of user(" + user.getId() + ")");
@@ -260,7 +260,23 @@ public class UserController {
 					return new ResponseEntity<>("e-mail was sent", HttpStatus.OK);
 				}).orElse(new ResponseEntity<>("e-mail address not registered", HttpStatus.BAD_REQUEST));
 	}
-    
+
+	/**
+	 * POST   /account/reset_password/finish : Finish to reset the password of the user
+	 *
+	 * @param keyAndPassword the generated key and the new password
+	 * @return the ResponseEntity with status 200 (OK) if the password has been reset,
+	 * or status 400 (Bad Request) or 500 (Internal Server Error) if the password could not be reset
+	 */
+	@RequestMapping(value = "/reset_password/finish",
+			method = RequestMethod.POST,
+			produces = MediaType.TEXT_PLAIN_VALUE)
+	public ResponseEntity<String> finishPasswordReset(@RequestBody KeyAndPasswordVM keyAndPassword) {
+		return userService.completePasswordReset(keyAndPassword.getNewPassword(), keyAndPassword.getKey())
+				.map(user -> new ResponseEntity<String>(HttpStatus.OK))
+				.orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+	}
+
     @CrossOrigin(origins = "*")
     @RequestMapping(value="/{userId}", method = RequestMethod.PUT, produces = "application/json")
     public User updateUser( @RequestBody @Valid final User userInput, HttpServletRequest httpRequest) throws Exception {

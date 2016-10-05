@@ -1,7 +1,9 @@
 package de.konfetti.controller;
 
 import de.konfetti.Application;
+import de.konfetti.controller.vm.KeyAndPasswordVM;
 import de.konfetti.data.User;
+import de.konfetti.data.UserRepository;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
@@ -17,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.subethamail.wiser.Wiser;
 
+import java.time.ZonedDateTime;
 import java.util.Locale;
 
 import static de.konfetti.utils.WiserAssertions.assertReceivedMessage;
@@ -41,6 +44,9 @@ public class UserControllerTest {
 
     @Autowired
     protected MessageSource messageSource;
+
+    @Autowired
+    protected UserRepository userRepository;
 
     private Wiser wiser;
 
@@ -105,6 +111,22 @@ public class UserControllerTest {
                 .from(emailFrom)
                 .to(user.getEMail())
                 .withSubject(messageSource.getMessage("email.reset.title", null, Locale.ENGLISH));
+    }
+
+    @Test
+    public void testRquestPasswordFinish() throws Exception {
+        User user = testHelper.getUser("testRquestPasswordFinish");
+        String resetKey = "123456";
+        user.setResetKey(resetKey);
+        user.setResetDate(ZonedDateTime.now());
+        User persistedUser = userRepository.save(user);
+        KeyAndPasswordVM keyAndPasswordVM = new KeyAndPasswordVM(resetKey, "newPassword");
+
+        myGiven()
+                .contentType(ContentType.JSON)
+                .body(keyAndPasswordVM)
+                .post(UserController.REST_API_MAPPING + "/reset_password/finish")
+                .then().statusCode(200);
     }
 
     @Test

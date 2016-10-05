@@ -1,20 +1,25 @@
 package de.konfetti.service;
 
+import de.konfetti.data.User;
+import de.konfetti.data.UserRepository;
+import de.konfetti.utils.Helper;
+import de.konfetti.utils.RandomUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import de.konfetti.data.User;
-import de.konfetti.data.UserRepository;
-import de.konfetti.utils.Helper;
-
-import de.konfetti.utils.RandomUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 @Service
+@Slf4j
 public class UserServiceImpl extends BaseService implements UserService {
+
+	@Value("${security.passwordsalt}")
+	private String passwordSalt;
 
     public UserServiceImpl() {
     }
@@ -128,4 +133,21 @@ public class UserServiceImpl extends BaseService implements UserService {
 					return user;
 				});
 	}
-}
+
+	@Override
+	public Optional<User> completePasswordReset(String newPassword, String key) {
+		log.debug("Reset user password for reset key {}", key);
+
+		return userRepository.findOneByResetKey(key)
+				.filter(user -> {
+					ZonedDateTime oneDayAgo = ZonedDateTime.now().minusHours(24);
+					return user.getResetDate().isAfter(oneDayAgo);
+				})
+				.map(user -> {
+					user.setPassword(Helper.hashPassword(this.passwordSalt, newPassword));
+					user.setResetKey(null);
+					user.setResetDate(null);
+					userRepository.save(user);
+					return user;
+				});
+	}}

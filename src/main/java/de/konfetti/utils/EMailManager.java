@@ -149,6 +149,7 @@ public class EMailManager {
         try {
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage, isMultipart, CharEncoding.UTF_8);
             message.setTo(to);
+            message.setReplyTo(replyToAddress);
             message.setFrom(fromEmailAddress);
             message.setSubject(subject);
             message.setText(content, isHtml);
