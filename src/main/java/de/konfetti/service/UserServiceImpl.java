@@ -1,12 +1,15 @@
 package de.konfetti.service;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import de.konfetti.data.User;
 import de.konfetti.data.UserRepository;
 import de.konfetti.utils.Helper;
 
+import de.konfetti.utils.RandomUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -113,5 +116,16 @@ public class UserServiceImpl extends BaseService implements UserService {
 	public List<User> getAllUsers() {
 		return userRepository.findAll();
 	}
-    
+
+	@Override
+	public Optional<User> requestPasswordReset(String email) {
+		return userRepository.findOneByEMail(email)
+//				.filter(User::isActive)
+				.map(user ->  {
+					user.setResetKey(RandomUtil.generateResetKey());
+					user.setResetDate(ZonedDateTime.now());
+					userRepository.save(user);
+					return user;
+				});
+	}
 }

@@ -3,12 +3,23 @@ package de.konfetti.controller;
 import de.konfetti.data.Code;
 import de.konfetti.data.Party;
 import de.konfetti.data.Request;
+import de.konfetti.data.User;
 
 import java.util.Date;
+
+import static com.natpryce.makeiteasy.MakeItEasy.an;
+import static com.natpryce.makeiteasy.MakeItEasy.make;
+import static com.natpryce.makeiteasy.MakeItEasy.with;
+import static de.konfetti.maker.UserMaker.ExampleUser;
+import static de.konfetti.maker.UserMaker.name;
 
 public class TestHelper {
 	
     public TestHelper() {
+    }
+
+    public User getUser(String username){
+        return make(an(ExampleUser).but(with(name, username)));
     }
 
     public Party getTestParty1() {

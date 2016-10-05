@@ -1,12 +1,16 @@
 package de.konfetti.utils;
 
+import de.konfetti.data.User;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.CharEncoding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.activation.URLDataSource;
@@ -15,7 +19,8 @@ import javax.mail.internet.MimeMessage;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
-
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring4.SpringTemplateEngine;
 
 /*
  * Use to send eMails.
@@ -45,6 +50,18 @@ public class EMailManager {
 
     @Value("${spring.mail.port}")
     private String mailPort;
+
+    private static final String USER = "user";
+    private static final String BASE_URL = "baseUrl";
+
+    @Autowired
+    private SpringTemplateEngine templateEngine;
+
+    @Autowired
+    private MessageSource messageSource;
+
+    @Value("${konfetti.server.url}")
+    private String serverUrl;
 
     /**
      * Sending an eMail with and optional attachment.
@@ -122,5 +139,37 @@ public class EMailManager {
         return replyToAddress;
     }
 
+    @Async
+    public void sendEmail(String to, String subject, String content, boolean isMultipart, boolean isHtml) {
+        log.debug("Send e-mail[multipart '{}' and html '{}'] to '{}' with subject '{}' and content={}",
+                isMultipart, isHtml, to, subject, content);
 
+        // Prepare message using a Spring helper
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper message = new MimeMessageHelper(mimeMessage, isMultipart, CharEncoding.UTF_8);
+            message.setTo(to);
+            message.setFrom(fromEmailAddress);
+            message.setSubject(subject);
+            message.setText(content, isHtml);
+            javaMailSender.send(mimeMessage);
+            log.debug("Sent e-mail to User '{}'", to);
+        } catch (Exception e) {
+            log.warn("E-mail could not be sent to user '{}', exception is: {}", to, e.getMessage());
+        }
+    }
+
+    @Async
+    public void sendPasswordResetMail(User user) {
+        log.debug("Sending password reset e-mail to '{}'", user.getEMail());
+        // TODO: when user has locale, use users locale
+//        Locale locale = Locale.forLanguageTag(user.getLangKey());
+        Locale locale = Locale.ENGLISH;
+        Context context = new Context(locale);
+        context.setVariable(USER, user);
+        context.setVariable(BASE_URL, serverUrl);
+        String content = templateEngine.process("passwordResetEmail", context);
+        String subject = messageSource.getMessage("email.reset.title", null, locale);
+        sendEmail(user.getEMail(), subject, content, false, true);
+    }
 }

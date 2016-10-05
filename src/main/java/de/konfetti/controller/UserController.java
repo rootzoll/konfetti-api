@@ -12,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,8 +32,10 @@ import java.util.Scanner;
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping("konfetti/api/account")
+@RequestMapping(UserController.REST_API_MAPPING)
 public class UserController {
+
+	public static final String REST_API_MAPPING = "konfetti/api/account";
 
 	private final UserService userService;
 	private final ClientService clientService;
@@ -54,7 +59,7 @@ public class UserController {
 	private ControllerSecurityHelper controllerSecurityHelper;
 
 	@Autowired
-	private EMailManager eMailManager;
+	private EMailManager mailService;
     
     @Autowired
     public UserController(final UserService userService, final ClientService clientService, final AccountingService accountingService, final PartyService partyService, final CodeService codeService) {
@@ -117,7 +122,7 @@ public class UserController {
 			log.info("Create new User with eMail(" + email + ") and passwordhash(" + passMD5 + ")");
 			// TODO --> email multi lang by lang set in user
 			try {
-	        	if (!eMailManager.sendMail(email, "rest.user.created.subject", "username: "+email+"\npass: "+pass+"\n\nkeep email or write password down", null, user.getSpokenLangs())) {
+	        	if (!mailService.sendMail(email, "rest.user.created.subject", "username: "+email+"\npass: "+pass+"\n\nkeep email or write password down", null, user.getSpokenLangs())) {
 					log.warn("was not able to send eMail on account creation to(" + email + ")");
 				}
 			} catch (Exception e) {
@@ -236,35 +241,25 @@ public class UserController {
     	
     	return user;
     }
-    
-    @CrossOrigin(origins = "*")
-    @RequestMapping(value="/recover", method = RequestMethod.GET, produces = "application/json")
-    public User recover(@RequestParam(value="mail", defaultValue="") String email) throws Exception {
-    	
-    	// check user and input data
-        User user = userService.findByMail(email.toLowerCase());
-        if (user==null) {
-			log.warn("RECOVER FAIL: user not found with mail(" + email + ")");
-			throw new Exception("mail not found");
-        }
-        
-        // reset password
-        String pass = Code.generadeCodeNumber()+"";
-    	String passMD5 = Helper.hashPassword(this.passwordSalt, pass);
-    	user.setPassword(passMD5);
-    	userService.update(user);
-   	
-    	// send by email
-    	// TODO --> email multi lang by lang set in user
-    	if (!eMailManager.sendMail(email, "rest.user.reset.subject", "username: "+email+"\npass: "+pass+"\n\nkeep email or write password down", null, user.getSpokenLangs())) {
-			log.warn("was not able to send eMail on account creation to(" + email + ")");
-		}
-    	
-    	// keep password hash just on server side
-    	user.setPassword("");
-    	
-    	return user;
-    }
+
+	/**
+	 * POST   /account/reset_password/init : Send an e-mail to reset the password of the user
+	 *
+	 * @param mail the mail of the user
+	 * @param request the HTTP request
+	 * @return the ResponseEntity with status 200 (OK) if the e-mail was sent, or status 400 (Bad Request) if the e-mail address is not registered
+	 */
+	@CrossOrigin(origins = "*")
+	@RequestMapping(value = "/reset_password/init",
+			method = RequestMethod.POST,
+			produces = MediaType.TEXT_PLAIN_VALUE)
+	public ResponseEntity<?> requestPasswordReset(@RequestBody String mail, HttpServletRequest request) {
+		return userService.requestPasswordReset(mail)
+				.map(user -> {
+					mailService.sendPasswordResetMail(user);
+					return new ResponseEntity<>("e-mail was sent", HttpStatus.OK);
+				}).orElse(new ResponseEntity<>("e-mail address not registered", HttpStatus.BAD_REQUEST));
+	}
     
     @CrossOrigin(origins = "*")
     @RequestMapping(value="/{userId}", method = RequestMethod.PUT, produces = "application/json")
@@ -288,7 +283,7 @@ public class UserController {
     			user.setPassword(Helper.hashPassword(this.passwordSalt, pass));
     			if (firstTimeMailSet) {
     				// TODO multi lang eMail text by lang in user object - use same text as on account created with email
-					eMailManager.sendMail(userInput.getEMail(), "rest.user.created.subject", "username: " + user.getEMail() + "\npass: " + pass + "\n\nkeep email or write password down", null, user.getSpokenLangs());
+					mailService.sendMail(userInput.getEMail(), "rest.user.created.subject", "username: " + user.getEMail() + "\npass: " + pass + "\n\nkeep email or write password down", null, user.getSpokenLangs());
 				}
     		}
     		
@@ -389,7 +384,7 @@ public class UserController {
 
     	log.info("URL to generate Coupons: " + urlStr);
 
-        if ((mailEnabled) && (!eMailManager.sendMail(email.trim(), "rest.user.coupons.subject", "Print out the PDF attached and spread the love :)", urlStr, user.getSpokenLangs()))) {
+        if ((mailEnabled) && (!mailService.sendMail(email.trim(), "rest.user.coupons.subject", "Print out the PDF attached and spread the love :)", urlStr, user.getSpokenLangs()))) {
     		throw new Exception("Was not able to send eMail with Coupons to " + user.getEMail());
     	}
 
@@ -561,7 +556,7 @@ public class UserController {
 			}
 
 			// send coupon by eMail
-	    	if ((mailEnabled) && (eMailManager.sendMail(address, "rest.user.coupons.received", "Open app and redeem coupon code: '"+code.getCode(), null, user.getSpokenLangs()))) {
+	    	if ((mailEnabled) && (mailService.sendMail(address, "rest.user.coupons.received", "Open app and redeem coupon code: '"+code.getCode(), null, user.getSpokenLangs()))) {
 				log.info("- email with coupon send to: " + address);
 			} else {
 				accountingService.addBalanceToAccount(TransactionType.PAYBACK, accountName, amount);
@@ -614,7 +609,7 @@ public class UserController {
 			if (!sendNotification) {
 
 				// eMail
-    	    	if ((mailEnabled) && (eMailManager.sendMail(address, "rest.user.coupons.received.party", "Open app and check party '"+party.getName()+"' :)", null, user.getSpokenLangs()))) {
+    	    	if ((mailEnabled) && (mailService.sendMail(address, "rest.user.coupons.received.party", "Open app and check party '"+party.getName()+"' :)", null, user.getSpokenLangs()))) {
 					log.info("- eMail with Info notification send to: " + address);
 				} else {
 					log.error("Was not able to send eMail with Notification about received konfetti to " + user.getEMail() + " - check address and server email config");

@@ -1,17 +1,23 @@
 package de.konfetti.controller;
 
 import de.konfetti.Application;
+import de.konfetti.data.User;
 import io.restassured.filter.log.LogDetail;
+import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.MessageSource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.subethamail.wiser.Wiser;
+
+import java.util.Locale;
 
 import static de.konfetti.utils.WiserAssertions.assertReceivedMessage;
 import static io.restassured.RestAssured.given;
@@ -28,10 +34,13 @@ import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
 public class UserControllerTest {
 
     @Value("${konfetti.sendFromMailAddress}")
-    private String fromEmailAddress;
+    private String emailFrom;
 
     @Value("${konfetti.replyToMailAddress}")
     private String replyToAddress;
+
+    @Autowired
+    protected MessageSource messageSource;
 
     private Wiser wiser;
 
@@ -40,8 +49,11 @@ public class UserControllerTest {
 
     private int emailPort;
 
+    private TestHelper testHelper;
+
     @Before
     public void setUp() throws Exception {
+        testHelper = new TestHelper();
         emailPort = 2500;
         wiser = new Wiser(emailPort);
         wiser.start();
@@ -57,22 +69,42 @@ public class UserControllerTest {
         String testEmail = "testCreateUser@test.de";
         String testPassword = "createUser";
         // check user is created
-        myGiven()
-                .param("mail", testEmail).param("pass", testPassword)
-                .when().post("konfetti/api/account")
-                .then().statusCode(200)
-                .body("id", notNullValue())
-                .body("email", equalToIgnoringCase(testEmail))
-                .body("password", isEmptyOrNullString())
-        ;
+        createUser(testEmail, testPassword);
 
         // check email was sent to the user
 //        MessageSourceResourceBundle.getBundle("messages", locale).getString(subjectKey);
         assertReceivedMessage(wiser)
-                .from(fromEmailAddress)
+                .from(emailFrom)
                 .to(testEmail)
 //                .withSubject(Message)
         ;
+    }
+
+    private void createUser(String email, String password) {
+        myGiven()
+                .param("mail", email).param("pass", password)
+                .when().post("konfetti/api/account")
+                .then().statusCode(200)
+                .body("id", notNullValue())
+                .body("email", equalToIgnoringCase(email))
+                .body("password", isEmptyOrNullString())
+        ;
+    }
+
+    @Test
+    public void testRquestPasswordReset() throws Exception {
+        User user = testHelper.getUser("testRquestPasswordReset");
+        createUser(user.getEMail(), user.getPassword());
+        myGiven()
+                .contentType(ContentType.TEXT)
+                .body(user.getEMail())
+                .post(UserController.REST_API_MAPPING + "/reset_password/init")
+                .then().statusCode(200);
+
+        assertReceivedMessage(wiser)
+                .from(emailFrom)
+                .to(user.getEMail())
+                .withSubject(messageSource.getMessage("email.reset.title", null, Locale.ENGLISH));
     }
 
     @Test

@@ -3,6 +3,8 @@ package de.konfetti.data;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
+import java.time.ZonedDateTime;
 
 @Entity
 @Data
@@ -47,6 +49,13 @@ public class User {
     private String pushSystem;
     
     private String pushID;
+
+    @Size(max = 20)
+    @Column(name = "reset_key", length = 20)
+    private String resetKey;
+
+    @Column(name = "reset_date", nullable = true)
+    private ZonedDateTime resetDate = null;
     
     /*
      * REST DELIVERY DATA
