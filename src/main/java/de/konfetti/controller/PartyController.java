@@ -180,7 +180,8 @@ public class PartyController {
 				
 				List<Request> requests = requestService.getAllPartyRequests(partyId);
 				List<Notification> notifications = notificationService.getAllNotificationsSince(client.getUserId(), partyId, lastTs);
-				notificationService.deleteAllNotificationsOlderThan(client.getUserId(), partyId, lastTs); //todo: why??? (tino is asking)
+				// TODO Causes Exception see https://github.com/rootzoll/konfetti-app/issues/32
+				// notificationService.deleteAllNotificationsOlderThan(client.getUserId(), partyId, lastTs);
 				if (requests == null) requests = new ArrayList<Request>();
 				if (notifications == null) notifications = new ArrayList<Notification>();
 				

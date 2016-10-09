@@ -66,6 +66,9 @@ public class NotificationServiceImpl extends BaseService implements Notification
 		return notificationRepository.findByUserIdAndPartyId(userId, partyId);
 	}
 
+	/*
+	 * TODO: Causes Exception see https://github.com/rootzoll/konfetti-app/issues/32
+	 */
 	@Override
 	public void deleteAllNotificationsOlderThan(Long userId, Long partyId, Long sinceTimestamp) {
 		notificationRepository.deleteByUserIdAndPartyIdAndTimeStampLessThan(userId, partyId, sinceTimestamp);
