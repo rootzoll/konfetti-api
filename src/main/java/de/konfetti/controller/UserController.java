@@ -414,7 +414,6 @@ public class UserController {
         }
 	}
 
-	@SuppressWarnings("deprecation")
 	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/coupons-admin/{partyId}", method = RequestMethod.GET, produces = "application/json")
 	public List<String> generateCodesAdmin(@PathVariable Long partyId,
@@ -444,7 +443,6 @@ public class UserController {
         return codes;
 	}
     
-    @SuppressWarnings("deprecation")
 	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/codes-admin/{partyId}", method = RequestMethod.GET, produces = "application/json")
 	public List<String> generateCodesAdmin(@PathVariable Long partyId,

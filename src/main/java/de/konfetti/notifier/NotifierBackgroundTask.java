@@ -109,15 +109,13 @@ public class NotifierBackgroundTask {
     		runNotifierBackgroundTaskThread();
     		
         	// statistics
-        	long timeSinceStartupInSeconds = (System.currentTimeMillis() - lastProcessingStart) / 1000l;
-//			log.info("Ended NotifierBackgroundTask loop in " + timeSinceStartupInSeconds + " seconds.");
+        	//long timeSinceStartupInSeconds = (System.currentTimeMillis() - lastProcessingStart) / 1000l;
+			//log.info("Ended NotifierBackgroundTask loop in " + timeSinceStartupInSeconds + " seconds.");
 
 		} catch (Exception e) {
 			log.error("EXCEPTION on NotifierBackgroundTask loop: ", e);
 			e.printStackTrace();
     	}
-
-//		log.info("");
 
     }
     
@@ -133,7 +131,7 @@ public class NotifierBackgroundTask {
     	
     	// TODO: get just pending notifications form database (at the moment all that are not deleted)
     	List<Notification> pendingNotifications = notificationService.getAllPossiblePushNotifications();
-//		log.info("--> PENDING NOTIFICATIONS: " + pendingNotifications.size());
+		//log.info("--> PENDING NOTIFICATIONS: " + pendingNotifications.size());
 
 		for (Notification notification : pendingNotifications) {
     		
@@ -148,7 +146,7 @@ public class NotifierBackgroundTask {
 
 					log.info("--> needs higher attention");
 
-					// to prevent spamming the user
+					// to prevent spaming the user
         			if (userNotFeelingSpammedYet(notification)) {
 
 						log.info(" -> SEND PUSH TO USER");

@@ -133,6 +133,7 @@ public class AccountingServiceImpl extends BaseService implements AccountingServ
 		return account.getBalance();
 	}
 
+	@SuppressWarnings("unused")
 	private List<Account> getAllAccounts() {
 		return accountRepository.findAll();
 	}
