@@ -157,25 +157,34 @@ public class PartyController {
 			Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(request, clientService);
 
 			if (client != null) {
+				
+				log.debug("getParty - adding info for client("+client.getId()+")");
 
 				User user = userService.findById(client.getUserId());
 				if (user == null)
 					throw new Exception("was not able to load user with id(" + client.getUserId() + ") - NOT FOUND");
 				boolean userIsPartyAdmin = Helper.contains(user.getAdminOnParties(), party.getId());
 				boolean userIsPartyReviewer = Helper.contains(user.getReviewerOnParties(), party.getId());
+				
+				log.debug("is User("+user.getId()+") isPartyAdmin("+userIsPartyAdmin+") isPartyReviewer("+userIsPartyReviewer+")");
 
 				// update activity on user
 				if (!user.wasUserActiveInLastMinutes(1)) {
-					log.info("Updating ActivityTS of user(" + user.getId() + ")");
+					log.debug("Updating ActivityTS of user(" + user.getId() + ")");
 					user.setLastActivityTS(System.currentTimeMillis());
 					userService.update(user);
+				} else {
+					log.debug("user was active within last minute - no need to update last acivity TS");
 				}
-
+				
+				
 				List<Request> requests = requestService.getAllPartyRequests(partyId);
 				List<Notification> notifications = notificationService.getAllNotificationsSince(client.getUserId(), partyId, lastTs);
 				notificationService.deleteAllNotificationsOlderThan(client.getUserId(), partyId, lastTs); //todo: why??? (tino is asking)
 				if (requests == null) requests = new ArrayList<Request>();
 				if (notifications == null) notifications = new ArrayList<Notification>();
+				
+				log.debug("got requests("+requests.size()+") & notifications("+notifications.size()+")");
 
 				// if not reviewer or admin then return just public and own requests
 				if ((!userIsPartyAdmin) && (!userIsPartyReviewer)) {
@@ -186,12 +195,14 @@ public class PartyController {
 						}
 					}
 					requests = filteredRequests;
+					log.debug("after non admin/reviewer filtering --> requests("+requests.size()+")");
 				}
 
 				party.setRequests(new HashSet<Request>(requests));
 				party.setNotifications(new HashSet<Notification>(notifications));
 
 				// add accounting info
+				log.debug("add accounting info");
 				final String userAccountName = AccountingTools.getAccountNameFromUserAndParty(client.getUserId(), partyId);
 				Long userBalance = accountingService.getBalanceOfAccount(userAccountName);
 				if (userBalance == null) userBalance = 0l;
@@ -215,6 +226,7 @@ public class PartyController {
 				party.setTopPosition(-1); // TODO: implement statistic later
 
 				// see if there is any new chat message for user TODO: find a more performat way
+				log.debug("see if there is any new chat message");
 				List<Chat> allPartyChatsUserIsPartOf = chatService.getAllByUserAndParty(client.getUserId(), partyId);
 				for (Chat chat : allPartyChatsUserIsPartOf) {
 					if (!chat.hasUserSeenLatestMessage(client.getUserId())) {
@@ -234,9 +246,7 @@ public class PartyController {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			// exception can be ignored - because its just optional
-			log.info("Was not able to get optional client info on request for party(" + partyId + "): " + e.getMessage());
+			log.error("Was not able to get optional client info on request for party(" + partyId + "): " + e.getMessage(), e);
 		}
 
 		return party;
