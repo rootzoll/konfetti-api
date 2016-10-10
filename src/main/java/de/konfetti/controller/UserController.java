@@ -2,6 +2,7 @@ package de.konfetti.controller;
 
 import de.konfetti.controller.vm.KeyAndPasswordVM;
 import de.konfetti.controller.vm.RedeemResponse;
+import de.konfetti.controller.vm.ResponseSendKonfetti;
 import de.konfetti.controller.vm.ResponseZip2Gps;
 import de.konfetti.data.*;
 import de.konfetti.service.*;
@@ -534,7 +535,7 @@ public class UserController {
 			// receiver has no account
 			// GENERATE SINGLE COUPON and SEND BY EMAIL
 			log.info("GENERATE SINGLE COUPON and SEND BY EMAIL");
-			result.transferedToAccount = false;
+			result.setTransferedToAccount(false);
 
 			// generate coupon
 			Code code = this.codeService.createKonfettiCoupon(party.getId(), client.getUserId(), new Long(amount));
@@ -558,7 +559,7 @@ public class UserController {
 			// receiver has account
 			// TRANSFERE BETWEEN ACCOUNT and SEND NOTIFICATION
 			log.info("TRANSFERE BETWEEN ACCOUNT and SEND NOTIFICATION");
-			result.transferedToAccount = true;
+			result.setTransferedToAccount(true);
 
 			// check if other user is already active on party
 			Long[] activeParties = user.getActiveOnParties();
@@ -646,19 +647,4 @@ public class UserController {
 		}
     	return result;
     }
-
-	private List<ClientAction> addFocusPartyAction(List<ClientAction> actions, Long partyId) {
-    	ClientAction a = new ClientAction();
-    	a.command = "focusParty";
-    	a.json = ""+partyId;
-    	actions.add(a);
-    	return actions;
-	}
-
-	class ResponseSendKonfetti {
-		public int resultCode = 0;
-		public boolean transferedToAccount = false;
-		public String response = "OK";
-	}
-
 }
