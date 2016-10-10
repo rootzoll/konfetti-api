@@ -506,7 +506,6 @@ public class PartyController {
                 }
             }
         }
-
         // create request
         Request persistent = requestService.create(request);
 

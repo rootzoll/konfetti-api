@@ -1,14 +1,12 @@
 package de.konfetti.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import de.konfetti.controller.vm.KeyAndPasswordVM;
+import de.konfetti.controller.vm.RedeemResponse;
 import de.konfetti.controller.vm.ResponseZip2Gps;
 import de.konfetti.data.*;
 import de.konfetti.service.*;
 import de.konfetti.utils.*;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,7 +57,6 @@ public class UserController {
     
     @Autowired
     public UserController(final UserService userService, final ClientService clientService, final AccountingService accountingService, final PartyService partyService, final CodeService codeService) {
-        
     	this.userService = userService;
         this.clientService = clientService;
         this.accountingService = accountingService;
@@ -621,7 +617,7 @@ public class UserController {
 	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/redeem/{code}", method = RequestMethod.GET, produces = "application/json")
 	public RedeemResponse redeemCode(@PathVariable String code, @RequestParam(value="locale", defaultValue="en") String locale, HttpServletRequest httpRequest) throws Exception {
-		if (code==null) throw new Exception("code is not valid");
+		if (StringUtils.isEmpty(code)) throw new Exception("code is not valid");
     	 // TODO implement reedem code feedback in locale
 		if (!locale.equals("en")) log.warn("TODO: implement reedem code feedback in locale '" + locale + "'");
 
@@ -631,163 +627,25 @@ public class UserController {
     	User user = userService.findById(client.getUserId());
     	if (user==null) throw new Exception("missing user with id("+client.getUserId()+")");
 
-		RedeemResponse result = new RedeemResponse();
-
-		result.actions = new ArrayList<ClientAction>();
-
 		// try to redeemcode
     	Code coupon = this.codeService.redeemByCode(code);
 
 		// just if backend is running on in test mode allow cheat codes
-		if (cheatCodesEnabled) {
+		if (cheatCodesEnabled && coupon == null) {
 			// --> creating coupons that are not in the database for testing
-        	if (code.equals("1")) {
-				// add 100 Konfetto #1
-        		coupon = new Code();
-        		coupon.setAmount(100l);
-        		coupon.setPartyID(1l);
-        		coupon.setUserID(0l);
-        		coupon.setCode("1");
-        		coupon.setActionType(Code.ACTION_TYPE_KONFETTI);
-        	} else if (code.equals("111")) {
-				// upgrade user to admin of party #1
-        		coupon = new Code();
-        		coupon.setPartyID(1l);
-        		coupon.setCode("111");
-        		coupon.setActionType(Code.ACTION_TYPE_ADMIN);
-        	} else if (code.equals("11")) {
-				// upgrade user to reviewer of party #1
-        		coupon = new Code();
-        		coupon.setPartyID(1l);
-        		coupon.setCode("11");
-        		coupon.setActionType(Code.ACTION_TYPE_REVIEWER);
-        	} else if (code.equals("2")) {
-				// add 100 Konfetto #2
-        		coupon = new Code();
-        		coupon.setAmount(100l);
-        		coupon.setPartyID(2l);
-        		coupon.setUserID(0l);
-        		coupon.setCode("2");
-        		coupon.setActionType(Code.ACTION_TYPE_KONFETTI);
-            } else if (code.equals("222")) {
-				// upgrade user to admin of party #2
-        		coupon = new Code();
-        		coupon.setPartyID(2l);
-        		coupon.setCode("222");
-        		coupon.setActionType(Code.ACTION_TYPE_ADMIN);
-        	} else if (code.equals("22")) {
-				// upgrade user to reviewer of party #2
-        		coupon = new Code();
-        		coupon.setPartyID(2l);
-        		coupon.setCode("22");
-        		coupon.setActionType(Code.ACTION_TYPE_REVIEWER);
-        	}
+			coupon = new CheatCodes().getCodeFromCouponCode(code);
     	}
 
+    	RedeemResponse result = new RedeemResponse();
 		if (coupon!=null) {
-			// redeem konfetti
-    		if (Code.ACTION_TYPE_KONFETTI==coupon.getActionType()) {
-    			// add konfetti to party
-        		result.actions = addKonfettiOnParty(user, coupon.getPartyID(), coupon.getAmount(), result.actions);
-        		
-        		// get GPS from party
-        		Party party = this.partyService.findById(coupon.getPartyID());
-        		ClientAction gpsInfo = new ClientAction();
-        		gpsInfo.command = "gpsInfo";
-        		gpsInfo.json = "{\"lat\":"+party.getLat()+", \"lon\":"+party.getLon()+"}";
-        		result.actions.add(gpsInfo);
-        		
-        	   	// TODO --> multi lang by lang set in user
-        		result.feedbackHtml = "You got now "+coupon.getAmount()+" konfetti to create a task with or upvote other ideas.";
-    		} else if (Code.ACTION_TYPE_REVIEWER==coupon.getActionType()) {
-				// promote user to reviewer
-        		result.actions = makeUserReviewerOnParty(user, coupon.getPartyID(), result.actions);
-        	   	// TODO --> multi lang by lang set in user
-        		result.feedbackHtml = "You are now REVIEWER on the following party.";
-        	} else if (Code.ACTION_TYPE_ADMIN==coupon.getActionType()) {
-				// promote user to admin
-        		result.actions = makeUserAdminOnParty(user, coupon.getPartyID(), result.actions);
-        	   	// TODO --> multi lang by lang set in user
-				result.feedbackHtml = "You are now ADMIN on the following party.";
-			}
-		} else{
+			result = this.codeService.processCodeCoupon(user, coupon);
+		} else {
 			// CODE NOT KNOWN
-    	   	// TODO --> multi lang by lang set in user
-    		result.feedbackHtml = "Sorry. The code '"+code+"' is not known or unvalid.";
+			// TODO --> multi lang by lang set in user
+			result.setFeedbackHtml("Sorry. The code '"+code+"' is not known or invalid.");
 		}
-
     	return result;
     }
-
-	private List<ClientAction> makeUserAdminOnParty(User user, Long partyId, List<ClientAction> actions) {
-		Long[] arr = user.getAdminOnParties();
-		if (!Helper.contains(arr, partyId)) arr = Helper.append(arr, partyId);
-		user.setAdminOnParties(arr);
-		userService.update(user);
-
-		log.info("user(" + user.getId() + ") is now ADMIN on party(" + partyId + ")");
-
-		actions = addUpdateUserAction(actions, user);
-		actions = addFocusPartyAction(actions, partyId);
-
-		return actions;
-	}
-	
-	private List<ClientAction> makeUserReviewerOnParty(User user, Long partyId, List<ClientAction> actions) {
-
-		Long[] arr = user.getReviewerOnParties();
-		if (!Helper.contains(arr, partyId)) arr = Helper.append(arr, partyId);
-		user.setReviewerOnParties(arr);
-		userService.update(user);
-
-		log.info("user(" + user.getId() + ") is now REVIEWER on party(" + partyId + ")");
-
-		actions = addUpdateUserAction(actions, user);
-		actions = addFocusPartyAction(actions, partyId);
-
-		return actions;
-	}
-
-	private List<ClientAction> addKonfettiOnParty(User user, Long partyId, Long konfettiAmount, List<ClientAction> actions) throws Exception {
-
-		final String userAccountName = AccountingTools.getAccountNameFromUserAndParty(user.getId(), partyId);
-		
-		// add user to party if not already part of
-		if (!Helper.contains(user.activeOnParties, partyId)) {
-			try {
-				user.activeOnParties = Helper.append(user.activeOnParties, partyId);
-				this.accountingService.createAccount(userAccountName);	
-				this.userService.update(user);
-			} catch (Exception e) {
-				log.warn("EXCEPTION: Was not able to add user("+user.id+") to party("+partyId+"): "+e.getMessage());
-			}
-		}
-		
-		Long konfettiBefore = this.accountingService.getBalanceOfAccount(userAccountName);
-		Long konfettiAfter = this.accountingService.addBalanceToAccount(TransactionType.COUPON, userAccountName, konfettiAmount);
-
-		if (konfettiBefore.equals(konfettiAfter)) throw new Exception("adding amount failed");
-
-		log.info("user(" + user.getId() + ") on party(" + partyId + ") +" + konfettiAmount + " konfetti");
-
-		actions = addFocusPartyAction(actions, partyId);
-
-		return actions;
-	}
-
-	private List<ClientAction> addUpdateUserAction(List<ClientAction> actions, User actualUser) {
-		String userJson = null;
-		try {
-			userJson = new ObjectMapper().writeValueAsString(actualUser);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-    	ClientAction a = new ClientAction();
-    	a.command = "updateUser";
-    	a.json = userJson;
-    	actions.add(a);
-    	return actions;
-	}
 
 	private List<ClientAction> addFocusPartyAction(List<ClientAction> actions, Long partyId) {
     	ClientAction a = new ClientAction();
@@ -795,11 +653,6 @@ public class UserController {
     	a.json = ""+partyId;
     	actions.add(a);
     	return actions;
-	}
-
-	class RedeemResponse {
-		public List<ClientAction> actions;
-		public String feedbackHtml;
 	}
 
 	class ResponseSendKonfetti {

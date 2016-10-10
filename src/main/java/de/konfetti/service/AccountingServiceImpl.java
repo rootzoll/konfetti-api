@@ -33,7 +33,7 @@ public class AccountingServiceImpl extends BaseService implements AccountingServ
 	}
 
 	@Override
-	public boolean createAccount(String accountName) throws Exception {
+	public boolean createAccount(String accountName) {
 		Account account = new Account();
 		account.setName(accountName);
 		return (accountRepository.saveAndFlush(account) != null);

@@ -9,17 +9,12 @@ import java.time.ZonedDateTime;
 @Entity
 @Data
 public class User {
-	
-	/*
-	 * OBJECT DATA FIELDS
-	 * 
-	 * data fields relevant to the user object
-	 */
 
 	public static final String PUSHSYSTEM_IOS = "ios";
 	public static final String PUSHSYSTEM_ANDROID = "android";
 	public static final String PUSHSYSTEM_CHROME = "chrome";
-	@Id
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
     // self written name (nick or real)
