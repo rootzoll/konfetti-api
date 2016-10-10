@@ -2,8 +2,10 @@ package de.konfetti.controller;
 
 import de.konfetti.Application;
 import de.konfetti.controller.vm.KeyAndPasswordVM;
+import de.konfetti.data.Party;
 import de.konfetti.data.User;
 import de.konfetti.data.UserRepository;
+import de.konfetti.service.PartyService;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
@@ -48,6 +50,9 @@ public class UserControllerTest {
 
     @Autowired
     protected UserRepository userRepository;
+
+    @Autowired
+    protected PartyService partyService;
 
     private Wiser wiser;
 
@@ -164,6 +169,17 @@ public class UserControllerTest {
                 .get(UserController.REST_API_MAPPING + "/login")
                 .then()
                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+    }
+
+    @Test
+    public void testGenerateCodesAdmin() throws Exception {
+        Party partyCreated = partyService.create(testHelper.getParty("partyTestGenerateCodesAdmin"));
+        myGiven()
+                .header(ControllerSecurityHelper.HEADER_ADMIN_PASSWORD, "admin")
+                .pathParam("partyId", partyCreated.getId())
+                .get(UserController.REST_API_MAPPING + "/codes-admin/{partyId}")
+                .then()
+                .statusCode(HttpStatus.OK.value());
     }
 
     @Test

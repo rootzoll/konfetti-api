@@ -284,7 +284,7 @@ public class UserController {
 			boolean firstTimeMailSet = (user.getEMail() == null) || (user.getEMail().trim().length() == 0);
 			if ((userInput.getEMail() != null) && (!userInput.getEMail().equals(user.getEMail()))) {
 				user.setEMail(userInput.getEMail());
-				String pass = Code.generadeCodeNumber()+"";
+				String pass = RandomUtil.generadeCodeNumber()+"";
     			user.setPassword(Helper.hashPassword(this.passwordSalt, pass));
     			if (firstTimeMailSet) {
     				// TODO multi lang eMail text by lang in user object - use same text as on account created with email

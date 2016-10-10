@@ -6,6 +6,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_ADMIN;
+import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
+import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_REVIEWER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -39,7 +42,7 @@ public class CodeServiceTest extends BaseTest {
         assertEquals("partyId persited", PARTY_ID, persistedCode.getPartyID());
         assertEquals("userId persited", USER_ID, persistedCode.getUserID());
         assertEquals("konfettiAmount persited", KONFETTI_AMOUNT, persistedCode.getAmount());
-        assertEquals("actionType persited", Code.ACTION_TYPE_KONFETTI, persistedCode.getActionType());
+        assertEquals("actionType persited", ACTION_TYPE_KONFETTI, persistedCode.getActionType());
         assertEquals("code persited", createdCode.getCode(), persistedCode.getCode());
         // NotNUll : persistedCode.getTimestamp()
     }
@@ -53,7 +56,7 @@ public class CodeServiceTest extends BaseTest {
         assertEquals("partyId persited", PARTY_ID, persistedCode.getPartyID());
         assertNull("userId is Null", persistedCode.getUserID());
         assertNull("konfettiAmount is Null", persistedCode.getAmount());
-        assertEquals("actionType persited", Code.ACTION_TYPE_ADMIN, persistedCode.getActionType());
+        assertEquals("actionType persited", ACTION_TYPE_ADMIN, persistedCode.getActionType());
         assertEquals("code persited", createdCode.getCode(), persistedCode.getCode());
     }
 
@@ -66,7 +69,7 @@ public class CodeServiceTest extends BaseTest {
         assertEquals("partyId persited", PARTY_ID, persistedCode.getPartyID());
         assertNull("userId is Null", persistedCode.getUserID());
         assertNull("konfettiAmount is Null", persistedCode.getAmount());
-        assertEquals("actionType persited", Code.ACTION_TYPE_REVIEWER, persistedCode.getActionType());
+        assertEquals("actionType persited", ACTION_TYPE_REVIEWER, persistedCode.getActionType());
         assertEquals("code persited", createdCode.getCode(), persistedCode.getCode());
     }
 
@@ -80,7 +83,7 @@ public class CodeServiceTest extends BaseTest {
         assertEquals("partyId persited", PARTY_ID, redeemedCode.getPartyID());
         assertEquals("userId persited", USER_ID, redeemedCode.getUserID());
         assertEquals("konfettiAmount persited", KONFETTI_AMOUNT, redeemedCode.getAmount());
-        assertEquals("actionType persited", Code.ACTION_TYPE_KONFETTI, redeemedCode.getActionType());
+        assertEquals("actionType persited", ACTION_TYPE_KONFETTI, redeemedCode.getActionType());
         assertEquals("code persited", createdCode.getCode(), redeemedCode.getCode());
 
         // verfiy the code does not exist anymore in the database

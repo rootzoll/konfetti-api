@@ -5,11 +5,16 @@ import de.konfetti.controller.vm.RedeemResponse;
 import de.konfetti.data.*;
 import de.konfetti.utils.AccountingTools;
 import de.konfetti.utils.Helper;
+import de.konfetti.utils.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_ADMIN;
+import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
+import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_REVIEWER;
 
 @Slf4j
 @Service
@@ -33,7 +38,7 @@ public class CodeServiceImpl extends BaseService implements CodeService {
     public Code createKonfettiCoupon(Long partyID, Long userID, Long konfettiAmount) {
         Code code = new Code();
         code.setPartyID(partyID);
-        code.setActionType(Code.ACTION_TYPE_KONFETTI);
+        code.setActionType(ACTION_TYPE_KONFETTI);
         code.setAmount(konfettiAmount);
         code.setUserID(userID);
         return saveWithUniqueCode(code);
@@ -43,7 +48,7 @@ public class CodeServiceImpl extends BaseService implements CodeService {
     public Code createAdminCode(Long partyID) {
         Code code = new Code();
         code.setPartyID(partyID);
-        code.setActionType(Code.ACTION_TYPE_ADMIN);
+        code.setActionType(ACTION_TYPE_ADMIN);
         return saveWithUniqueCode(code);
     }
 
@@ -51,7 +56,7 @@ public class CodeServiceImpl extends BaseService implements CodeService {
     public Code createReviewCode(Long partyID) {
         Code code = new Code();
         code.setPartyID(partyID);
-        code.setActionType(Code.ACTION_TYPE_REVIEWER);
+        code.setActionType(ACTION_TYPE_REVIEWER);
         return saveWithUniqueCode(code);
     }
 
@@ -72,7 +77,7 @@ public class CodeServiceImpl extends BaseService implements CodeService {
     public RedeemResponse processCodeCoupon(User user, Code coupon) throws Exception {
         RedeemResponse result = new RedeemResponse();
         // redeem konfetti
-        if (Code.ACTION_TYPE_KONFETTI == coupon.getActionType()) {
+        if (ACTION_TYPE_KONFETTI == coupon.getActionType()) {
             // add konfetti to party
             result.setActions(addKonfettiOnParty(user, coupon.getPartyID(), coupon.getAmount(), result.getActions()));
 
@@ -85,12 +90,12 @@ public class CodeServiceImpl extends BaseService implements CodeService {
 
             // TODO --> multi lang by lang set in user
             result.setFeedbackHtml("You got now " + coupon.getAmount() + " konfetti to create a task with or upvote other ideas.");
-        } else if (Code.ACTION_TYPE_REVIEWER == coupon.getActionType()) {
+        } else if (ACTION_TYPE_REVIEWER == coupon.getActionType()) {
             // promote user to reviewer
             result.setActions(makeUserReviewerOnParty(user, coupon.getPartyID(), result.getActions()));
             // TODO --> multi lang by lang set in user
             result.setFeedbackHtml("You are now REVIEWER on the following party.");
-        } else if (Code.ACTION_TYPE_ADMIN == coupon.getActionType()) {
+        } else if (ACTION_TYPE_ADMIN == coupon.getActionType()) {
             // promote user to admin
             result.setActions(makeUserAdminOnParty(user, coupon.getPartyID(), result.getActions()));
             // TODO --> multi lang by lang set in user
@@ -179,7 +184,7 @@ public class CodeServiceImpl extends BaseService implements CodeService {
         do {
             count++;
             try {
-                code.setCode("" + Code.generadeCodeNumber());
+                code.setCode("" + RandomUtil.generadeCodeNumber());
                 result = saveWhenCodeUnique(code);
             } catch (Exception e) {
                 log.warn("Was not able to use code ... will try again");
