@@ -1,10 +1,11 @@
 package de.konfetti.data;
 
+import de.konfetti.data.enums.CodeActionTypeEnum;
 import lombok.Data;
 
 import javax.persistence.*;
 
-import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
+import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
 
 @Data
 @Entity

@@ -1,4 +1,4 @@
-package de.konfetti.data;
+package de.konfetti.data.enums;
 
 /**
  * Created by relampago on 10.10.16.

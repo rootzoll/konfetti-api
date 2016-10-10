@@ -24,8 +24,8 @@ public class PartyServiceImpl extends BaseService implements PartyService {
 
     @Override
     public Party create(@NotNull Party party) {
-    	
-    	// check input
+
+        // check input
         nonnull(party);
 
         Long partyId = party.getId();
@@ -46,7 +46,7 @@ public class PartyServiceImpl extends BaseService implements PartyService {
 
     @Override
     public Party delete(long listId) {
-    	
+
         // make sure the list exists
         Party dbParty = partyRepository.findOne(listId);
         if (dbParty == null) {
@@ -66,8 +66,8 @@ public class PartyServiceImpl extends BaseService implements PartyService {
         // filter out deactivated parties
         List<Party> result = new ArrayList<Party>();
         for (Party party : parties) {
-			if (party.getVisibility()>=0) result.add(party);
-		}
+            if (party.getVisibility().ordinal() >= 0) result.add(party);
+        }
         return result;
     }
 
@@ -89,7 +89,7 @@ public class PartyServiceImpl extends BaseService implements PartyService {
 
     @Override
     public Long getNumberOfParties() {
-		return partyRepository.count();
-	}
+        return partyRepository.count();
+    }
 
 }

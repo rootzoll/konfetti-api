@@ -2,9 +2,9 @@ package de.konfetti.utils;
 
 import de.konfetti.data.Code;
 
-import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_ADMIN;
-import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
-import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_REVIEWER;
+import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_ADMIN;
+import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
+import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_REVIEWER;
 
 /**
  * Created by relampago on 10.10.16.

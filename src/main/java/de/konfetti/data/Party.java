@@ -1,27 +1,17 @@
 package de.konfetti.data;
 
+import de.konfetti.data.enums.PartyVisibilityEnum;
 import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Set;
 
+import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_PUBLIC;
+
 @Entity
 @Data
 public class Party {
 
-	/*
-	 * FINAL VISIBILITY VALUES
-	 */
-
-    // 0 = default - for everybody to see
-	public static final int VISIBILITY_PUBLIC = 0;
-    // 1 = can be found but is asking for invitation code
-	public static final int VISIBILITY_PRIVATE = 1;
-    // 2 = cannot be found, just enter with invitation code
-	public static final int VISIBILITY_HIDDEN = 2;
-    // -1 = deactivated
-	public static final int VISIBILITY_DEACTIVATED = -1;
-	
 	/*
 	 * FINAL REVIEW LEVEL VALUES
 	 */
@@ -70,7 +60,7 @@ public class Party {
     
     // determines the visibilty of the party to new users
     // see final values VISIBILITY_* above
-    private int visibility = 0;
+    private PartyVisibilityEnum visibility = VISIBILITY_PUBLIC;
     
     // determines if orga admins need to review public posting
     // see final values REVIEWLEVEL_* above

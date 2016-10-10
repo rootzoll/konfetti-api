@@ -6,9 +6,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_ADMIN;
-import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
-import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_REVIEWER;
+import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_ADMIN;
+import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
+import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_REVIEWER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 

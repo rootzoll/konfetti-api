@@ -12,7 +12,7 @@ import java.util.Date;
 import static com.natpryce.makeiteasy.MakeItEasy.an;
 import static com.natpryce.makeiteasy.MakeItEasy.make;
 import static com.natpryce.makeiteasy.MakeItEasy.with;
-import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
+import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
 import static de.konfetti.maker.PartyMaker.ExampleParty;
 import static de.konfetti.maker.UserMaker.ExampleUser;
 import static de.konfetti.maker.UserMaker.name;

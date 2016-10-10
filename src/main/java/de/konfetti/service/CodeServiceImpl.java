@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_ADMIN;
-import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
-import static de.konfetti.data.CodeActionTypeEnum.ACTION_TYPE_REVIEWER;
+import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_ADMIN;
+import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
+import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_REVIEWER;
 
 @Slf4j
 @Service

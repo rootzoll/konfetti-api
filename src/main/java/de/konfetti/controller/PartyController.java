@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Set;
 
 import static de.konfetti.data.NotificationType.*;
+import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_DEACTIVATED;
+import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_PUBLIC;
 
 @Slf4j
 @CrossOrigin
@@ -138,7 +140,7 @@ public class PartyController {
     	 */
 
         Party party = partyService.findById(partyId);
-        party.setVisibility(Party.VISIBILITY_DEACTIVATED);
+        party.setVisibility(VISIBILITY_DEACTIVATED);
         partyService.update(party);
 
         return true;
@@ -260,7 +262,7 @@ public class PartyController {
 
         // TODO: improve later by filter on GPS per search index
 
-        List<Party> foundParties = partyService.findByVisibility(Party.VISIBILITY_PUBLIC);
+        List<Party> foundParties = partyService.findByVisibility(VISIBILITY_PUBLIC.ordinal());
         List<Party> resultParties = new ArrayList<Party>();
 
         // TODO: fix this if it works again, at the moment no filtering by geo coordinates, does not work on server
