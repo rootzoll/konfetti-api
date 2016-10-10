@@ -148,8 +148,6 @@ public class ControllerSecurityHelper {
 		if (!req.isSecure()) {
 			log.warn("ControllerSecurityHelper: No HTTPS security (" + clientId + "/" + clientSecret + ") from IP(" + req.getRemoteAddr() + ")");
 		}
-		
 		return client;
-		
 	}
 }

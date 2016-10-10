@@ -22,7 +22,7 @@ public class UserMaker {
             User user = new User();
             user.setName(propertyLookup.valueOf(name, "testName"));
             user.setEMail(propertyLookup.valueOf(email, "testusername@test.de"));
-            user.setPassword(propertyLookup.valueOf(password, "testUsername"));
+            user.setPassword(propertyLookup.valueOf(password, "testPassword"));
             return user;
         }
     };

@@ -3,12 +3,10 @@ package de.konfetti.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.konfetti.controller.vm.KeyAndPasswordVM;
+import de.konfetti.controller.vm.ResponseZip2Gps;
 import de.konfetti.data.*;
 import de.konfetti.service.*;
-import de.konfetti.utils.AccountingTools;
-import de.konfetti.utils.EMailManager;
-import de.konfetti.utils.Helper;
-import de.konfetti.utils.PushManager;
+import de.konfetti.utils.*;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +21,10 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 
 @Slf4j
 @CrossOrigin
@@ -165,7 +161,6 @@ public class UserController {
     
     	// check if user is allowed to read
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
-    		
     		// A) check that user is himself
     		Client client;
     		try {
@@ -185,16 +180,13 @@ public class UserController {
 				user.setLastActivityTS(System.currentTimeMillis());
     			userService.update(user);
     		}
-    		
     	} else {
-    		
     		// B) check for trusted application with administrator privilege
         	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
     	}
     	
     	// keep password hash just on server side
     	user.setPassword("");
-    	
         return user;
     }
     
@@ -316,7 +308,6 @@ public class UserController {
     				);
     			}
     		}
-    		
         	// transfer selective values from input to existing user
 			user.setEMail(userInput.getEMail());
 			user.setImageMediaID(userInput.getImageMediaID());
@@ -326,17 +317,12 @@ public class UserController {
         	user.setPushID(userInput.getPushID());
         	user.setSpokenLangs(userInput.getSpokenLangs());
     		user.setLastActivityTS(System.currentTimeMillis());
-    		
     	} else {
-    		
     		// B) check for trusted application with administrator privilege
         	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
-        	
         	// complete overwrite allowed
         	user = userInput;
-        	
     	}
-    	
     	// update user in persistence
     	userService.update(user);
     	
@@ -403,9 +389,7 @@ public class UserController {
         if ((mailEnabled) && (!mailService.sendMail(email.trim(), "rest.user.coupons.subject", "Print out the PDF attached and spread the love :)", urlStr, user.getSpokenLangs()))) {
     		throw new Exception("Was not able to send eMail with Coupons to " + user.getEMail());
     	}
-
     	return true;
-    		
 	}
 
 	private void checkEmailConfiguration() throws Exception {
@@ -517,7 +501,6 @@ public class UserController {
 
      	// check amount of sending
 		if (party.getSendKonfettiMode()==Party.SENDKONFETTIMODE_JUSTEARNED) {
-
 			long userEarnedBalance = this.accountingService.getBalanceEarnedOfAccount(accountName);
 			if (amount>userEarnedBalance) throw new Exception("user earned fund too low - has ("+userBalance+") of that earned("+userEarnedBalance+")wants to send ("+amount+")");
 
@@ -552,7 +535,6 @@ public class UserController {
 		// check if user with that address has already an account
 		User toUser = userService.findByMail(address);
 		if (toUser==null) {
-
 			// receiver has no account
 			// GENERATE SINGLE COUPON and SEND BY EMAIL
 			log.info("GENERATE SINGLE COUPON and SEND BY EMAIL");
@@ -576,9 +558,7 @@ public class UserController {
 				accountingService.addBalanceToAccount(TransactionType.PAYBACK, accountName, amount);
 				throw new Exception("Was not able to send eMail with coupon code to " + user.getEMail() + " - check address and server email config");
 			}
-
 		} else {
-
 			// receiver has account
 			// TRANSFERE BETWEEN ACCOUNT and SEND NOTIFICATION
 			log.info("TRANSFERE BETWEEN ACCOUNT and SEND NOTIFICATION");
@@ -602,7 +582,6 @@ public class UserController {
 			// send notification receiver (email as fallback)
 			boolean sendNotification = false;
     		if ((toUser.getPushID()!=null) && (PushManager.getInstance().isAvaliable())) {
-
 				// push notification
     			if (PushManager.getInstance().sendNotification(
 						PushManager.mapUserPlatform(toUser.getPushSystem()),
@@ -617,69 +596,31 @@ public class UserController {
     			} else {
 					log.warn("was not able to send push notification to uuserId(" + user.getId() + ")");
 				}
-
 			}
 
 			if (!sendNotification) {
-
 				// eMail
     	    	if ((mailEnabled) && (mailService.sendMail(address, "rest.user.coupons.received.party", "Open app and check party '"+party.getName()+"' :)", null, user.getSpokenLangs()))) {
 					log.info("- eMail with Info notification send to: " + address);
 				} else {
 					log.error("Was not able to send eMail with Notification about received konfetti to " + user.getEMail() + " - check address and server email config");
 				}
-
 			}
-
 		}
-
 		log.info("OK SENDING KONFETTI");
 		return result;
      }
     
     @CrossOrigin(origins = "*")
 	@RequestMapping(value = "/zip2gps/{country}/{code}", method = RequestMethod.GET, produces = "application/json")
-	public ResponseZip2Gps redeemCode(@PathVariable String country, @PathVariable String code) throws Exception {
-    	ResponseZip2Gps result = new ResponseZip2Gps();
-    	result.resultCode = -1;
-    	try {
-    		System.out.println("ZIP2GPS country("+country+") zip("+code+") -->");
-    		Scanner scanner = new Scanner(new URL("https://maps.googleapis.com/maps/api/geocode/json?address="+code+","+country).openStream(), "UTF-8");
-    		String json = scanner.useDelimiter("\\A").next();
-    		scanner.close();
-    		int i = json.indexOf("\"location\" : {");
-    		int e = 0;
-    		if (i>0) {
-    			i+=14;
-    			json = json.substring(i);
-    			i = json.indexOf("\"lat\" : ");
-    			if (i>0) {
-    				i+=8;
-    				e = json.indexOf(",", i);
-    				String latStr = json.substring(i,e).trim();
-    				System.out.println("LAT("+latStr+")");
-    				result.lat = Double.parseDouble(latStr);
-    			}
-    			i = json.indexOf("\"lng\" : ");
-    			if (i>0) {
-    				i+=8;
-    				e = json.indexOf("}", i);
-    				String lngStr = json.substring(i,e).trim();
-    				System.out.println("LNG("+lngStr+")");
-    				result.lon = Double.parseDouble(lngStr);
-    			}
-    			result.resultCode = 0;
-    		}
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    	}
-    	return result;
+	public ResponseZip2Gps zip2Gps(@PathVariable String country, @PathVariable String code) throws Exception {
+		GpsConverter gpsConverter = new GpsConverter();
+		return gpsConverter.fromZipCode(country, code);
     }
 
 	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/redeem/{code}", method = RequestMethod.GET, produces = "application/json")
 	public RedeemResponse redeemCode(@PathVariable String code, @RequestParam(value="locale", defaultValue="en") String locale, HttpServletRequest httpRequest) throws Exception {
-
 		if (code==null) throw new Exception("code is not valid");
     	 // TODO implement reedem code feedback in locale
 		if (!locale.equals("en")) log.warn("TODO: implement reedem code feedback in locale '" + locale + "'");
@@ -700,52 +641,42 @@ public class UserController {
 		// just if backend is running on in test mode allow cheat codes
 		if (cheatCodesEnabled) {
 			// --> creating coupons that are not in the database for testing
-
-			// add 100 Konfetto #1
         	if (code.equals("1")) {
+				// add 100 Konfetto #1
         		coupon = new Code();
         		coupon.setAmount(100l);
         		coupon.setPartyID(1l);
         		coupon.setUserID(0l);
         		coupon.setCode("1");
         		coupon.setActionType(Code.ACTION_TYPE_KONFETTI);
-        	} else
-        	// upgrade user to admin of party #1
-        	if (code.equals("111")) {
+        	} else if (code.equals("111")) {
+				// upgrade user to admin of party #1
         		coupon = new Code();
         		coupon.setPartyID(1l);
         		coupon.setCode("111");
         		coupon.setActionType(Code.ACTION_TYPE_ADMIN);
-        	} else
-
+        	} else if (code.equals("11")) {
 				// upgrade user to reviewer of party #1
-        	if (code.equals("11")) {
         		coupon = new Code();
         		coupon.setPartyID(1l);
         		coupon.setCode("11");
         		coupon.setActionType(Code.ACTION_TYPE_REVIEWER);
-        	} else
-
+        	} else if (code.equals("2")) {
 				// add 100 Konfetto #2
-        	if (code.equals("2")) {
         		coupon = new Code();
         		coupon.setAmount(100l);
         		coupon.setPartyID(2l);
         		coupon.setUserID(0l);
         		coupon.setCode("2");
         		coupon.setActionType(Code.ACTION_TYPE_KONFETTI);
-            } else
-
+            } else if (code.equals("222")) {
 				// upgrade user to admin of party #2
-        	if (code.equals("222")) {
         		coupon = new Code();
         		coupon.setPartyID(2l);
         		coupon.setCode("222");
         		coupon.setActionType(Code.ACTION_TYPE_ADMIN);
-        	} else
-
+        	} else if (code.equals("22")) {
 				// upgrade user to reviewer of party #2
-        	if (code.equals("22")) {
         		coupon = new Code();
         		coupon.setPartyID(2l);
         		coupon.setCode("22");
@@ -754,10 +685,8 @@ public class UserController {
     	}
 
 		if (coupon!=null) {
-
 			// redeem konfetti
     		if (Code.ACTION_TYPE_KONFETTI==coupon.getActionType()) {
-    			
     			// add konfetti to party
         		result.actions = addKonfettiOnParty(user, coupon.getPartyID(), coupon.getAmount(), result.actions);
         		
@@ -770,26 +699,19 @@ public class UserController {
         		
         	   	// TODO --> multi lang by lang set in user
         		result.feedbackHtml = "You got now "+coupon.getAmount()+" konfetti to create a task with or upvote other ideas.";
-    		} else
-
+    		} else if (Code.ACTION_TYPE_REVIEWER==coupon.getActionType()) {
 				// promote user to reviewer
-        	if (Code.ACTION_TYPE_REVIEWER==coupon.getActionType()) {
         		result.actions = makeUserReviewerOnParty(user, coupon.getPartyID(), result.actions);
         	   	// TODO --> multi lang by lang set in user
         		result.feedbackHtml = "You are now REVIEWER on the following party.";
-        	} else
-
+        	} else if (Code.ACTION_TYPE_ADMIN==coupon.getActionType()) {
 				// promote user to admin
-            if (Code.ACTION_TYPE_ADMIN==coupon.getActionType()) {
         		result.actions = makeUserAdminOnParty(user, coupon.getPartyID(), result.actions);
         	   	// TODO --> multi lang by lang set in user
 				result.feedbackHtml = "You are now ADMIN on the following party.";
 			}
-
-		} else
-
-		// CODE NOT KNOWN
-    	{
+		} else{
+			// CODE NOT KNOWN
     	   	// TODO --> multi lang by lang set in user
     		result.feedbackHtml = "Sorry. The code '"+code+"' is not known or unvalid.";
 		}
@@ -798,7 +720,6 @@ public class UserController {
     }
 
 	private List<ClientAction> makeUserAdminOnParty(User user, Long partyId, List<ClientAction> actions) {
-
 		Long[] arr = user.getAdminOnParties();
 		if (!Helper.contains(arr, partyId)) arr = Helper.append(arr, partyId);
 		user.setAdminOnParties(arr);
@@ -887,10 +808,4 @@ public class UserController {
 		public String response = "OK";
 	}
 
-	class ResponseZip2Gps {
-		public int resultCode = 0;
-		public double lat = 0d;
-		public double lon = 0d;
-	}
-	
 }

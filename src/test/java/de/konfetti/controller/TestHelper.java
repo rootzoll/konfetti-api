@@ -4,6 +4,7 @@ import de.konfetti.data.Code;
 import de.konfetti.data.Party;
 import de.konfetti.data.Request;
 import de.konfetti.data.User;
+import de.konfetti.maker.UserMaker;
 
 import java.util.Date;
 
@@ -11,6 +12,7 @@ import static com.natpryce.makeiteasy.MakeItEasy.an;
 import static com.natpryce.makeiteasy.MakeItEasy.make;
 import static com.natpryce.makeiteasy.MakeItEasy.with;
 import static de.konfetti.maker.UserMaker.ExampleUser;
+import static de.konfetti.maker.UserMaker.email;
 import static de.konfetti.maker.UserMaker.name;
 
 public class TestHelper {
@@ -19,7 +21,8 @@ public class TestHelper {
     }
 
     public User getUser(String username){
-        return make(an(ExampleUser).but(with(name, username)));
+        String email = username + "@test.de";
+        return make(an(ExampleUser).but(with(name, username), with(UserMaker.email, email.toLowerCase())));
     }
 
     public Party getTestParty1() {

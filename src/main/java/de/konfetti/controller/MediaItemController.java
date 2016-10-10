@@ -50,14 +50,11 @@ public class MediaItemController {
     	
     	// check if user is allowed to create
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
-    		
     		// A) check that chat is just hosted by user
     		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     		if (client==null) throw new Exception("client is NULL");
         	template.setUserId(client.getUserId());
-        	
     	} else {
-    		
     		// B) check for trusted application with administrator privilege
         	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
     	}

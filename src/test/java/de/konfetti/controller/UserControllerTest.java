@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.subethamail.wiser.Wiser;
@@ -72,7 +73,7 @@ public class UserControllerTest {
 
     @Test
     public void createUser() throws Exception {
-        String testEmail = "testCreateUser@test.de";
+        String testEmail = "testcreateuser@test.de";
         String testPassword = "createUser";
         // check user is created
         createUser(testEmail, testPassword);
@@ -88,7 +89,7 @@ public class UserControllerTest {
 
     private void createUser(String email, String password) {
         myGiven()
-                .param("mail", email).param("pass", password)
+                .param("mail", email.toLowerCase()).param("pass", password)
                 .when().post("konfetti/api/account")
                 .then().statusCode(200)
                 .body("id", notNullValue())
@@ -98,8 +99,8 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testRquestPasswordReset() throws Exception {
-        User user = testHelper.getUser("testRquestPasswordReset");
+    public void testRequestPasswordReset() throws Exception {
+        User user = testHelper.getUser("testRequestPasswordReset");
         createUser(user.getEMail(), user.getPassword());
         myGiven()
                 .contentType(ContentType.TEXT)
@@ -131,7 +132,38 @@ public class UserControllerTest {
 
     @Test
     public void login() throws Exception {
+        User user = testHelper.getUser("testLogin");
+        createUser(user.getEMail(), user.getPassword());
+        myGiven()
+                .param("mail", user.getEMail())
+                .param("pass", user.getPassword())
+                .get(UserController.REST_API_MAPPING + "/login")
+                .then()
+                .statusCode(HttpStatus.OK.value());
+    }
 
+    @Test
+    public void loginWrongPassword() throws Exception {
+        User user = testHelper.getUser("testLoginWrongPassword");
+        createUser(user.getEMail(), user.getPassword());
+        myGiven()
+                .param("mail", user.getEMail())
+                .param("pass", "wrongPassword")
+                .get(UserController.REST_API_MAPPING + "/login")
+                .then()
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+    }
+
+    @Test
+    public void loginEmailNotExisting() throws Exception {
+        User user = testHelper.getUser("testLoginEmailNotExisting");
+        createUser(user.getEMail(), user.getPassword());
+        myGiven()
+                .param("mail", "wrongEmail@test.de")
+                .param("pass", user.getPassword())
+                .get(UserController.REST_API_MAPPING + "/login")
+                .then()
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
 
     @Test
