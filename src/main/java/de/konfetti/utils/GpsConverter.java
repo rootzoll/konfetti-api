@@ -1,6 +1,8 @@
 package de.konfetti.utils;
 
 import de.konfetti.controller.vm.ResponseZip2Gps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.util.Scanner;
@@ -10,16 +12,18 @@ import java.util.Scanner;
  */
 public class GpsConverter {
 
+    private static final Logger logger = LoggerFactory.getLogger(GpsConverter.class);
+
     public ResponseZip2Gps fromZipCode(String country, String code){
         ResponseZip2Gps result = new ResponseZip2Gps();
-        result.resultCode = -1;
+        result.setResultCode(-1);
         try {
-            System.out.println("ZIP2GPS country("+country+") zip("+code+") -->");
+            logger.debug("ZIP2GPS country("+country+") zip("+code+") -->");
             Scanner scanner = new Scanner(new URL("https://maps.googleapis.com/maps/api/geocode/json?address="+code+","+country).openStream(), "UTF-8");
             String json = scanner.useDelimiter("\\A").next();
             scanner.close();
             int i = json.indexOf("\"location\" : {");
-            int e = 0;
+            int e;
             if (i>0) {
                 i+=14;
                 json = json.substring(i);
@@ -29,7 +33,7 @@ public class GpsConverter {
                     e = json.indexOf(",", i);
                     String latStr = json.substring(i,e).trim();
                     System.out.println("LAT("+latStr+")");
-                    result.lat = Double.parseDouble(latStr);
+                    result.setLat(Double.parseDouble(latStr));
                 }
                 i = json.indexOf("\"lng\" : ");
                 if (i>0) {
@@ -37,9 +41,9 @@ public class GpsConverter {
                     e = json.indexOf("}", i);
                     String lngStr = json.substring(i,e).trim();
                     System.out.println("LNG("+lngStr+")");
-                    result.lon = Double.parseDouble(lngStr);
+                    result.setLon(Double.parseDouble(lngStr));
                 }
-                result.resultCode = 0;
+                result.setResultCode(0);
             }
         } catch (Exception e) {
             e.printStackTrace();
