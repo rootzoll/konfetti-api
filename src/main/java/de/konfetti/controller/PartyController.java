@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 import static de.konfetti.data.NotificationType.*;
+import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_DEACTIVATED;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_PUBLIC;
 
@@ -462,7 +463,7 @@ public class PartyController {
         request.setPartyId(partyId);
 
         // set state based on party settings
-        if (party.getReviewLevel() == Party.REVIEWLEVEL_NONE) {
+        if (party.getReviewLevel() == REVIEWLEVEL_NONE) {
             request.setState(Request.STATE_OPEN);
         } else {
             request.setState(Request.STATE_REVIEW);

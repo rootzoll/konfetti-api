@@ -4,9 +4,11 @@ import com.natpryce.makeiteasy.Instantiator;
 import com.natpryce.makeiteasy.Property;
 import com.natpryce.makeiteasy.PropertyLookup;
 import de.konfetti.data.Party;
+import de.konfetti.data.enums.PartyReviewLevelEnum;
 import de.konfetti.data.enums.PartyVisibilityEnum;
 
 import static com.natpryce.makeiteasy.Property.newProperty;
+import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_PUBLIC;
 
 /**
@@ -18,7 +20,7 @@ public class PartyMaker {
     public static final Property<Party, String> detailText = newProperty();
     public static final Property<Party, String> contact = newProperty();
     public static final Property<Party, PartyVisibilityEnum> visibility = newProperty();
-    public static final Property<Party, Integer> reviewLevel = newProperty();
+    public static final Property<Party, PartyReviewLevelEnum> reviewLevel = newProperty();
     public static final Property<Party, Integer> newRequestMinKonfetti = newProperty();
     public static final Property<Party, Long> welcomeBalance = newProperty();
     public static final Property<Party, Float> lon = newProperty();
@@ -33,7 +35,7 @@ public class PartyMaker {
             party.setDetailText(propertyLookup.valueOf(detailText, "testPartyDetailsText"));
             party.setContact(propertyLookup.valueOf(contact, "testPartyContact"));
             party.setVisibility(propertyLookup.valueOf(visibility, VISIBILITY_PUBLIC));
-            party.setReviewLevel(propertyLookup.valueOf(reviewLevel, Integer.parseInt("0")));
+            party.setReviewLevel(propertyLookup.valueOf(reviewLevel, REVIEWLEVEL_NONE));
             party.setNewRequestMinKonfetti(propertyLookup.valueOf(newRequestMinKonfetti, Integer.parseInt("0")));
             party.setWelcomeBalance(propertyLookup.valueOf(welcomeBalance, Long.parseLong("0")));
             party.setLon(propertyLookup.valueOf(lon, Float.parseFloat("0")));

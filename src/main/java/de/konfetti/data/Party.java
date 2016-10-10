@@ -1,29 +1,19 @@
 package de.konfetti.data;
 
+import de.konfetti.data.enums.PartyReviewLevelEnum;
 import de.konfetti.data.enums.PartyVisibilityEnum;
 import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Set;
 
+import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_PUBLIC;
 
 @Entity
 @Data
 public class Party {
 
-	/*
-	 * FINAL REVIEW LEVEL VALUES
-	 */
-	
-	// 0 = no review
-	public static final int REVIEWLEVEL_NONE = 0;	
-    // 1 = full review of all public posts
-	public static final int REVIEWLEVEL_EVERYTHING = 1;
-    // 2 = just review the initial task, follow up public info on request no review
-	public static final int REVIEWLEVEL_TASKS = 2;
-	
-	
 	/*
 	 * KONFETTI SEND MODE
 	 */
@@ -39,10 +29,6 @@ public class Party {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    /*
-     * DESCRIBING DATA
-     */
-
     // name of party to display
     private String name;
     
@@ -54,17 +40,13 @@ public class Party {
     // optional but should be seperate field so client can offer options
     private String contact;
     
-    /*
-     * PARTY SETTINGS
-     */
-    
     // determines the visibilty of the party to new users
     // see final values VISIBILITY_* above
     private PartyVisibilityEnum visibility = VISIBILITY_PUBLIC;
     
     // determines if orga admins need to review public posting
     // see final values REVIEWLEVEL_* above
-    private int reviewLevel = 0;
+    private PartyReviewLevelEnum reviewLevel = REVIEWLEVEL_NONE;
     
     // minimal konfetti to spend on new request posting
     private int newRequestMinKonfetti = 0;
