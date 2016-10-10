@@ -45,8 +45,6 @@ public class EMailManagerTest extends BaseTest {
         wiser.stop();
     }
 
-    // TODO : reactivate when tests work again
-    @Ignore
     @Test
     public void sendMailWithDefault() throws Exception {
         String bodyText = "username: " + email + "\npass: " + password + "\n\nkeep email or write password down";
@@ -64,7 +62,6 @@ public class EMailManagerTest extends BaseTest {
 //                .withContent(bodyText);
     }
 
-    @Ignore
     @Test
     public void sendMailWithGerman() throws Exception {
         String bodyText = "username: " + email + "\npass: " + password + "\n\nkeep email or write password down";

@@ -4,13 +4,12 @@ import de.konfetti.Application;
 import de.konfetti.controller.TestHelper;
 import de.konfetti.data.*;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
@@ -19,8 +18,8 @@ import static org.junit.Assert.*;
 /**
  * Created by catarata02 on 08.11.15.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = Application.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Application.class)
 @ActiveProfiles("test")
 public class RequestServiceImplTestIt {
 
@@ -66,11 +65,8 @@ public class RequestServiceImplTestIt {
         // assertTrue("same request in party", testHelper.equalRequests(createdRequest, partyService.findByName(party.getName());
     }
 
-    @Ignore
     @Test
     public void testUpdateRequest() throws Exception {
-        // TODO: make test to work again!!!
-
         Party party = persistDefaultParty(testHelper, partyService);
 
         Request testRequest = testHelper.getTestRequest1(party);

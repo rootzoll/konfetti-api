@@ -49,12 +49,10 @@ public class Request {
     
     // hard copy from user
     private String[] spokenLangs = {};
- 
-    
+
     /*
      * Transient Data
      */
-
     @Transient // --> get from accounting
     private long konfettiCount;
 

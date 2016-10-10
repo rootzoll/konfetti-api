@@ -66,8 +66,6 @@ public class TestHelper {
 //    }
 
     public boolean equalRequests(Request actual, Request expected){
-        if (actual.getKonfettiCount() != expected.getKonfettiCount()) return false;
-        if (actual.getKonfettiAdd() != expected.getKonfettiAdd()) return false;
         // TODO: repair to work again -> link between party and requests
         // if (actual.getPartyId() != expected.getPartyId()) return false;
 //        if (actual.getTime() != null ? !actual.getTime().equals(expected.getTime()) : expected.getTime() != null) return false;
