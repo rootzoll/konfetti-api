@@ -2,6 +2,7 @@ package de.konfetti.controller;
 
 import de.konfetti.Application;
 import de.konfetti.data.MediaItem;
+import de.konfetti.data.enums.MediaItemTypeEnum;
 import de.konfetti.service.MediaService;
 import io.restassured.http.ContentType;
 import org.junit.After;
@@ -45,6 +46,17 @@ public class MediaItemControllerTest extends BaseControllerTest {
                 .body(mediaItem)
                 .post(MediaItemController.REST_API_MAPPING)
                 .then().statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
+    public void createMediaWithWrongType() {
+        MediaItem mediaItem = testHelper.getMediaItem();
+        mediaItem.setType(MediaItemTypeEnum.TYPE_UNKOWN);
+        myGivenAdmin()
+                .contentType(ContentType.JSON)
+                .body(mediaItem)
+                .post(MediaItemController.REST_API_MAPPING)
+                .then().statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
 
     @Test

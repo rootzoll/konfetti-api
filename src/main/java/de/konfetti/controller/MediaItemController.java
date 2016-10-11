@@ -3,6 +3,7 @@ package de.konfetti.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.konfetti.data.Client;
 import de.konfetti.data.MediaItem;
+import de.konfetti.data.enums.MediaItemTypeEnum;
 import de.konfetti.data.mediaitem.MultiLang;
 import de.konfetti.service.ClientService;
 import de.konfetti.service.MediaService;
@@ -68,14 +69,9 @@ public class MediaItemController {
     	template.setReviewed(REVIEWED_PRIVATE);
     	
     	// check if type is supported
-    	boolean typeIsSupported = false;
-    	if (TYPE_TEXT.equals(template.getType())) typeIsSupported = true;
-    	if (TYPE_MULTILANG.equals(template.getType())) typeIsSupported = true;
-    	if (TYPE_IMAGE.equals(template.getType())) typeIsSupported = true;
-    	if (TYPE_LOCATION.equals(template.getType())) typeIsSupported = true;
-    	if (TYPE_DATE.equals(template.getType())) typeIsSupported = true;
-    	if (!typeIsSupported) throw new Exception("type("+template.getType()+") is not supported as media item");
-    	
+		if (!MediaItemTypeEnum.validTypes().contains(template.getType()))
+			throw new Exception("type("+template.getType()+") is not supported as media item. Supported MediaTypes are : " + MediaItemTypeEnum.validTypes());
+
     	// MULTI-LANG auto translation
     	if (TYPE_MULTILANG.equals(template.getType())) {
 			log.info("Is MultiLang --> AUTOTRANSLATION");
