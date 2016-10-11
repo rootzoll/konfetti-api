@@ -69,8 +69,8 @@ public class Request {
 	private MediaItem titleMultiLang;
 	
 	@Transient // --> the amount a single user supported the request
-	private Long konfettiAmountSupport = 0l;
+	private Long konfettiAmountSupport = 0L;
 	
 	@Transient // --> the amount a single user got rewarded by the request
-	private Long konfettiAmountReward = 0l;
+	private Long konfettiAmountReward = 0L;
 }

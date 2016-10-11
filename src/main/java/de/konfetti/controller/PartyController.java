@@ -30,6 +30,7 @@ import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_PUBLIC;
 import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_ALL;
 import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_DISABLED;
 import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_JUSTEARNED;
+import static de.konfetti.data.mediaitem.MediaItemTypeEnum.TYPE_MULTILANG;
 
 @Slf4j
 @CrossOrigin
@@ -488,7 +489,7 @@ public class PartyController {
         mediaItem.setData(json);
         mediaItem.setLastUpdateTS(System.currentTimeMillis());
         mediaItem.setReviewed(MediaItem.REVIEWED_PUBLIC);
-        mediaItem.setType(MediaItem.TYPE_MULTILANG);
+        mediaItem.setType(TYPE_MULTILANG);
         mediaItem.setUserId(client.getUserId());
         mediaItem = mediaService.create(mediaItem);
         log.info("multilang stored with id(" + mediaItem.getId() + ")");

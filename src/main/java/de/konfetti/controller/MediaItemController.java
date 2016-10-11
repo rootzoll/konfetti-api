@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
 
+import static de.konfetti.data.mediaitem.MediaItemTypeEnum.*;
+
 @Slf4j
 @CrossOrigin
 @RestController
@@ -66,15 +68,15 @@ public class MediaItemController {
     	
     	// check if type is supported
     	boolean typeIsSupported = false;
-    	if (MediaItem.TYPE_TEXT.equals(template.getType())) typeIsSupported = true;
-    	if (MediaItem.TYPE_MULTILANG.equals(template.getType())) typeIsSupported = true;
-    	if (MediaItem.TYPE_IMAGE.equals(template.getType())) typeIsSupported = true;
-    	if (MediaItem.TYPE_LOCATION.equals(template.getType())) typeIsSupported = true;
-    	if (MediaItem.TYPE_DATE.equals(template.getType())) typeIsSupported = true;
+    	if (TYPE_TEXT.equals(template.getType())) typeIsSupported = true;
+    	if (TYPE_MULTILANG.equals(template.getType())) typeIsSupported = true;
+    	if (TYPE_IMAGE.equals(template.getType())) typeIsSupported = true;
+    	if (TYPE_LOCATION.equals(template.getType())) typeIsSupported = true;
+    	if (TYPE_DATE.equals(template.getType())) typeIsSupported = true;
     	if (!typeIsSupported) throw new Exception("type("+template.getType()+") is not supported as media item");
     	
     	// MULTI-LANG auto translation
-    	if (MediaItem.TYPE_MULTILANG.equals(template.getType())) {
+    	if (TYPE_MULTILANG.equals(template.getType())) {
 			log.info("Is MultiLang --> AUTOTRANSLATION");
 			try {
     			MultiLang multiLang = new ObjectMapper().readValue(template.getData(), MultiLang.class);
@@ -115,7 +117,7 @@ public class MediaItemController {
     	if (item==null) throw new Exception("media("+mediaId+") not found");
     	
     	// check if image
-    	if (!item.getType().equals(MediaItem.TYPE_IMAGE)) throw new Exception("media("+mediaId+") is not image");
+    	if (!item.getType().equals(TYPE_IMAGE)) throw new Exception("media("+mediaId+") is not image");
     	
     	// get base64 string
     	String base64 = item.getData();

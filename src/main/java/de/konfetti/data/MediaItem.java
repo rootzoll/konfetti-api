@@ -1,20 +1,16 @@
 package de.konfetti.data;
 
+import de.konfetti.data.mediaitem.MediaItemTypeEnum;
 import lombok.Data;
 
 import javax.persistence.*;
+
+import static de.konfetti.data.mediaitem.MediaItemTypeEnum.TYPE_UNKOWN;
 
 @Data
 @Entity
 public class MediaItem {
 
-	public static final String TYPE_UNKOWN = "n/a";
-	public static final String TYPE_TEXT = "java.lang.String";
-	public static final String TYPE_MULTILANG = "MediaItemMultiLang";
-	public static final String TYPE_LOCATION = "Location";
-	public static final String TYPE_IMAGE = "Image";
-	public static final String TYPE_DATE = "Date";
-	
 	public static final Integer REVIEWED_PUBLIC = 0;
 	public static final Integer REVIEWED_PRIVATE = 1;
 	
@@ -30,7 +26,7 @@ public class MediaItem {
     
     private Long lastUpdateTS = 0l; 
     
-    private String type = TYPE_UNKOWN; 
+    private MediaItemTypeEnum type = TYPE_UNKOWN;
     
     // JSON or BASE64
     @Lob
