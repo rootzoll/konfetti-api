@@ -1,5 +1,6 @@
 package de.konfetti.data;
 
+import de.konfetti.data.enums.RequestStateEnum;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -10,13 +11,6 @@ import java.util.List;
 @Data
 public class Request {
 
-	// possible sates of an request
-	public static final String STATE_REVIEW = "review";
-	public static final String STATE_REJECTED = "rejected";
-	public static final String STATE_OPEN = "open";
-	public static final String STATE_PROCESSING = "processing";
-	public static final String STATE_DONE = "done";
-	
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,7 +19,7 @@ public class Request {
 
     private Long partyId;
     
-    private String state;
+    private RequestStateEnum state;
     
     private String title;
     

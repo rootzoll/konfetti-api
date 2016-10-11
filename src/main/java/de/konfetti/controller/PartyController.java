@@ -28,6 +28,7 @@ import static de.konfetti.data.enums.MediaItemReviewEnum.REVIEWED_PUBLIC;
 import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_DEACTIVATED;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_PUBLIC;
+import static de.konfetti.data.enums.RequestStateEnum.*;
 import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_ALL;
 import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_DISABLED;
 import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_JUSTEARNED;
@@ -196,7 +197,7 @@ public class PartyController {
                 if ((!userIsPartyAdmin) && (!userIsPartyReviewer)) {
                     List<Request> filteredRequests = new ArrayList<Request>();
                     for (Request r : requests) {
-                        if ((r.getUserId().equals(user.getId())) || (r.getState().equals(Request.STATE_DONE)) || (r.getState().equals(Request.STATE_PROCESSING)) || (r.getState().equals(Request.STATE_OPEN))) {
+                        if ((r.getUserId().equals(user.getId())) || (r.getState().equals(STATE_DONE)) || (r.getState().equals(STATE_PROCESSING)) || (r.getState().equals(STATE_OPEN))) {
                             filteredRequests.add(r);
                         }
                     }
@@ -469,9 +470,9 @@ public class PartyController {
 
         // set state based on party settings
         if (party.getReviewLevel() == REVIEWLEVEL_NONE) {
-            request.setState(Request.STATE_OPEN);
+            request.setState(STATE_OPEN);
         } else {
-            request.setState(Request.STATE_REVIEW);
+            request.setState(STATE_REVIEW);
             // TODO push info to review admin
             if (user.getPushActive()) log.warn("TODO: push info to review admin");
         }
@@ -571,14 +572,14 @@ public class PartyController {
             controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
         }
         // delete any waiting notification finding a reviewer
-        if (Request.STATE_REVIEW.equals(request.getState()))
+        if (STATE_REVIEW.equals(request.getState()))
             notificationService.deleteByTypeAndReference(REVIEW_WAITING, request.getId());
 
         // delete
         Request result = requestService.delete(request.getId());
 
         // payback of upvote konfetti when request is still open
-        if (!Request.STATE_DONE.equals(request.getState())) {
+        if (!STATE_DONE.equals(request.getState())) {
             List<KonfettiTransaction> allPayIns = konfettiTransactionService.getAllTransactionsToAccount(AccountingTools.getAccountNameFromRequest(requestId));
             for (KonfettiTransaction payIn : allPayIns) {
                 if ((payIn.getType() == TransactionType.TASK_SUPPORT) && (!AccountingTools.getAccountNameFromUserAndParty(request.getUserId(), request.getPartyId()).equals(payIn.getFromAccount()))) {
@@ -647,7 +648,7 @@ public class PartyController {
 
             // add info about rewards from the request to user
             long konfettiAmountReward = 0l;
-            if (request.getState().equals(Request.STATE_DONE)) {
+            if (request.getState().equals(STATE_DONE)) {
                 String accountName = AccountingTools.getAccountNameFromRequest(request.getId());
                 List<KonfettiTransaction> allTransactionsFromRequest = konfettiTransactionService.getAllTransactionsFromAccountSinceTS(accountName, request.getTime());
                 for (KonfettiTransaction konfettiTransaction : allTransactionsFromRequest) {
@@ -733,24 +734,24 @@ public class PartyController {
 
             // Actions
             // open from review (by admin and reviewer)
-            if (action.equals(Request.STATE_OPEN)) {
+            if (action.equals(STATE_OPEN)) {
                 // check if pre-state is valid
-                boolean fromReview = request.getState().equals(Request.STATE_REVIEW);
-                boolean fromProcessing = request.getState().equals(Request.STATE_PROCESSING);
+                boolean fromReview = request.getState().equals(STATE_REVIEW);
+                boolean fromProcessing = request.getState().equals(STATE_PROCESSING);
                 if ((!fromReview) && (!fromProcessing))
-                    throw new Exception("request(" + requestId + ") with state(" + request.getState() + ") CANNOT set to '" + Request.STATE_OPEN + "'");
+                    throw new Exception("request(" + requestId + ") with state(" + request.getState() + ") CANNOT set to '" + STATE_OPEN + "'");
 
                 // check if admin or reviewer
                 if ((!userIsPartyAdmin) && (!userIsPartyReviewer)) {
                     // if is author unpausing an request
-                    if ((!userIsAuthor) || (!request.getState().equals(Request.STATE_PROCESSING)))
+                    if ((!userIsAuthor) || (!request.getState().equals(STATE_PROCESSING)))
                         throw new Exception("request(" + requestId + ") author cannot set to open");
                 }
 
                 // set open & persists
-                request.setState(Request.STATE_OPEN);
+                request.setState(STATE_OPEN);
                 requestService.update(request);
-                log.info("request(" + requestId + ") set STATE to " + Request.STATE_OPEN);
+                log.info("request(" + requestId + ") set STATE to " + STATE_OPEN);
 
                 if (fromReview) {
                     // send notification to author
@@ -766,26 +767,26 @@ public class PartyController {
                 webSocket.convertAndSend("/out/updates", GSON.toJson(msg));
             } else
                 // set processing (by all)
-                if (action.equals(Request.STATE_PROCESSING)) {
+                if (action.equals(STATE_PROCESSING)) {
                     // check if pre-state is valid
-                    if (!request.getState().equals(Request.STATE_OPEN))
-                        throw new Exception("request(" + requestId + ") with state(" + request.getState() + ") CANNOT set to '" + Request.STATE_PROCESSING + "'");
+                    if (!request.getState().equals(STATE_OPEN))
+                        throw new Exception("request(" + requestId + ") with state(" + request.getState() + ") CANNOT set to '" + STATE_PROCESSING + "'");
 
                     // set processing & persists
-                    request.setState(Request.STATE_PROCESSING);
+                    request.setState(STATE_PROCESSING);
                     requestService.update(request);
-                    log.info("request(" + requestId + ") set STATE to " + Request.STATE_PROCESSING);
+                    log.info("request(" + requestId + ") set STATE to " + STATE_PROCESSING);
                 } else
                     // set rejected (by admin and reviewer)
-                    if (action.equals(Request.STATE_REJECTED)) {
+                    if (action.equals(STATE_REJECTED)) {
                         // check if admin or reviewer
                         if ((!userIsPartyAdmin) && (!userIsPartyReviewer))
                             throw new Exception("request(" + requestId + ") author cannot set to rejected");
 
                         // set processing & persists
-                        request.setState(Request.STATE_REJECTED);
+                        request.setState(STATE_REJECTED);
                         requestService.update(request);
-                        log.info("request(" + requestId + ") set STATE to " + Request.STATE_REJECTED);
+                        log.info("request(" + requestId + ") set STATE to " + STATE_REJECTED);
 
                         // publish info about update on public channel
                         CommandMessage msg = new CommandMessage();
@@ -868,9 +869,9 @@ public class PartyController {
                             }
 
                             // set processing & persists
-                            request.setState(Request.STATE_DONE);
+                            request.setState(STATE_DONE);
                             requestService.update(request);
-                            log.info("request(" + requestId + ") set STATE to " + Request.STATE_DONE);
+                            log.info("request(" + requestId + ") set STATE to " + STATE_DONE);
 
                             // publish info about update on public channel
                             CommandMessage msg = new CommandMessage();

@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.*;
 
+import static de.konfetti.data.enums.RequestStateEnum.STATE_DONE;
+import static de.konfetti.data.enums.RequestStateEnum.STATE_PROCESSING;
+
 @Slf4j
 @CrossOrigin
 @RestController
@@ -83,8 +86,8 @@ public class ChatController {
         	template.setPartyId(request.getPartyId());
 
         	// C) check if request is open for chats (not done or processing)
-        	if (Request.STATE_DONE.equals(request.getState())) throw new Exception("no chat possible on DONE request");
-        	if (Request.STATE_PROCESSING.equals(request.getState())) throw new Exception("no chat possible on PROCESSING request");
+        	if (STATE_DONE.equals(request.getState())) throw new Exception("no chat possible on DONE request");
+        	if (STATE_PROCESSING.equals(request.getState())) throw new Exception("no chat possible on PROCESSING request");
 
     	} else {
 
