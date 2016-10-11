@@ -2,6 +2,7 @@ package de.konfetti.controller;
 
 import io.restassured.filter.log.LogDetail;
 import io.restassured.specification.RequestSpecification;
+import org.junit.After;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +40,11 @@ public class BaseControllerTest {
         emailPort = 2500;
         wiser = new Wiser(emailPort);
         wiser.start();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        wiser.stop();
     }
 
     protected RequestSpecification myGiven(){

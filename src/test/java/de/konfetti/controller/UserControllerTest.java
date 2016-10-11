@@ -47,7 +47,7 @@ public class UserControllerTest extends BaseControllerTest {
 
     @After
     public void tearDown() throws Exception {
-        wiser.stop();
+        super.tearDown();
     }
 
     @Test

@@ -4,7 +4,9 @@ import de.konfetti.Application;
 import de.konfetti.data.MediaItem;
 import de.konfetti.service.MediaService;
 import io.restassured.http.ContentType;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,12 @@ public class MediaItemControllerTest extends BaseControllerTest {
         super.setUp();
     }
 
+    @After
+    public void tearDown() throws Exception {
+        super.tearDown();
+    }
+
+
     @Test
     public void createMedia() throws Exception {
         MediaItem mediaItem = testHelper.getMediaItem();
@@ -49,6 +57,7 @@ public class MediaItemControllerTest extends BaseControllerTest {
                 .statusCode(HttpStatus.OK.value());
     }
 
+    @Ignore
     @Test
     public void getMediaAsImage() throws Exception {
 
