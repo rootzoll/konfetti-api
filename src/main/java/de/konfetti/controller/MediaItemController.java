@@ -19,7 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
 
-import static de.konfetti.data.mediaitem.MediaItemTypeEnum.*;
+import static de.konfetti.data.enums.MediaItemReviewEnum.REVIEWED_PRIVATE;
+import static de.konfetti.data.enums.MediaItemTypeEnum.*;
 
 @Slf4j
 @CrossOrigin
@@ -64,7 +65,7 @@ public class MediaItemController {
     	// security override on template
     	template.setId(null);
     	template.setLastUpdateTS(System.currentTimeMillis());
-    	template.setReviewed(MediaItem.REVIEWED_PRIVATE);
+    	template.setReviewed(REVIEWED_PRIVATE);
     	
     	// check if type is supported
     	boolean typeIsSupported = false;

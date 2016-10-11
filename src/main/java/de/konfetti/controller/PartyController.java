@@ -24,13 +24,14 @@ import java.util.List;
 import java.util.Set;
 
 import static de.konfetti.data.NotificationType.*;
+import static de.konfetti.data.enums.MediaItemReviewEnum.REVIEWED_PUBLIC;
 import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_DEACTIVATED;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_PUBLIC;
 import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_ALL;
 import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_DISABLED;
 import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_JUSTEARNED;
-import static de.konfetti.data.mediaitem.MediaItemTypeEnum.TYPE_MULTILANG;
+import static de.konfetti.data.enums.MediaItemTypeEnum.TYPE_MULTILANG;
 
 @Slf4j
 @CrossOrigin
@@ -488,7 +489,7 @@ public class PartyController {
         MediaItem mediaItem = new MediaItem();
         mediaItem.setData(json);
         mediaItem.setLastUpdateTS(System.currentTimeMillis());
-        mediaItem.setReviewed(MediaItem.REVIEWED_PUBLIC);
+        mediaItem.setReviewed(REVIEWED_PUBLIC);
         mediaItem.setType(TYPE_MULTILANG);
         mediaItem.setUserId(client.getUserId());
         mediaItem = mediaService.create(mediaItem);
@@ -990,7 +991,7 @@ public class PartyController {
                                                 throw new Exception("request(" + requestId + ") not allowed to remove media(" + mediaId + ")");
 
                                             // set media public
-                                            item.setReviewed(MediaItem.REVIEWED_PUBLIC);
+                                            item.setReviewed(REVIEWED_PUBLIC);
                                             mediaService.update(item);
                                             log.info("mediaItem(" + mediaId + ") is now public");
                                         } else {

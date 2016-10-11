@@ -1,19 +1,18 @@
 package de.konfetti.data;
 
-import de.konfetti.data.mediaitem.MediaItemTypeEnum;
+import de.konfetti.data.enums.MediaItemReviewEnum;
+import de.konfetti.data.enums.MediaItemTypeEnum;
 import lombok.Data;
 
 import javax.persistence.*;
 
-import static de.konfetti.data.mediaitem.MediaItemTypeEnum.TYPE_UNKOWN;
+import static de.konfetti.data.enums.MediaItemReviewEnum.REVIEWED_PUBLIC;
+import static de.konfetti.data.enums.MediaItemTypeEnum.TYPE_UNKOWN;
 
 @Data
 @Entity
 public class MediaItem {
 
-	public static final Integer REVIEWED_PUBLIC = 0;
-	public static final Integer REVIEWED_PRIVATE = 1;
-	
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,7 +21,7 @@ public class MediaItem {
     private Long userId = 0l;
     
     // info if can be displayed to public
-    private Integer reviewed = 0;
+    private MediaItemReviewEnum reviewed = REVIEWED_PUBLIC;
     
     private Long lastUpdateTS = 0l; 
     
