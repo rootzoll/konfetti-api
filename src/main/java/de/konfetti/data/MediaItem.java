@@ -24,7 +24,8 @@ public class MediaItem {
     private MediaItemReviewEnum reviewed = REVIEWED_PUBLIC;
     
     private Long lastUpdateTS = 0l; 
-    
+
+    @Enumerated(EnumType.STRING)
     private MediaItemTypeEnum type = TYPE_UNKOWN;
     
     // JSON or BASE64

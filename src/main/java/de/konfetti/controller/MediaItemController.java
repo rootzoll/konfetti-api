@@ -25,8 +25,10 @@ import static de.konfetti.data.enums.MediaItemTypeEnum.*;
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping("konfetti/api/media")
+@RequestMapping(MediaItemController.REST_API_MAPPING)
 public class MediaItemController {
+
+	public static final String REST_API_MAPPING = "konfetti/api/media";
 
 	private final ClientService clientService;
 	private final MediaService mediaService;
@@ -63,8 +65,6 @@ public class MediaItemController {
     	}
     	
     	// security override on template
-    	template.setId(null);
-    	template.setLastUpdateTS(System.currentTimeMillis());
     	template.setReviewed(REVIEWED_PRIVATE);
     	
     	// check if type is supported

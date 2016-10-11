@@ -488,7 +488,6 @@ public class PartyController {
         log.info("request title --autotranslate--> " + json);
         MediaItem mediaItem = new MediaItem();
         mediaItem.setData(json);
-        mediaItem.setLastUpdateTS(System.currentTimeMillis());
         mediaItem.setReviewed(REVIEWED_PUBLIC);
         mediaItem.setType(TYPE_MULTILANG);
         mediaItem.setUserId(client.getUserId());

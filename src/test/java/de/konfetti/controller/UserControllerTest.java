@@ -6,27 +6,21 @@ import de.konfetti.data.Party;
 import de.konfetti.data.User;
 import de.konfetti.data.UserRepository;
 import de.konfetti.service.PartyService;
-import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.subethamail.wiser.Wiser;
 
 import java.time.ZonedDateTime;
 import java.util.Locale;
 
 import static de.konfetti.utils.WiserAssertions.assertReceivedMessage;
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
 import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
@@ -37,16 +31,7 @@ import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class UserControllerTest {
-
-    @Value("${konfetti.sendFromMailAddress}")
-    private String emailFrom;
-
-    @Value("${konfetti.replyToMailAddress}")
-    private String replyToAddress;
-
-    @Autowired
-    protected MessageSource messageSource;
+public class UserControllerTest extends BaseControllerTest {
 
     @Autowired
     protected UserRepository userRepository;
@@ -54,21 +39,10 @@ public class UserControllerTest {
     @Autowired
     protected PartyService partyService;
 
-    private Wiser wiser;
-
-    @Value("${local.server.port}")
-    int serverPort;
-
-    private int emailPort;
-
-    private TestHelper testHelper;
-
     @Before
     public void setUp() throws Exception {
-        testHelper = new TestHelper();
-        emailPort = 2500;
-        wiser = new Wiser(emailPort);
-        wiser.start();
+        super.setUp();
+
     }
 
     @After
@@ -190,10 +164,6 @@ public class UserControllerTest {
     @Test
     public void updateUser() throws Exception {
 
-    }
-
-    protected RequestSpecification myGiven(){
-        return given().port(serverPort).log().ifValidationFails(LogDetail.ALL);
     }
 
 }
