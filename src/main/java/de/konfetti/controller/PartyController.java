@@ -27,6 +27,9 @@ import static de.konfetti.data.NotificationType.*;
 import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_DEACTIVATED;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_PUBLIC;
+import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_ALL;
+import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_DISABLED;
+import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_JUSTEARNED;
 
 @Slf4j
 @CrossOrigin
@@ -210,13 +213,13 @@ public class PartyController {
                 party.setKonfettiCount(userBalance);
 
                 // set how many konfetti can be send id feature is enabled
-                if (party.getSendKonfettiMode() == Party.SENDKONFETTIMODE_DISABLED) {
+                if (party.getSendKonfettiMode() == SENDKONFETTIMODE_DISABLED) {
                     // is disabled - set to zero
                     party.setSendKonfettiMaxAmount(0);
-                } else if (party.getSendKonfettiMode() == Party.SENDKONFETTIMODE_ALL) {
+                } else if (party.getSendKonfettiMode() == SENDKONFETTIMODE_ALL) {
                     // all konfetti can be spend
                     party.setSendKonfettiMaxAmount(party.getKonfettiCount());
-                } else if (party.getSendKonfettiMode() == Party.SENDKONFETTIMODE_JUSTEARNED) {
+                } else if (party.getSendKonfettiMode() == SENDKONFETTIMODE_JUSTEARNED) {
                     // just earned konfetti can be spend
                     party.setSendKonfettiMaxAmount(this.accountingService.getBalanceEarnedOfAccount(userAccountName));
                 } else {

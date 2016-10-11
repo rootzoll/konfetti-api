@@ -2,6 +2,7 @@ package de.konfetti.data;
 
 import de.konfetti.data.enums.PartyReviewLevelEnum;
 import de.konfetti.data.enums.PartyVisibilityEnum;
+import de.konfetti.data.enums.SendKonfettiModeEnum;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -9,21 +10,11 @@ import java.util.Set;
 
 import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_PUBLIC;
+import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_DISABLED;
 
 @Entity
 @Data
 public class Party {
-
-	/*
-	 * KONFETTI SEND MODE
-	 */
-	
-	// sending of konfetti to other users is disabled 
-	public static final int SENDKONFETTIMODE_DISABLED = 0;
-	// all konfetti can be send to other users/e-mails
-	public static final int SENDKONFETTIMODE_ALL = 1;
-	// just earned konfetti can be send to other users/e-mails	
-	public static final int SENDKONFETTIMODE_JUSTEARNED = 2;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -75,7 +66,7 @@ public class Party {
      * white list is a list of e-mail addresses only allowed to send to
      */
     
-    private Integer sendKonfettiMode;
+    private SendKonfettiModeEnum sendKonfettiMode;
     private String[] sendKonfettiWhiteList = {};
 
     /*
@@ -103,7 +94,7 @@ public class Party {
 		return sendKonfettiWhiteList;
 	}
 
-	public Integer getSendKonfettiMode() {
+	public SendKonfettiModeEnum getSendKonfettiMode() {
 		if (sendKonfettiMode==null) return SENDKONFETTIMODE_DISABLED;
 		return sendKonfettiMode;
 	}

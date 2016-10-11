@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_DISABLED;
+import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_JUSTEARNED;
+
 @Slf4j
 @CrossOrigin
 @RestController
@@ -488,7 +491,7 @@ public class UserController {
      	if (party==null) throw new Exception("party does not exist");
 
      	// check if party allows sending konfetti
-     	if (party.getSendKonfettiMode()==Party.SENDKONFETTIMODE_DISABLED) {
+     	if (party.getSendKonfettiMode()==SENDKONFETTIMODE_DISABLED) {
      		throw new Exception("party("+party.getId()+") is not allowing sending of konfetti");
      	}
 
@@ -497,7 +500,7 @@ public class UserController {
 		Long userBalance = accountingService.getBalanceOfAccount(accountName);
 
      	// check amount of sending
-		if (party.getSendKonfettiMode()==Party.SENDKONFETTIMODE_JUSTEARNED) {
+		if (party.getSendKonfettiMode()==SENDKONFETTIMODE_JUSTEARNED) {
 			long userEarnedBalance = this.accountingService.getBalanceEarnedOfAccount(accountName);
 			if (amount>userEarnedBalance) throw new Exception("user earned fund too low - has ("+userBalance+") of that earned("+userEarnedBalance+")wants to send ("+amount+")");
 
