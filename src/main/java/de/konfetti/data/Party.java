@@ -33,10 +33,12 @@ public class Party {
     
     // determines the visibilty of the party to new users
     // see final values VISIBILITY_* above
+    @Enumerated
     private PartyVisibilityEnum visibility = VISIBILITY_PUBLIC;
     
     // determines if orga admins need to review public posting
     // see final values REVIEWLEVEL_* above
+    @Enumerated
     private PartyReviewLevelEnum reviewLevel = REVIEWLEVEL_NONE;
     
     // minimal konfetti to spend on new request posting

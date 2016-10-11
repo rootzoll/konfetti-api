@@ -2,6 +2,7 @@ package de.konfetti.service;
 
 import de.konfetti.data.Party;
 import de.konfetti.data.PartyRepository;
+import de.konfetti.data.enums.PartyVisibilityEnum;
 import de.konfetti.service.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -77,7 +78,7 @@ public class PartyServiceImpl extends BaseService implements PartyService {
     }
 
     @Override
-    public List<Party> findByVisibility(int visibility) {
+    public List<Party> findByVisibility(PartyVisibilityEnum visibility) {
         return partyRepository.findByVisibility(visibility);
     }
 

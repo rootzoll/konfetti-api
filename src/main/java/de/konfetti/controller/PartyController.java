@@ -268,7 +268,7 @@ public class PartyController {
 
         // TODO: improve later by filter on GPS per search index
 
-        List<Party> foundParties = partyService.findByVisibility(VISIBILITY_PUBLIC.ordinal());
+        List<Party> foundParties = partyService.findByVisibility(VISIBILITY_PUBLIC);
         List<Party> resultParties = new ArrayList<Party>();
 
         // TODO: fix this if it works again, at the moment no filtering by geo coordinates, does not work on server
