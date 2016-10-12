@@ -167,6 +167,9 @@ public class EMailManager {
 //        Locale locale = Locale.forLanguageTag(user.getLangKey());
         Locale locale = Locale.ENGLISH;
         Context context = new Context(locale);
+        if (user.getName() == null) {
+            user.setName("Konfetti User");
+        }
         context.setVariable(USER, user);
         context.setVariable(BASE_URL, serverUrl);
         String content = templateEngine.process("passwordResetEmail", context);
