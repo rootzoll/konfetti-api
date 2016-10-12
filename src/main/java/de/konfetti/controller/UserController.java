@@ -269,6 +269,7 @@ public class UserController {
 				.orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
 	}
 
+
     @CrossOrigin(origins = "*")
     @RequestMapping(value="/{userId}", method = RequestMethod.PUT, produces = "application/json")
     public User updateUser( @RequestBody @Valid final User userInput, HttpServletRequest httpRequest) throws Exception {

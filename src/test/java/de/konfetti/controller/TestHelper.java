@@ -1,9 +1,6 @@
 package de.konfetti.controller;
 
-import de.konfetti.data.Code;
-import de.konfetti.data.Party;
-import de.konfetti.data.Request;
-import de.konfetti.data.User;
+import de.konfetti.data.*;
 import de.konfetti.maker.PartyMaker;
 import de.konfetti.maker.UserMaker;
 
@@ -13,6 +10,7 @@ import static com.natpryce.makeiteasy.MakeItEasy.an;
 import static com.natpryce.makeiteasy.MakeItEasy.make;
 import static com.natpryce.makeiteasy.MakeItEasy.with;
 import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
+import static de.konfetti.maker.MediaMaker.ExampleMediaItem;
 import static de.konfetti.maker.PartyMaker.ExampleParty;
 import static de.konfetti.maker.UserMaker.ExampleUser;
 import static de.konfetti.maker.UserMaker.name;
@@ -30,6 +28,10 @@ public class TestHelper {
 
     public Party getParty(String partyName){
         return make(an(ExampleParty).but(with(PartyMaker.name, partyName)));
+    }
+
+    public MediaItem getMediaItem(){
+        return make(an(ExampleMediaItem));
     }
 
     public Party getTestParty1() {
