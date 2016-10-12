@@ -18,7 +18,8 @@ public class Request {
     private Long userId;
 
     private Long partyId;
-    
+
+    @Enumerated(EnumType.STRING)
     private RequestStateEnum state;
     
     private String title;
