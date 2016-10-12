@@ -5,10 +5,8 @@ import de.konfetti.data.MediaItem;
 import de.konfetti.data.enums.MediaItemTypeEnum;
 import de.konfetti.service.MediaService;
 import io.restassured.http.ContentType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import io.restassured.response.Response;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -57,6 +55,23 @@ public class MediaItemControllerTest extends BaseControllerTest {
                 .body(mediaItem)
                 .post(MediaItemController.REST_API_MAPPING)
                 .then().statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+    }
+
+    @Test
+    public void createMediaWithArabicText() {
+        String arabicText = "اختبار للغة العربية";
+        MediaItem mediaItem = testHelper.getMediaItem();
+        mediaItem.setData(arabicText);
+        MediaItem persistedMediaItem = mediaService.create(mediaItem);
+        Response response = myGivenAdmin()
+                .get(MediaItemController.REST_API_MAPPING + "/" + persistedMediaItem.getId())
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract().
+                        response();
+
+        Assert.assertEquals(response.path("data"), arabicText);
+//        assertTh response.path("data");
     }
 
     @Test
