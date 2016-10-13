@@ -14,25 +14,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static de.konfetti.data.NotificationType.*;
 import static de.konfetti.data.enums.MediaItemReviewEnum.REVIEWED_PUBLIC;
+import static de.konfetti.data.enums.MediaItemTypeEnum.TYPE_MULTILANG;
 import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_DEACTIVATED;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_PUBLIC;
 import static de.konfetti.data.enums.RequestStateEnum.*;
-import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_ALL;
-import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_DISABLED;
-import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_JUSTEARNED;
-import static de.konfetti.data.enums.MediaItemTypeEnum.TYPE_MULTILANG;
+import static de.konfetti.data.enums.SendKonfettiModeEnum.*;
 
 @Slf4j
 @CrossOrigin
@@ -1012,6 +1008,45 @@ public class PartyController {
     @RequestMapping(value = "/{partyId}/request", method = RequestMethod.GET)
     public List<Request> getAllPartyRequests(@PathVariable long partyId) throws Exception {
         return requestService.getAllPartyRequests(partyId);
+    }
+
+    @CrossOrigin(origins = "*")
+    @RequestMapping(value = "/testData", method = RequestMethod.GET)
+    public List<Party> testData() throws Exception {
+        List<Party> foundParties = partyService.findByName("Helferverein Nord e.V.");
+        if (CollectionUtils.isEmpty(foundParties)) {
+            log.debug("Creating Test Parties : Creating test parties..");
+            Party partyOne = new Party();
+            partyOne.setName("Helferverein Nord e.V.");
+            partyOne.setContact("http://pankowhilft.blogsport.de");
+            partyOne.setDetailText("Berliner Str. 99, 13189 Berlin, GERMANY");
+            partyOne.setLat(Float.parseFloat("52.52"));
+            partyOne.setLon(Float.parseFloat("13.13"));
+            partyOne.setMeters(0);
+            partyOne.setVisibility(VISIBILITY_PUBLIC);
+            partyOne.setReviewLevel(REVIEWLEVEL_NONE);
+            partyOne.setNewRequestMinKonfetti(1);
+            partyOne.setWelcomeBalance(Long.parseLong("100"));
+            partyOne.setSendKonfettiMode(SENDKONFETTIMODE_ALL);
+            Party partyOnePersisted = partyService.create(partyOne);
+            Party partyTwo = new Party();
+            partyTwo.setName("Helferverein Süd e.V.");
+            partyTwo.setContact("http://muenchen.blogsport.de");
+            partyTwo.setDetailText("Antonplatz 3, 89282 München, GERMANY");
+            partyTwo.setLat(Float.parseFloat("52.52"));
+            partyTwo.setLon(Float.parseFloat("13.13"));
+            partyTwo.setMeters(0);
+            partyTwo.setVisibility(VISIBILITY_PUBLIC);
+            partyTwo.setReviewLevel(REVIEWLEVEL_NONE);
+            partyTwo.setNewRequestMinKonfetti(10);
+            partyTwo.setWelcomeBalance(Long.parseLong("10"));
+            partyTwo.setSendKonfettiMode(SENDKONFETTIMODE_ALL);
+            Party partyTwoPersisted = partyService.create(partyTwo);
+            List<Party> parties = Arrays.asList(partyOnePersisted, partyTwoPersisted);
+            return parties;
+        }
+        log.debug("Creating Test Parties : Parties exist already, doing nothing..");
+        return null;
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

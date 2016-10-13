@@ -84,8 +84,8 @@ public class PartyServiceImpl extends BaseService implements PartyService {
 
 
     @Override
-    public Party findByName(String name) {
-        return (Party) partyRepository.findByName(name);
+    public List<Party> findByName(String name) {
+        return partyRepository.findByName(name);
     }
 
     @Override

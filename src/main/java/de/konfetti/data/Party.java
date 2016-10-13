@@ -52,7 +52,6 @@ public class Party {
      * is a GPS coordinate (lat/lon) together with a radius in meter
      * just if user within this radius party will be shown
      */
-
     private Float lon;
     private Float lat;
     private int meters;
@@ -75,14 +74,16 @@ public class Party {
      * TRANSIENT DATA
      * just be delivered to client on REST end point
      */
-    
     @Transient // how many konfetti has calling user personally on this party
     private long konfettiCount;
+
     @Transient // how many konfetti can be send if feature is enabled
     private long sendKonfettiMaxAmount;
+
     @Transient // how many konfetti calling user earned total on this party
     private long konfettiTotal;
-    @Transient // which ranking place the calling user has on this party   
+
+    @Transient // which ranking place the calling user has on this party
     private int topPosition;
     
     @Transient // requests (tasks) relevant for this party

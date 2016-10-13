@@ -24,5 +24,5 @@ public interface PartyService {
 
     Long getNumberOfParties();
 
-    Party findByName(@Param("name") String name);
+    List<Party> findByName(@Param("name") String name);
 }
