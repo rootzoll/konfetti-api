@@ -1,8 +1,9 @@
 package de.konfetti.service;
 
-import java.util.List;
-
 import de.konfetti.data.User;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
 
@@ -23,4 +24,8 @@ public interface UserService {
 	Long getNumberOfActiveUsers();
 
 	List<User> getAllUsers();
+
+	Optional<User> requestPasswordReset(String mail);
+
+	Optional<User>  completePasswordReset(String newPassword, String key);
 }

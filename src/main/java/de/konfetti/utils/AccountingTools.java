@@ -13,10 +13,6 @@ public class AccountingTools {
 		return "r"+requestId;
 	}
 	
-	public static String getAccountNameFromParty(Long partyId) {
-		return "p"+partyId;
-	}
-	
 	public static Long getUserIdFromAccountName(String accountName) {
 		Long result = null;
 		try {

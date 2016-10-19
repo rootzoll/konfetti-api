@@ -1,5 +1,6 @@
 package de.konfetti.data;
 
+import de.konfetti.data.enums.RequestStateEnum;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -10,13 +11,6 @@ import java.util.List;
 @Data
 public class Request {
 
-	// possible sates of an request
-	public static final String STATE_REVIEW = "review";
-	public static final String STATE_REJECTED = "rejected";
-	public static final String STATE_OPEN = "open";
-	public static final String STATE_PROCESSING = "processing";
-	public static final String STATE_DONE = "done";
-	
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,8 +18,9 @@ public class Request {
     private Long userId;
 
     private Long partyId;
-    
-    private String state;
+
+    @Enumerated(EnumType.STRING)
+    private RequestStateEnum state;
     
     private String title;
     
@@ -49,12 +44,10 @@ public class Request {
     
     // hard copy from user
     private String[] spokenLangs = {};
- 
-    
+
     /*
      * Transient Data
      */
-
     @Transient // --> get from accounting
     private long konfettiCount;
 
@@ -71,8 +64,8 @@ public class Request {
 	private MediaItem titleMultiLang;
 	
 	@Transient // --> the amount a single user supported the request
-	private Long konfettiAmountSupport = 0l;
+	private Long konfettiAmountSupport = 0L;
 	
 	@Transient // --> the amount a single user got rewarded by the request
-	private Long konfettiAmountReward = 0l;
+	private Long konfettiAmountReward = 0L;
 }

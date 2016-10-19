@@ -16,6 +16,8 @@ import java.net.InetAddress;
 @Slf4j
 public class ControllerSecurityHelper {
 
+	public static final String HEADER_ADMIN_PASSWORD = "X-ADMIN-PASSWORD";
+
 	private boolean doneInit = false;
 	
 	/*
@@ -80,8 +82,8 @@ public class ControllerSecurityHelper {
 			// if (!req.isSecure()) throw new Exception("ControllerSecurityHelper: HTTPS is needed when password security is used from IP("+req.getRemoteAddr()+")");
 
 			// get password from HTTP header
-			String requestingPassword = req.getHeader("X-ADMIN-PASSWORD");
-			if (requestingPassword==null) throw new Exception("ControllerSecurityHelper: Missing X-ADMIN-PASSWORD header field on HTTP request for ADMIN-LEVEL SECURITY from IP("+req.getRemoteAddr()+")");
+			String requestingPassword = req.getHeader(HEADER_ADMIN_PASSWORD);
+			if (requestingPassword==null) throw new Exception("ControllerSecurityHelper: Missing " + HEADER_ADMIN_PASSWORD + " header field on HTTP request for ADMIN-LEVEL SECURITY from IP("+req.getRemoteAddr()+")");
 
 			// check if given password is valid
 			boolean correctPassword = ((adminPassword !=null) && (adminPassword.equals(requestingPassword)));
@@ -148,8 +150,6 @@ public class ControllerSecurityHelper {
 		if (!req.isSecure()) {
 			log.warn("ControllerSecurityHelper: No HTTPS security (" + clientId + "/" + clientSecret + ") from IP(" + req.getRemoteAddr() + ")");
 		}
-		
 		return client;
-		
 	}
 }

@@ -17,7 +17,9 @@ public class MediaServiceImpl extends BaseService implements MediaService {
     
     @Override
     public MediaItem create(MediaItem  item) {
-    	
+		item.setId(null);
+		item.setLastUpdateTS(System.currentTimeMillis());
+
         MediaItem persited = mediaRepository.saveAndFlush(item);
 		log.debug("MediaItem(" + persited.getId() + ") CREATED");
 		return persited;
@@ -28,7 +30,6 @@ public class MediaServiceImpl extends BaseService implements MediaService {
     public MediaItem  findById(long id) {
 		log.debug("MediaItem(" + id + ") READ");
 		return mediaRepository.findOne(id);
-    
     }
 
 	@Override

@@ -1,14 +1,37 @@
 package de.konfetti.controller;
 
-import de.konfetti.data.Code;
-import de.konfetti.data.Party;
-import de.konfetti.data.Request;
+import de.konfetti.data.*;
+import de.konfetti.maker.PartyMaker;
+import de.konfetti.maker.UserMaker;
 
 import java.util.Date;
+
+import static com.natpryce.makeiteasy.MakeItEasy.an;
+import static com.natpryce.makeiteasy.MakeItEasy.make;
+import static com.natpryce.makeiteasy.MakeItEasy.with;
+import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
+import static de.konfetti.maker.MediaMaker.ExampleMediaItem;
+import static de.konfetti.maker.PartyMaker.ExampleParty;
+import static de.konfetti.maker.UserMaker.ExampleUser;
+import static de.konfetti.maker.UserMaker.name;
 
 public class TestHelper {
 	
     public TestHelper() {
+    }
+
+    public User getUser(String username){
+        String email = username + "@test.de";
+        return make(an(ExampleUser).but(with(name, username), with(UserMaker.email, email.toLowerCase())));
+    }
+
+
+    public Party getParty(String partyName){
+        return make(an(ExampleParty).but(with(PartyMaker.name, partyName)));
+    }
+
+    public MediaItem getMediaItem(){
+        return make(an(ExampleMediaItem));
     }
 
     public Party getTestParty1() {
@@ -40,7 +63,7 @@ public class TestHelper {
     public Code getTestCodeKonfetti1(long partyId, long userId, String codeString){
         Code code = new Code();
         code.setAmount((long) 1000);
-        code.setActionType(Code.ACTION_TYPE_KONFETTI);
+        code.setActionType(ACTION_TYPE_KONFETTI);
         code.setTimestamp(new Date().getTime());
         code.setCode(codeString);
         code.setPartyID(partyId);
@@ -55,8 +78,6 @@ public class TestHelper {
 //    }
 
     public boolean equalRequests(Request actual, Request expected){
-        if (actual.getKonfettiCount() != expected.getKonfettiCount()) return false;
-        if (actual.getKonfettiAdd() != expected.getKonfettiAdd()) return false;
         // TODO: repair to work again -> link between party and requests
         // if (actual.getPartyId() != expected.getPartyId()) return false;
 //        if (actual.getTime() != null ? !actual.getTime().equals(expected.getTime()) : expected.getTime() != null) return false;

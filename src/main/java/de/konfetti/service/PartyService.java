@@ -1,6 +1,7 @@
 package de.konfetti.service;
 
 import de.konfetti.data.Party;
+import de.konfetti.data.enums.PartyVisibilityEnum;
 import org.springframework.data.repository.query.Param;
 
 import javax.validation.constraints.NotNull;
@@ -17,9 +18,11 @@ public interface PartyService {
 
     List<Party> getAllParties();
 
+    List<Party> findByVisibility(PartyVisibilityEnum visibility);
+
     Party findById(long partyId);
 
     Long getNumberOfParties();
 
-    Party findByName(@Param("name") String name);
+    List<Party> findByName(@Param("name") String name);
 }

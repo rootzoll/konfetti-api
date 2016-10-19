@@ -59,7 +59,8 @@ Change into main directory and run command
 To stop the server:
 - just press CTRL-C in console, or kill the process
 
-To change the Profile, change the value "spring.profiles.active" in file "api/src/main/resources/application.properties"
+To run with a different profile, start with environment variable spring.profiles.active, e.g. to start dev profile and skip Tests:
+./mvnw spring-boot:run -Dspring.profiles.active=dev -DskipTets
 
 existing Profiles at the moment:
 dev
@@ -67,6 +68,24 @@ dev
 test
     -> using H2 inMemory Database
 
+If you need to change parameters, modify application-dev.properties, but make sure you dont commit the changes, except they are general adjustments, not just 
+for your local environment
+
 to test if the server is running correctly, call the URL http://localhost:9000/konfetti/api/account
 
 should return something like this "{"clientId":"1","secret":"3915478b-f51d-4306-ab3b-fa7762f4c6bc","userId":"1"}"
+
+# Swagger Api Documentation
+For dev profile the swagger api documentation is build, accessable by 
+
+Json:
+http://localhost:9000/v2/api-docs
+
+UI:
+http://localhost:9000/swagger-ui.html
+
+# Eclipse IDE Setup with Lombok
+
+Open Eclipse (tested with NEON). "File > New > Other" .. then select "Maven > Maven Project". Choose the path were you did the check-out from GIT.
+
+If you see Errors about missing log and getter/setters: The Java code uses the Lombok Lib (see pom.xml for version) https://projectlombok.org/download.html - you need to download the lombok.jar, close eclipse and start the JAR (double click) or "java -jar lombok.jar" - make sure to set the correct eclipse path with lombok install dialog.

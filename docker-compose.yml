@@ -13,7 +13,7 @@ services:
     image: konfetti/api
     container_name: konfettiApi
     ports:
-      - "9000:9000"
+      - "8280:8280"
 #      - "8000:8000"
 #      - "8181:8181"
     networks:

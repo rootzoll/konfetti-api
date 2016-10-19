@@ -1,6 +1,8 @@
 package de.konfetti.service;
 
+import de.konfetti.controller.vm.RedeemResponse;
 import de.konfetti.data.Code;
+import de.konfetti.data.User;
 
 public interface CodeService {
 
@@ -14,4 +16,6 @@ public interface CodeService {
     Code redeemByCode(String code) throws Exception;
 
     Code findByCode(String code);
+
+    RedeemResponse processCodeCoupon(User user, Code code) throws Exception;
 }

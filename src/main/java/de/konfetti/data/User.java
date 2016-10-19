@@ -3,21 +3,18 @@ package de.konfetti.data;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
+import java.time.ZonedDateTime;
 
 @Entity
 @Data
 public class User {
-	
-	/*
-	 * OBJECT DATA FIELDS
-	 * 
-	 * data fields relevant to the user object
-	 */
 
 	public static final String PUSHSYSTEM_IOS = "ios";
 	public static final String PUSHSYSTEM_ANDROID = "android";
 	public static final String PUSHSYSTEM_CHROME = "chrome";
-	@Id
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
     // self written name (nick or real)
@@ -47,6 +44,13 @@ public class User {
     private String pushSystem;
     
     private String pushID;
+
+    @Size(max = 20)
+    @Column(name = "reset_key", length = 20)
+    private String resetKey;
+
+    @Column(name = "reset_date", nullable = true)
+    private ZonedDateTime resetDate = null;
     
     /*
      * REST DELIVERY DATA

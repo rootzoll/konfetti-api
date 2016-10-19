@@ -17,7 +17,7 @@ public interface AccountingService {
 
 	Long getBalanceEarnedOfAccount(String accountName);
 
-	boolean createAccount(String accountName) throws Exception;
+	boolean createAccount(String accountName);
 
 	boolean deleteAccount(String accountName) throws Exception;
 

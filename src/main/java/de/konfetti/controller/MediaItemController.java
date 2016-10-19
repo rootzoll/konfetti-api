@@ -3,6 +3,7 @@ package de.konfetti.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.konfetti.data.Client;
 import de.konfetti.data.MediaItem;
+import de.konfetti.data.enums.MediaItemTypeEnum;
 import de.konfetti.data.mediaitem.MultiLang;
 import de.konfetti.service.ClientService;
 import de.konfetti.service.MediaService;
@@ -19,11 +20,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
 
+import static de.konfetti.data.enums.MediaItemReviewEnum.REVIEWED_PRIVATE;
+import static de.konfetti.data.enums.MediaItemTypeEnum.*;
+
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping("konfetti/api/media")
+@RequestMapping(MediaItemController.REST_API_MAPPING)
 public class MediaItemController {
+
+	public static final String REST_API_MAPPING = "konfetti/api/media";
 
 	private final ClientService clientService;
 	private final MediaService mediaService;
@@ -50,34 +56,24 @@ public class MediaItemController {
     	
     	// check if user is allowed to create
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
-    		
     		// A) check that chat is just hosted by user
     		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     		if (client==null) throw new Exception("client is NULL");
         	template.setUserId(client.getUserId());
-        	
     	} else {
-    		
     		// B) check for trusted application with administrator privilege
         	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
     	}
     	
     	// security override on template
-    	template.setId(null);
-    	template.setLastUpdateTS(System.currentTimeMillis());
-    	template.setReviewed(MediaItem.REVIEWED_PRIVATE);
+    	template.setReviewed(REVIEWED_PRIVATE);
     	
     	// check if type is supported
-    	boolean typeIsSupported = false;
-    	if (MediaItem.TYPE_TEXT.equals(template.getType())) typeIsSupported = true;
-    	if (MediaItem.TYPE_MULTILANG.equals(template.getType())) typeIsSupported = true;
-    	if (MediaItem.TYPE_IMAGE.equals(template.getType())) typeIsSupported = true;
-    	if (MediaItem.TYPE_LOCATION.equals(template.getType())) typeIsSupported = true;
-    	if (MediaItem.TYPE_DATE.equals(template.getType())) typeIsSupported = true;
-    	if (!typeIsSupported) throw new Exception("type("+template.getType()+") is not supported as media item");
-    	
+		if (!MediaItemTypeEnum.validTypes().contains(template.getType()))
+			throw new Exception("type("+template.getType()+") is not supported as media item. Supported MediaTypes are : " + MediaItemTypeEnum.validTypes());
+
     	// MULTI-LANG auto translation
-    	if (MediaItem.TYPE_MULTILANG.equals(template.getType())) {
+    	if (TYPE_MULTILANG.equals(template.getType())) {
 			log.info("Is MultiLang --> AUTOTRANSLATION");
 			try {
     			MultiLang multiLang = new ObjectMapper().readValue(template.getData(), MultiLang.class);
@@ -118,7 +114,7 @@ public class MediaItemController {
     	if (item==null) throw new Exception("media("+mediaId+") not found");
     	
     	// check if image
-    	if (!item.getType().equals(MediaItem.TYPE_IMAGE)) throw new Exception("media("+mediaId+") is not image");
+    	if (!item.getType().equals(TYPE_IMAGE)) throw new Exception("media("+mediaId+") is not image");
     	
     	// get base64 string
     	String base64 = item.getData();

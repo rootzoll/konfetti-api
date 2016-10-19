@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.*;
 
+import static de.konfetti.data.enums.RequestStateEnum.STATE_DONE;
+import static de.konfetti.data.enums.RequestStateEnum.STATE_PROCESSING;
+
 @Slf4j
 @CrossOrigin
 @RestController
@@ -83,15 +86,14 @@ public class ChatController {
         	template.setPartyId(request.getPartyId());
 
         	// C) check if request is open for chats (not done or processing)
-        	if (Request.STATE_DONE.equals(request.getState())) throw new Exception("no chat possible on DONE request");
-        	if (Request.STATE_PROCESSING.equals(request.getState())) throw new Exception("no chat possible on PROCESSING request");
+        	if (STATE_DONE.equals(request.getState())) throw new Exception("no chat possible on DONE request");
+        	if (STATE_PROCESSING.equals(request.getState())) throw new Exception("no chat possible on PROCESSING request");
 
     	} else {
 
     		// B) check for trusted application with administrator privilege
         	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
     	}
-
     	// security override on template
     	template.setId(null);
     	template.setMessages(new ArrayList<Message>());
@@ -102,7 +104,6 @@ public class ChatController {
 			User memberUser = userService.findById(memberId);
 			if (memberUser==null) throw new Exception("member("+memberId+") on new chat does NOT EXIST");
 		}
-
     	// create new user
     	Chat chat = chatService.create(template);
 
@@ -114,7 +115,6 @@ public class ChatController {
 				log.warn("Cannot set ChatPartnerInfo on chats with more than one member.");
 			}
     	}
-
         return chat;
     }
     
@@ -132,7 +132,6 @@ public class ChatController {
 
     	// check if user is allowed to get data
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
-
 			// A) check that user is host or member of chat
     		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     		boolean userIsHost = (chat.getHostId().equals(client.getUserId()));
@@ -167,13 +166,10 @@ public class ChatController {
     			// show host as chat partner
     			setChatPartnerInfoOn(userService, chat, chat.getHostId(), client.getUserId());
     		}
-
 		} else {
-
 			// B) check for trusted application with administrator privilege
         	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
     	}
-
 		return chat;
     }
     
