@@ -2,7 +2,7 @@
 <included>
     <!--http://logging.paluch.biz/examples/logback.html-->
     <appender name="PALUCH_GELF_APPENDER" class="biz.paluch.logging.gelf.logback.GelfLogbackAppender">
-        <host>udp:localhost</host>
+        <host>udp:graylog</host>
         <port>12201</port>
         <!--<version>1.0</version>-->
         <facility>konfettiApi</facility>

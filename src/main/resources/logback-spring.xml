@@ -4,13 +4,9 @@
     <jmxConfigurator/>
     <include resource="./paluchGelfAppender.xml"/>
     <root level="info">
-        <!--<if condition='"${log.graylog.enabled}"'>-->
-        <if condition='"${log.graylog.enabled}".equals("true")'>
-            <then>
-                <!--<appender-ref ref="GELF UDP APPENDER" />-->
-                <appender-ref ref="PALUCH_GELF_APPENDER" />
-            </then>
-        </if>
+        <springProfile name="dev, docker">
+            <appender-ref ref="PALUCH_GELF_APPENDER" />
+        </springProfile>
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />
     </root>
