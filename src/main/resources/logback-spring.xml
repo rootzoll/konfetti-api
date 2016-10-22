@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <springProfile name="docker">
+        <include resource="./paluchGelfAppender.xml"/>
+    </springProfile>
     <jmxConfigurator/>
     <root level="info">
         <springProfile name="docker">
-            <include resource="./paluchGelfAppender.xml"/>
             <appender-ref ref="PALUCH_GELF_APPENDER" />
         </springProfile>
         <appender-ref ref="CONSOLE" />
