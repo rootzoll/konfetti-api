@@ -25,9 +25,9 @@ Run service with docker-compose in console
 
 maybe you need to stop & delete old containers before compose-up is working (`docker ps -a` and then `docker stop [ID]` then `docker rm [ID]`) ... if docker-compose up worked you sould see the logs from both containers (backend and DB)
 
-To check if konfetti docker server is running call in your browser: http://localhost:9000/actuator/info
+To check if konfetti docker server is running call in your browser: http://localhost:8280/actuator/info
 
-On the first time making a docker-compose up it could be that be startup fails and you dont get a response on localhost:9000 - then stop docker containers with CTRL+C and make again a `docker-compose up` - this time it should work.
+On the first time making a docker-compose up it could be that be startup fails and you dont get a response on localhost:8280 - then stop docker containers with CTRL+C and make again a `docker-compose up` - this time it should work.
 
 ## More info on managing docker
 
@@ -49,12 +49,14 @@ docker exec -it {containerName | containerId} bash
 Log out from container
 exit
 
+**if using locally and graylog is not running, remove the lines in logback-spring.xml loading the gelfAppender!!**
+
 # To start server locally without docker (for experts)
 
 Change into main directory and run command
 "./mvnw spring-boot:run"
 
-- service should be running on port 9000
+- service should be running on port 8280
 
 To stop the server:
 - just press CTRL-C in console, or kill the process
@@ -71,7 +73,7 @@ test
 If you need to change parameters, modify application-dev.properties, but make sure you dont commit the changes, except they are general adjustments, not just 
 for your local environment
 
-to test if the server is running correctly, call the URL http://localhost:9000/konfetti/api/account
+to test if the server is running correctly, call the URL http://localhost:8280/konfetti/api/account
 
 should return something like this "{"clientId":"1","secret":"3915478b-f51d-4306-ab3b-fa7762f4c6bc","userId":"1"}"
 
@@ -79,10 +81,10 @@ should return something like this "{"clientId":"1","secret":"3915478b-f51d-4306-
 For dev profile the swagger api documentation is build, accessable by 
 
 Json:
-http://localhost:9000/v2/api-docs
+http://localhost:8280/v2/api-docs
 
 UI:
-http://localhost:9000/swagger-ui.html
+http://localhost:8280/swagger-ui.html
 
 # Eclipse IDE Setup with Lombok
 
