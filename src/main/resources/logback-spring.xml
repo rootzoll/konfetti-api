@@ -5,7 +5,7 @@
         <include resource="./paluchGelfAppender.xml"/>
     </springProfile>
     <jmxConfigurator/>
-    <root level="debug">
+    <root level="info">
         <springProfile name="docker">
             <appender-ref ref="PALUCH_GELF_APPENDER" />
         </springProfile>
