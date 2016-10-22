@@ -1,8 +1,10 @@
 version: '2'
 
 networks:
-  productionNetwork:
+  konfettiNetwork:
     external: false
+  graylogNetwork:
+    external: true
 
 volumes:
   konfettiDb:
@@ -17,7 +19,8 @@ services:
 #      - "8000:8000"
 #      - "8181:8181"
     networks:
-      - productionNetwork
+      - konfettiNetwork
+      - graylogNetwork
     depends_on:
       - database
     volumes:
@@ -33,7 +36,7 @@ services:
     ports:
       - "2001:80"
     networks:
-      - productionNetwork
+      - konfettiNetwork
     depends_on:
       - konfettiApi
 
@@ -43,7 +46,7 @@ services:
     ports:
       - "8080:80"
     networks:
-      - productionNetwork
+      - konfettiNetwork
     depends_on:
       - konfettiApi
 
@@ -53,7 +56,7 @@ services:
     ports:
       - "2342:2342"
     networks:
-      - productionNetwork
+      - konfettiNetwork
 
   konfettiBootAdmin:
     image: konfetti/spring-boot-admin
@@ -61,7 +64,7 @@ services:
     ports:
       - "8180:8180"
     networks:
-      - productionNetwork
+      - konfettiNetwork
     env_file:
       - /konfetti/config/spring-boot-admin.env
 
@@ -71,7 +74,7 @@ services:
     ports:
       - "3307:3306"
     networks:
-      - productionNetwork
+      - konfettiNetwork
     environment:
       MYSQL_ROOT_PASSWORD: rootPassword
       MYSQL_DATABASE: konfetti
