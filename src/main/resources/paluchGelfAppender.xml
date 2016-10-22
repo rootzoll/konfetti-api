@@ -17,7 +17,7 @@
         <!--<dynamicMdcFields>myMdc.*,[a-z]+Field</dynamicMdcFields>-->
         <!--<includeFullMdc>true</includeFullMdc>-->
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>INFO</level>
+            <level>DEBUG</level>
         </filter>
     </appender>
 </included>
