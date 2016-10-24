@@ -732,7 +732,7 @@ public class PartyController {
 
             // Actions
             // open from review (by admin and reviewer)
-            if (action.equals(STATE_OPEN)) {
+            if (action.equals(STATE_OPEN.toString())) {
                 // check if pre-state is valid
                 boolean fromReview = request.getState().equals(STATE_REVIEW);
                 boolean fromProcessing = request.getState().equals(STATE_PROCESSING);
@@ -765,7 +765,7 @@ public class PartyController {
                 webSocket.convertAndSend("/out/updates", GSON.toJson(msg));
             } else
                 // set processing (by all)
-                if (action.equals(STATE_PROCESSING)) {
+                if (action.equals(STATE_PROCESSING.toString())) {
                     // check if pre-state is valid
                     if (!request.getState().equals(STATE_OPEN))
                         throw new Exception("request(" + requestId + ") with state(" + request.getState() + ") CANNOT set to '" + STATE_PROCESSING + "'");
@@ -776,7 +776,7 @@ public class PartyController {
                     log.info("request(" + requestId + ") set STATE to " + STATE_PROCESSING);
                 } else
                     // set rejected (by admin and reviewer)
-                    if (action.equals(STATE_REJECTED)) {
+                    if (action.equals(STATE_REJECTED.toString())) {
                         // check if admin or reviewer
                         if ((!userIsPartyAdmin) && (!userIsPartyReviewer))
                             throw new Exception("request(" + requestId + ") author cannot set to rejected");
