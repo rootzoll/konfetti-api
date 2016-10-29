@@ -380,7 +380,7 @@ public class UserController {
         	urlStr += (","+code);
     	}
         
-        urlStr = "http://localhost:2342/generate?template="+URLEncoder.encode("coupon-master-template.html")+"&amount="+amount+"&codes=" +URLEncoder.encode(urlStr.substring(1));
+        urlStr = "http://konfettiCouponGenerator:2342/generate?template="+URLEncoder.encode("coupon-master-template.html")+"&amount="+amount+"&codes=" +URLEncoder.encode(urlStr.substring(1));
     	if (urlStr.length() > (6 * 1024))
     			log.warn("the URL to generate the codes is >6KB - limit is 8KB - may become critical");
     	if (urlStr.length()>(8*1024)) throw new Exception("the URL to generate the codes is >8KB - thats bigger than URL GET data can be with NodeJS");
