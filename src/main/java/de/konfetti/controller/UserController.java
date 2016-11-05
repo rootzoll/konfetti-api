@@ -21,6 +21,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_DISABLED;
 import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_JUSTEARNED;
@@ -56,7 +57,9 @@ public class UserController {
 
 	@Autowired
 	private EMailManager mailService;
-    
+
+	private UserMapper userMapper;
+
     @Autowired
     public UserController(final UserService userService, final ClientService clientService, final AccountingService accountingService, final PartyService partyService, final CodeService codeService) {
     	this.userService = userService;
@@ -64,6 +67,7 @@ public class UserController {
         this.accountingService = accountingService;
         this.partyService = partyService;
         this.codeService = codeService;
+		userMapper = new UserMapper();
     }
 
 	@PostConstruct
@@ -78,14 +82,17 @@ public class UserController {
     
     @CrossOrigin(origins = "*")
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
-    public List<User> getAllUsers(HttpServletRequest httpRequest) throws Exception {
+    public List<UserResponse> getAllUsers(HttpServletRequest httpRequest) throws Exception {
     	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
-        return userService.getAllUsers();
+		List<UserResponse> listOfUserResponses = userService.getAllUsers()
+				.stream().map(user -> userMapper.fromUserToUserResponse(user))
+				.collect(Collectors.toList());
+		return listOfUserResponses;
     }
     
     @CrossOrigin(origins = "*")
     @RequestMapping(method = RequestMethod.POST, produces = "application/json")
-    public User createUser(
+    public UserResponse createUser(
 			@RequestParam(value="mail", defaultValue="") String email,
 			@RequestParam(value="pass", defaultValue="") String pass,
 			@RequestParam(value="locale", defaultValue="en") String locale ) throws Exception {
@@ -100,9 +107,7 @@ public class UserController {
     		
         	// if email is set - check if email exists on other account
     		if (userService.findByMail(email) != null) {
-    			User errorUser = new User();
-    			errorUser.setId(-1l);
-    			return errorUser;
+				return new UserResponse(-1L);
     		}
     		
     	}
@@ -135,14 +140,13 @@ public class UserController {
     	// create new client
     	Client client = clientService.create(user.getId());
     	
-    	// set client data on user and return
-    	user.setClientId(client.getId());
-    	user.setClientSecret(client.getSecret());
-    	
     	// keep password hash just on server side
     	user.setPassword("");
- 
-        return user;
+
+		UserResponse userResponse = userMapper.fromUserToUserResponse(user);
+		userResponse.setClientId(client.getId());
+		userResponse.setClientSecret(client.getSecret());
+		return userResponse;
     }
 
     @CrossOrigin(origins = "*")
@@ -183,13 +187,12 @@ public class UserController {
     	
     	// keep password hash just on server side
     	user.setPassword("");
-		UserMapper userMapper = new UserMapper();
         return userMapper.fromUserToUserResponse(user);
     }
     
     @CrossOrigin(origins = "*")
     @RequestMapping(value="/login", method = RequestMethod.GET, produces = "application/json")
-	public User login(@RequestParam(value = "mail", defaultValue = "") String email,
+	public UserResponse login(@RequestParam(value = "mail", defaultValue = "") String email,
 					  @RequestParam(value = "pass", defaultValue = "") String pass) throws Exception {
 
 		// check user and input data
@@ -221,14 +224,14 @@ public class UserController {
     	// create new client for session
     	Client client = clientService.create(user.getId());
     	
-    	// set client data on user and return
-    	user.setClientId(client.getId());
-    	user.setClientSecret(client.getSecret());
-    		
     	// keep password hash just on server side
     	user.setPassword("");
-    	
-    	return user;
+
+		UserResponse userResponse = userMapper.fromUserToUserResponse(user);
+		// set client data on user and return
+		userResponse.setClientId(client.getId());
+		userResponse.setClientSecret(client.getSecret());
+		return userResponse;
     }
 
 	/**
@@ -269,7 +272,7 @@ public class UserController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value="/{userId}", method = RequestMethod.PUT, produces = "application/json")
-    public User updateUser( @RequestBody @Valid final User userInput, HttpServletRequest httpRequest) throws Exception {
+    public UserResponse updateUser( @RequestBody @Valid final User userInput, HttpServletRequest httpRequest) throws Exception {
     	
         User user = userService.findById(userInput.getId());
         if (user==null) throw new Exception("NOT FOUND user("+userInput.getId()+")");
@@ -327,7 +330,7 @@ public class UserController {
     	// keep password hash just on server side
     	user.setPassword("");
     	
-        return user;
+        return userMapper.fromUserToUserResponse(user);
     }
     
     @SuppressWarnings("deprecation")

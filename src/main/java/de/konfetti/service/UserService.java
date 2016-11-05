@@ -13,8 +13,6 @@ public interface UserService {
     
     User findById(long userId);
     
-    User findByClientId(long clientId);
-
 	User findByMail(String mail);
 	
 	List<User> getAllUsersAdminOnParty(Long partyID);

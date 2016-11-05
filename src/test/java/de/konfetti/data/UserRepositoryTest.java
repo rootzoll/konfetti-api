@@ -38,7 +38,7 @@ public class UserRepositoryTest extends BaseTest {
 
     private void createUser(Long clientId, String email){
         User user = new User();
-        user.setClientId(clientId);
+//        user.setClientId(clientId);
 		user.setEMail(email);
 		userRepository.save(user);
     }

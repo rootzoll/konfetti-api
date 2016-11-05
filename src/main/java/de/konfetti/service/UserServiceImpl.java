@@ -51,17 +51,6 @@ public class UserServiceImpl extends BaseService implements UserService {
     
     }
 
-	// TODO improve performance : how can this work if clientId is transient field and is not persited??
-	@Override
-	public User findByClientId(long clientId) {
-		Long clientID = new Long(clientId);
-		List<User> all = userRepository.findAll();
-		for (User user : all) {
-			if (user.getClientId().equals(clientID)) return user;
-		}
-		return null;
-	}
-
 	@Override
 	public User update(User user) {
 		return userRepository.saveAndFlush(user);

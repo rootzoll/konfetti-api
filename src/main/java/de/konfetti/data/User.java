@@ -52,19 +52,6 @@ public class User {
     @Column(name = "reset_date", nullable = true)
     private ZonedDateTime resetDate = null;
     
-    /*
-     * REST DELIVERY DATA
-     * 
-     * the following values are used to deliver the user together with
-     * relevant client info to client on user REST end point
-     */
-
-    @Transient // multiple client can exists per user
-    private Long clientId;
-
-    @Transient // is persistent on client object
-    private String clientSecret;
-	
 	public boolean wasUserActiveInLastMinutes(int minutes) {
 		long minutesSinceLastActivity = Math.round((System.currentTimeMillis() - this.lastActivityTS) / (60d*1000d));
 		boolean wasUserActiveInLastMinutes = ((minutesSinceLastActivity==0) || (minutes>=minutesSinceLastActivity));
