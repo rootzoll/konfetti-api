@@ -94,7 +94,6 @@ public class NotifierBackgroundTask {
     public void periodicStartUpTimer() {
         // prepare start
         lastProcessingStart = System.currentTimeMillis();
-        log.debug("Starting NotifierBackgroundTask loop ...");
 
         // start notifier background task loop and catch all problems
         try {
