@@ -14,17 +14,17 @@
 				{
 					"name": "Get Accounts",
 					"request": {
-						"url": "{{protocol}}://{{host}}:{{port}}/konfetti/api/account",
+						"url": "{{protocol}}://{{host}}:{{port}}/konfetti/api/account/coupons/1?count=10&amount=100&email=kliment%40gmx.ch&locale=en",
 						"method": "GET",
 						"header": [
 							{
 								"key": "X-CLIENT-ID",
-								"value": "1",
+								"value": "{{xClientId}}",
 								"description": ""
 							},
 							{
 								"key": "X-CLIENT-SECRET",
-								"value": "ASDF",
+								"value": "{{xClientSecret}}",
 								"description": ""
 							}
 						],
@@ -44,12 +44,12 @@
 						"header": [
 							{
 								"key": "X-CLIENT-ID",
-								"value": "1",
+								"value": "{{xClientId}}",
 								"description": ""
 							},
 							{
 								"key": "X-CLIENT-SECRET",
-								"value": "ASDF",
+								"value": "{{xClientSecret}}",
 								"description": ""
 							}
 						],
@@ -69,12 +69,12 @@
 						"header": [
 							{
 								"key": "X-CLIENT-ID",
-								"value": "1",
+								"value": "{{xClientId}}",
 								"description": ""
 							},
 							{
 								"key": "X-CLIENT-SECRET",
-								"value": "ASDF",
+								"value": "{{xClientSecret}}",
 								"description": ""
 							}
 						],
@@ -94,12 +94,12 @@
 						"header": [
 							{
 								"key": "X-CLIENT-ID",
-								"value": "1",
+								"value": "{{xClientId}}",
 								"description": ""
 							},
 							{
 								"key": "X-CLIENT-SECRET",
-								"value": "ASDF",
+								"value": "{{xClientSecret}}",
 								"description": ""
 							}
 						],
@@ -119,12 +119,12 @@
 						"header": [
 							{
 								"key": "X-CLIENT-ID",
-								"value": "1",
+								"value": "{{xClientId}}",
 								"description": ""
 							},
 							{
 								"key": "X-CLIENT-SECRET",
-								"value": "ASDF",
+								"value": "{{xClientSecret}}",
 								"description": ""
 							}
 						],
@@ -144,12 +144,12 @@
 						"header": [
 							{
 								"key": "X-CLIENT-ID",
-								"value": "1",
+								"value": "{{xClientId}}",
 								"description": ""
 							},
 							{
 								"key": "X-CLIENT-SECRET",
-								"value": "ASDF",
+								"value": "{{xClientSecret}}",
 								"description": ""
 							},
 							{
@@ -175,6 +175,56 @@
 							{
 								"key": "X-ADMIN-PASSWORD",
 								"value": "admin",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Get Coupons",
+					"request": {
+						"url": "{{protocol}}://{{host}}:{{port}}/konfetti/api/account",
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-CLIENT-ID",
+								"value": "{{xClientId}}",
+								"description": ""
+							},
+							{
+								"key": "X-CLIENT-SECRET",
+								"value": "{{xClientSecret}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Redeem Code",
+					"request": {
+						"url": "{{protocol}}://{{host}}:{{port}}/konfetti/api/account/redeem/12345",
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-CLIENT-ID",
+								"value": "{{xClientId}}",
+								"description": ""
+							},
+							{
+								"key": "X-CLIENT-SECRET",
+								"value": "{{xClientSecret}}",
 								"description": ""
 							}
 						],
@@ -311,7 +361,7 @@
 							},
 							{
 								"key": "X-CLIENT-SECRET",
-								"value": "ASDF",
+								"value": "{{xClientSecret}}",
 								"description": ""
 							},
 							{
@@ -322,7 +372,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"type\" : \"java.lang.String\",\n\t\"data\" : \"testFromRestApi\"\n}\n"
+							"raw": "{\n\t\"type\" : \"TYPE_TEXT\",\n\t\"data\" : \"اختبار للغة العربية\"\n}\n"
 						},
 						"description": ""
 					},
@@ -342,12 +392,12 @@
 						"header": [
 							{
 								"key": "X-CLIENT-ID",
-								"value": "1",
+								"value": "{{xClientId}}",
 								"description": ""
 							},
 							{
 								"key": "X-CLIENT-SECRET",
-								"value": "ASDF",
+								"value": "{{xClientSecret}}",
 								"description": ""
 							}
 						],
@@ -367,12 +417,12 @@
 						"header": [
 							{
 								"key": "X-CLIENT-ID",
-								"value": "1",
+								"value": "{{xClientId}}",
 								"description": ""
 							},
 							{
 								"key": "X-CLIENT-SECRET",
-								"value": "ASDF",
+								"value": "{{xClientSecret}}",
 								"description": ""
 							}
 						],
@@ -392,12 +442,12 @@
 						"header": [
 							{
 								"key": "X-CLIENT-ID",
-								"value": "1",
+								"value": "{{xClientId}}",
 								"description": ""
 							},
 							{
 								"key": "X-CLIENT-SECRET",
-								"value": "ASDF",
+								"value": "{{xClientSecret}}",
 								"description": ""
 							}
 						],
@@ -417,12 +467,12 @@
 						"header": [
 							{
 								"key": "X-CLIENT-ID",
-								"value": "1",
+								"value": "{{xClientId}}",
 								"description": ""
 							},
 							{
 								"key": "X-CLIENT-SECRET",
-								"value": "ASDF",
+								"value": "{{xClientSecret}}",
 								"description": ""
 							},
 							{
@@ -447,12 +497,62 @@
 						"header": [
 							{
 								"key": "X-CLIENT-ID",
-								"value": "1",
+								"value": "{{xClientId}}",
 								"description": ""
 							},
 							{
 								"key": "X-CLIENT-SECRET",
-								"value": "ASDF",
+								"value": "{{xClientSecret}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "testParties",
+					"request": {
+						"url": "{{protocol}}://{{host}}:{{port}}/konfetti/api/party/testData",
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-CLIENT-ID",
+								"value": "{{xClientId}}",
+								"description": ""
+							},
+							{
+								"key": "X-CLIENT-SECRET",
+								"value": "{{xClientSecret}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Get PartyRequest",
+					"request": {
+						"url": "{{protocol}}://{{host}}:{{port}}/konfetti/api/party/0/request/10",
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-CLIENT-ID",
+								"value": "{{xClientId}}",
+								"description": ""
+							},
+							{
+								"key": "X-CLIENT-SECRET",
+								"value": "{{xClientSecret}}",
 								"description": ""
 							}
 						],

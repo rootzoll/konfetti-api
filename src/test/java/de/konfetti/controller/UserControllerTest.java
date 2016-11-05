@@ -19,9 +19,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.ZonedDateTime;
 import java.util.Locale;
+import java.util.UUID;
 
 import static de.konfetti.utils.WiserAssertions.assertReceivedMessage;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
 import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
 
@@ -118,7 +121,25 @@ public class UserControllerTest extends BaseControllerTest {
                 .param("pass", user.getPassword())
                 .get(UserController.REST_API_MAPPING + "/login")
                 .then()
-                .statusCode(HttpStatus.OK.value());
+                .statusCode(HttpStatus.OK.value())
+                .body("id", notNullValue())
+                .body("name", nullValue())
+                .body("password", isEmptyOrNullString())
+                .body("imageMediaID", nullValue())
+                .body("spokenLangs", hasItem("en"))
+                .body("activeOnParties", is(empty()))
+                .body("adminOnParties", is(empty()))
+                .body("reviewerOnParties", is(empty()))
+                .body("lastActivityTS", greaterThan(1000L))
+                .body("pushActive", is(false))
+                .body("pushSystem", nullValue())
+                .body("pushID", nullValue())
+                .body("resetKey", nullValue())
+                .body("resetDate", nullValue())
+                .body("clientId", notNullValue())
+                .body("clientSecret", notNullValue())
+                .body("email", is(user.getEMail()))
+        ;
     }
 
     @Test

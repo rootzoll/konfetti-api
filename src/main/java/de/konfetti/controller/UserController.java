@@ -1,9 +1,7 @@
 package de.konfetti.controller;
 
-import de.konfetti.controller.vm.KeyAndPasswordVM;
-import de.konfetti.controller.vm.RedeemResponse;
-import de.konfetti.controller.vm.ResponseSendKonfetti;
-import de.konfetti.controller.vm.ResponseZip2Gps;
+import de.konfetti.controller.mapper.UserMapper;
+import de.konfetti.controller.vm.*;
 import de.konfetti.data.*;
 import de.konfetti.service.*;
 import de.konfetti.utils.*;
@@ -149,14 +147,13 @@ public class UserController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value="/{userId}", method = RequestMethod.GET, produces = "application/json")
-    public User readUser(@PathVariable Long userId, HttpServletRequest httpRequest) throws Exception {
+    public UserResponse getUser(@PathVariable Long userId, HttpServletRequest httpRequest) throws Exception {
     	
         User user = userService.findById(userId);
         if (user==null) {
 			log.warn("NOT FOUND user(" + userId + ")");
-			user = new User();
-			user.setId(0l); // 0 --> signal, that client auth failed
-			return user;
+			// 0 --> signal, that client auth failed
+			return new UserResponse(0L);
         }
     
     	// check if user is allowed to read
@@ -166,10 +163,9 @@ public class UserController {
     		try {
     			client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     		} catch (Exception e) {
-				log.warn("Exception on readUser (get client): " + e.getMessage());
-				user = new User();
-    			user.setId(0l); // 0 --> signal, that client auth failed
-    			return user;
+				log.warn("Exception on getUser (get client): " + e.getMessage());
+				// 0 --> signal, that client auth failed
+				return new UserResponse(0L);
     		}
     		
     		if (!client.getUserId().equals(user.getId())) throw new Exception("client("+client.getId()+") is not allowed to read user("+userId+")");
@@ -187,7 +183,8 @@ public class UserController {
     	
     	// keep password hash just on server side
     	user.setPassword("");
-        return user;
+		UserMapper userMapper = new UserMapper();
+        return userMapper.fromUserToUserResponse(user);
     }
     
     @CrossOrigin(origins = "*")
