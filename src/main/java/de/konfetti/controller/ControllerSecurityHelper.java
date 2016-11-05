@@ -146,10 +146,6 @@ public class ControllerSecurityHelper {
 			throw new Exception("ControllerSecurityHelper: Client("+clientId+") wrong secretGiven("+clientSecret+") should be secretIs("+client.getSecret()+") from IP("+req.getRemoteAddr()+")");
 		}
 
-		// check HTTPS --> should be used to protect secret on transport
-		if (!req.isSecure()) {
-			log.warn("ControllerSecurityHelper: No HTTPS security (" + clientId + "/" + clientSecret + ") from IP(" + req.getRemoteAddr() + ")");
-		}
 		return client;
 	}
 }
