@@ -53,6 +53,8 @@ public class CheatCodes {
             coupon.setPartyID(2l);
             coupon.setCode("22");
             coupon.setActionType(ACTION_TYPE_REVIEWER);
+        } else {
+            return null;
         }
         return coupon;
     }
