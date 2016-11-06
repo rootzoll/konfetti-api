@@ -69,6 +69,9 @@ public class PartyController {
     @Autowired
     private SimpMessagingTemplate webSocket;
 
+    @Autowired
+    private MediaRepository mediaRepository;
+
     private PartyMapper partyMapper;
 
     @Autowired
@@ -195,14 +198,14 @@ public class PartyController {
                 List<Notification> notifications = notificationService.getAllNotificationsSince(client.getUserId(), partyId, lastTs);
                 // TODO Causes Exception see https://github.com/rootzoll/konfetti-app/issues/32
                 // notificationService.deleteAllNotificationsOlderThan(client.getUserId(), partyId, lastTs);
-                if (requests == null) requests = new ArrayList<Request>();
-                if (notifications == null) notifications = new ArrayList<Notification>();
+                if (requests == null) requests = new ArrayList<>();
+                if (notifications == null) notifications = new ArrayList<>();
 
                 log.debug("got requests(" + requests.size() + ") & notifications(" + notifications.size() + ")");
 
                 // if not reviewer or admin then return just public and own requests
                 if ((!userIsPartyAdmin) && (!userIsPartyReviewer)) {
-                    List<Request> filteredRequests = new ArrayList<Request>();
+                    List<Request> filteredRequests = new ArrayList<>();
                     for (Request r : requests) {
                         if ((r.getUserId().equals(user.getId())) || (r.getState().equals(STATE_DONE)) || (r.getState().equals(STATE_PROCESSING)) || (r.getState().equals(STATE_OPEN))) {
                             filteredRequests.add(r);
@@ -386,7 +389,7 @@ public class PartyController {
                         }
                         // show welcome notification
                         log.info("NOTIFICATION Welcome Paty (" + partyResponse.getId() + ")");
-                        notificationService.create(NotificationType.PARTY_WELCOME, user.getId(), partyResponse.getId(), 0l);
+                        notificationService.create(NotificationType.PARTY_WELCOME, user.getId(), partyResponse.getId(), 0L);
 
                         log.debug("userBalance(" + userBalance + ")");
                     } else {
@@ -431,7 +434,7 @@ public class PartyController {
 
         // Action
         if (action.equals("delete")) {
-            if (notiId >= 0l) {
+            if (notiId >= 0L) {
                 notificationService.delete(notiId);
                 log.info("Notification(" + notiId + ") DELETED");
             } else {
@@ -634,8 +637,7 @@ public class PartyController {
             if (infos == null) infos = new ArrayList<MediaItem>();
             Long[] mediaIDs = request.getMediaItemIds();
             if ((mediaIDs != null) && (mediaIDs.length > 0)) {
-                for (int i = 0; i < mediaIDs.length; i++) {
-                    Long mediaID = mediaIDs[i];
+                for (Long mediaID : mediaIDs) {
                     if (mediaID != null) {
                         MediaItem item = mediaService.findById(mediaID);
                         infos.add(item);
@@ -644,9 +646,14 @@ public class PartyController {
             }
             request.setInfo(infos);
 
+            // get multi language media item
+            if (request.getTitleMultiLangRef()!=null) {
+                request.setTitleMultiLang(mediaRepository.findOne(request.getTitleMultiLangRef()));
+            }
+
 
             // add info about support to the request from this user
-            long konfettiAmountSupport = 0l;
+            long konfettiAmountSupport = 0L;
             List<KonfettiTransaction> allTransactionsToRequest = konfettiTransactionService.getAllTransactionsToAccountSinceTS(AccountingTools.getAccountNameFromRequest(request.getId()), request.getTime());
             for (KonfettiTransaction konfettiTransaction : allTransactionsToRequest) {
                 if (AccountingTools.getUserIdFromAccountName(konfettiTransaction.getFromAccount()).equals(user.getId())) {
@@ -656,7 +663,7 @@ public class PartyController {
             request.setKonfettiAmountSupport(konfettiAmountSupport);
 
             // add info about rewards from the request to user
-            long konfettiAmountReward = 0l;
+            long konfettiAmountReward = 0L;
             if (request.getState().equals(STATE_DONE)) {
                 String accountName = AccountingTools.getAccountNameFromRequest(request.getId());
                 List<KonfettiTransaction> allTransactionsFromRequest = konfettiTransactionService.getAllTransactionsFromAccountSinceTS(accountName, request.getTime());
@@ -674,7 +681,7 @@ public class PartyController {
             request.setKonfettiAmountReward(konfettiAmountReward);
 
             // UPVOTE (optional when request parameter set)
-            if (upvoteAmount > 0l) {
+            if (upvoteAmount > 0L) {
                 log.info("Upvoting request(" + requestId + ") with amount(" + upvoteAmount + ") ...");
                 // check if user has enough balance
                 String userAccountname = AccountingTools.getAccountNameFromUserAndParty(client.getUserId(), partyId);
@@ -813,7 +820,7 @@ public class PartyController {
                         if (action.equals("reward")) {
                             // needed json data
                             if ((json == null) || (json.length() == 0)) throw new Exception("minning parameter json");
-                            List<Long> ids = new ArrayList<Long>();
+                            List<Long> ids = new ArrayList<>();
                             try {
                                 List<Integer> idsInts = (new ObjectMapper()).readValue(json, ids.getClass());
                                 int nInts = idsInts.size();
@@ -841,7 +848,7 @@ public class PartyController {
                                 throw new Exception("there are more rewardees than reward - not possible");
 
                             // split reward
-                            Long rewardPerPerson = 0l;
+                            Long rewardPerPerson = 0L;
                             if (requestBalance > 0) {
 
                                 rewardPerPerson = (long) Math.floor((requestBalance * 1d) / (ids.size() * 1d));
@@ -893,7 +900,7 @@ public class PartyController {
                                 // needed json data
                                 if ((json == null) || (json.length() == 0))
                                     throw new Exception("minning parameter json");
-                                Long chatId = 0l;
+                                Long chatId = 0L;
                                 try {
                                     chatId = (new ObjectMapper()).readValue(json, chatId.getClass());
                                 } catch (Exception e) {
@@ -924,7 +931,7 @@ public class PartyController {
                                     // needed json data --> the id of the media item to add
                                     if ((json == null) || (json.length() == 0))
                                         throw new Exception("missing parameter json");
-                                    Long mediaId = 0l;
+                                    Long mediaId = 0L;
                                     try {
                                         mediaId = (new ObjectMapper()).readValue(json, mediaId.getClass());
                                     } catch (Exception e) {
@@ -940,7 +947,7 @@ public class PartyController {
                                         throw new Exception("request(" + requestId + ") not allowed to remove media(" + mediaId + ")");
 
                                     // remove media
-                                    request.setMediaItemIds(Helper.remove(request.getMediaItemIds(), new Long(mediaId)));
+                                    request.setMediaItemIds(Helper.remove(request.getMediaItemIds(), mediaId));
                                     requestService.update(request);
                                     log.info("mediaItem(" + mediaId + ") removed from request(" + requestId + ")");
                                 } else
@@ -949,7 +956,7 @@ public class PartyController {
                                         // needed json data --> the id of the media item to add
                                         if ((json == null) || (json.length() == 0))
                                             throw new Exception("missing parameter json");
-                                        Long mediaId = 0l;
+                                        Long mediaId = 0L;
                                         try {
                                             mediaId = (new ObjectMapper()).readValue(json, mediaId.getClass());
                                         } catch (Exception e) {
@@ -980,7 +987,7 @@ public class PartyController {
                                             // needed json data --> the id of the media item to add
                                             if ((json == null) || (json.length() == 0))
                                                 throw new Exception("missing parameter json");
-                                            Long mediaId = 0l;
+                                            Long mediaId = 0L;
                                             try {
                                                 mediaId = (new ObjectMapper()).readValue(json, mediaId.getClass());
                                             } catch (Exception e) {
@@ -1053,8 +1060,7 @@ public class PartyController {
             partyTwo.setWelcomeBalance(Long.parseLong("10"));
             partyTwo.setSendKonfettiMode(SENDKONFETTIMODE_ALL);
             Party partyTwoPersisted = partyService.create(partyTwo);
-            List<Party> parties = Arrays.asList(partyOnePersisted, partyTwoPersisted);
-            return parties;
+            return Arrays.asList(partyOnePersisted, partyTwoPersisted);
         }
         log.debug("Creating Test Parties : Parties exist already, doing nothing..");
         return null;
@@ -1068,10 +1074,10 @@ public class PartyController {
     }
 
     public class DashBoardInfo {
-        public Long numberOfKonfetti = -1l;
-        public Long numberOfUsers = -1l;
-        public Long numberOfTasks = -1l;
-        public Long numberOfParties = -1l;
+        public Long numberOfKonfetti = -1L;
+        public Long numberOfUsers = -1L;
+        public Long numberOfTasks = -1L;
+        public Long numberOfParties = -1L;
     }
 
 }
