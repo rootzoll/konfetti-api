@@ -2,6 +2,9 @@ package de.konfetti.controller.vm;
 
 import lombok.Data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created by relampago on 05.11.16.
  */
@@ -16,13 +19,13 @@ public class UserResponse {
 
     private Long imageMediaID;
 
-    private String[] spokenLangs = {};
+    private Set<String> spokenLangs = new HashSet<>();
 
-    public Long[] activeOnParties = {};
+    public Set<Long> activeOnParties = new HashSet<>();
 
-    private Long[] adminOnParties = {};
+    private Set<Long> adminOnParties = new HashSet<>();
 
-    private Long[] reviewerOnParties = {};
+    private Set<Long> reviewerOnParties = new HashSet<>();
 
     private Long lastActivityTS = 0l;
 

@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -30,11 +31,15 @@ public class User {
     // IDs of parties the user has an konfetti balance on
     public Long[] activeOnParties = {};
 
-	/*
-	 * PUSH MESSAGING
-	 */
 	// IDs of parties the user has admin privileges on
     private Long[] adminOnParties = {};
+    @ManyToMany
+    @JoinTable(
+            name = "user_party_admin",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "party_id", referencedColumnName = "id"))
+    private List<Party> adminParties;
+
     // IDs of parties the user has reviewer privileges on
     private Long[] reviewerOnParties = {};
     // time stamp when the user last was online (not more precise 1 minute)

@@ -7,6 +7,8 @@ import lombok.Data;
 
 import javax.persistence.*;
 
+import java.util.List;
+
 import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_PUBLIC;
 import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_DISABLED;
@@ -54,6 +56,9 @@ public class Party {
     private Float lon;
     private Float lat;
     private int meters;
+
+    @ManyToMany(mappedBy = "adminParties")
+    private List<User> adminUsers;
 
 
     /*
