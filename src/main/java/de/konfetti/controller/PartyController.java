@@ -219,7 +219,7 @@ public class PartyController {
                 log.debug("add accounting info");
                 final String userAccountName = AccountingTools.getAccountNameFromUserAndParty(client.getUserId(), partyId);
                 Long userBalance = accountingService.getBalanceOfAccount(userAccountName);
-                if (userBalance == null) userBalance = 0l;
+                if (userBalance == null) userBalance = 0L;
                 partyResponse.setKonfettiCount(userBalance);
 
                 // set how many konfetti can be send id feature is enabled
@@ -357,7 +357,7 @@ public class PartyController {
 
                 // for all parties
                 for (final Party party : resultParties) {
-                    PartyResponse partyResponse = new PartyResponse(party.getId());
+                    PartyResponse partyResponse = partyMapper.fromPartyToPartyResponse(party);
                     final String accountName = AccountingTools.getAccountNameFromUserAndParty(client.getUserId(), partyResponse.getId());
 
                     // add accounting info
@@ -466,7 +466,7 @@ public class PartyController {
 
         // check if user has minimal konfetti
         Long userBalance = accountingService.getBalanceOfAccount(AccountingTools.getAccountNameFromUserAndParty(client.getUserId(), party.getId()));
-        if (userBalance == null) userBalance = 0l;
+        if (userBalance == null) userBalance = 0L;
         if (userBalance < request.getKonfettiCount())
             throw new Exception("not enough konfetti on userbalance - is(" + userBalance + ") needed(" + request.getKonfettiCount() + ")");
 
