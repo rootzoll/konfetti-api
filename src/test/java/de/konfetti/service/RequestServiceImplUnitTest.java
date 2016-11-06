@@ -15,7 +15,7 @@ import static org.mockito.Mockito.when;
  * Created by catarata02 on 08.11.15.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class RequestServiceImplTestUnit {
+public class RequestServiceImplUnitTest {
 
     @Mock
     private PartyRepository partyRepository;

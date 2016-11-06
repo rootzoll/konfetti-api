@@ -27,7 +27,9 @@ public class TestHelper {
 
 
     public Party getParty(String partyName){
-        return make(an(ExampleParty).but(with(PartyMaker.name, partyName)));
+        Party party = make(an(ExampleParty).but(with(PartyMaker.name, partyName)));
+        party.setId(null);
+        return party;
     }
 
     public MediaItem getMediaItem(){

@@ -19,14 +19,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.ZonedDateTime;
 import java.util.Locale;
-import java.util.UUID;
 
 import static de.konfetti.utils.WiserAssertions.assertReceivedMessage;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
-import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
 
 /**
  * Created by relampago on 25.09.16.
@@ -66,17 +64,6 @@ public class UserControllerTest extends BaseControllerTest {
                 .from(emailFrom)
                 .to(testEmail)
 //                .withSubject(Message)
-        ;
-    }
-
-    private void createUser(String email, String password) {
-        myGiven()
-                .param("mail", email.toLowerCase()).param("pass", password)
-                .when().post("konfetti/api/account")
-                .then().statusCode(200)
-                .body("id", notNullValue())
-                .body("email", equalToIgnoringCase(email))
-                .body("password", isEmptyOrNullString())
         ;
     }
 

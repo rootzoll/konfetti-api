@@ -41,22 +41,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingGET",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingGET",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           },
           "401": {
@@ -74,22 +71,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingHEAD",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingHEAD",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           },
           "401": {
@@ -107,22 +101,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingPOST",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingPOST",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           },
           "201": {
@@ -143,22 +134,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingPUT",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingPUT",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           },
           "201": {
@@ -179,22 +167,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingDELETE",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingDELETE",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           },
           "401": {
@@ -212,22 +197,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingOPTIONS",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingOPTIONS",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           },
           "401": {
@@ -245,22 +227,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingPATCH",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingPATCH",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           },
           "401": {
@@ -294,7 +273,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/User"
+                "$ref": "#/definitions/UserResponse"
               }
             }
           },
@@ -349,7 +328,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/UserResponse"
             }
           },
           "201": {
@@ -600,7 +579,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/UserResponse"
             }
           },
           "401": {
@@ -875,8 +854,8 @@
         "tags": [
           "user-controller"
         ],
-        "summary": "readUser",
-        "operationId": "readUserUsingGET",
+        "summary": "getUser",
+        "operationId": "getUserUsingGET",
         "consumes": [
           "application/json"
         ],
@@ -897,7 +876,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/UserResponse"
             }
           },
           "401": {
@@ -938,7 +917,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/UserResponse"
             }
           },
           "201": {
@@ -1324,7 +1303,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Party"
+                "$ref": "#/definitions/PartyResponse"
               }
             }
           },
@@ -1354,11 +1333,11 @@
         "parameters": [
           {
             "in": "body",
-            "name": "party",
-            "description": "party",
+            "name": "partyResponse",
+            "description": "partyResponse",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Party"
+              "$ref": "#/definitions/PartyResponse"
             }
           }
         ],
@@ -1366,7 +1345,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/Party"
+              "$ref": "#/definitions/PartyResponse"
             }
           },
           "201": {
@@ -1398,11 +1377,11 @@
         "parameters": [
           {
             "in": "body",
-            "name": "party",
-            "description": "party",
+            "name": "partyResponse",
+            "description": "partyResponse",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Party"
+              "$ref": "#/definitions/PartyResponse"
             }
           }
         ],
@@ -1410,7 +1389,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/Party"
+              "$ref": "#/definitions/PartyResponse"
             }
           },
           "201": {
@@ -1588,7 +1567,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/Party"
+              "$ref": "#/definitions/PartyResponse"
             }
           },
           "401": {
@@ -1968,75 +1947,6 @@
     }
   },
   "definitions": {
-    "LocalDateTime": {
-      "type": "object",
-      "properties": {
-        "chronology": {
-          "$ref": "#/definitions/Chronology"
-        },
-        "dayOfMonth": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "dayOfWeek": {
-          "type": "string",
-          "enum": [
-            "MONDAY",
-            "TUESDAY",
-            "WEDNESDAY",
-            "THURSDAY",
-            "FRIDAY",
-            "SATURDAY",
-            "SUNDAY"
-          ]
-        },
-        "dayOfYear": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "hour": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "minute": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "month": {
-          "type": "string",
-          "enum": [
-            "JANUARY",
-            "FEBRUARY",
-            "MARCH",
-            "APRIL",
-            "MAY",
-            "JUNE",
-            "JULY",
-            "AUGUST",
-            "SEPTEMBER",
-            "OCTOBER",
-            "NOVEMBER",
-            "DECEMBER"
-          ]
-        },
-        "monthValue": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "nano": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "second": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "year": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
     "ClientAction": {
       "type": "object",
       "properties": {
@@ -2064,13 +1974,6 @@
             "type": "integer",
             "format": "int64"
           }
-        },
-        "clientId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "clientSecret": {
-          "type": "string"
         },
         "email": {
           "type": "string"
@@ -2408,9 +2311,6 @@
         "id": {
           "type": "string"
         },
-        "rules": {
-          "$ref": "#/definitions/ZoneRules"
-        },
         "totalSeconds": {
           "type": "integer",
           "format": "int32"
@@ -2435,6 +2335,278 @@
       }
     },
     "Party": {
+      "type": "object",
+      "properties": {
+        "contact": {
+          "type": "string"
+        },
+        "detailText": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "lat": {
+          "type": "number",
+          "format": "float"
+        },
+        "lon": {
+          "type": "number",
+          "format": "float"
+        },
+        "meters": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "name": {
+          "type": "string"
+        },
+        "newRequestMinKonfetti": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reviewLevel": {
+          "type": "string",
+          "enum": [
+            "REVIEWLEVEL_NONE",
+            "REVIEWLEVEL_EVERYTHING",
+            "REVIEWLEVEL_TASKS"
+          ]
+        },
+        "sendKonfettiMode": {
+          "type": "string",
+          "enum": [
+            "SENDKONFETTIMODE_DISABLED",
+            "SENDKONFETTIMODE_ALL",
+            "SENDKONFETTIMODE_JUSTEARNED"
+          ]
+        },
+        "sendKonfettiWhiteList": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "VISIBILITY_PUBLIC",
+            "VISIBILITY_PRIVATE",
+            "VISIBILITY_HIDDEN",
+            "VISIBILITY_DEACTIVATED"
+          ]
+        },
+        "welcomeBalance": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "RedeemResponse": {
+      "type": "object",
+      "properties": {
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ClientAction"
+          }
+        },
+        "feedbackHtml": {
+          "type": "string"
+        }
+      }
+    },
+    "ZonedDateTime": {
+      "type": "object",
+      "properties": {
+        "offset": {
+          "$ref": "#/definitions/ZoneOffset"
+        },
+        "zone": {
+          "$ref": "#/definitions/ZoneId"
+        }
+      }
+    },
+    "Chat": {
+      "type": "object",
+      "properties": {
+        "chatPartnerId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "chatPartnerImageMediaID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "chatPartnerName": {
+          "type": "string"
+        },
+        "chatPartnerSpokenLangs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hostId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "lastTSperMember": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Message"
+          }
+        },
+        "muted": {
+          "type": "boolean"
+        },
+        "partyId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "requestId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "unreadMessage": {
+          "type": "boolean"
+        }
+      }
+    },
+    "KeyAndPasswordVM": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "newPassword": {
+          "type": "string"
+        }
+      }
+    },
+    "ZoneId": {
+      "type": "object"
+    },
+    "InputStream": {
+      "type": "object"
+    },
+    "Request": {
+      "type": "object",
+      "properties": {
+        "chats": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Chat"
+          }
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "imageMediaID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "info": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MediaItem"
+          }
+        },
+        "konfettiAdd": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "konfettiAmountReward": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "konfettiAmountSupport": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "konfettiCount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "mediaItemIds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "partyId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "spokenLangs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "STATE_REVIEW",
+            "STATE_REJECTED",
+            "STATE_OPEN",
+            "STATE_PROCESSING",
+            "STATE_DONE"
+          ]
+        },
+        "time": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "titleMultiLang": {
+          "$ref": "#/definitions/MediaItem"
+        },
+        "titleMultiLangRef": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "userId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "userName": {
+          "type": "string"
+        }
+      }
+    },
+    "View": {
+      "type": "object",
+      "properties": {
+        "contentType": {
+          "type": "string"
+        }
+      }
+    },
+    "PartyResponse": {
       "type": "object",
       "properties": {
         "contact": {
@@ -2535,344 +2707,32 @@
         }
       }
     },
-    "RedeemResponse": {
+    "UserResponse": {
       "type": "object",
       "properties": {
-        "actions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ClientAction"
-          }
-        },
-        "feedbackHtml": {
-          "type": "string"
-        }
-      }
-    },
-    "ZonedDateTime": {
-      "type": "object",
-      "properties": {
-        "chronology": {
-          "$ref": "#/definitions/Chronology"
-        },
-        "dayOfMonth": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "dayOfWeek": {
-          "type": "string",
-          "enum": [
-            "MONDAY",
-            "TUESDAY",
-            "WEDNESDAY",
-            "THURSDAY",
-            "FRIDAY",
-            "SATURDAY",
-            "SUNDAY"
-          ]
-        },
-        "dayOfYear": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "hour": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "minute": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "month": {
-          "type": "string",
-          "enum": [
-            "JANUARY",
-            "FEBRUARY",
-            "MARCH",
-            "APRIL",
-            "MAY",
-            "JUNE",
-            "JULY",
-            "AUGUST",
-            "SEPTEMBER",
-            "OCTOBER",
-            "NOVEMBER",
-            "DECEMBER"
-          ]
-        },
-        "monthValue": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "nano": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "offset": {
-          "$ref": "#/definitions/ZoneOffset"
-        },
-        "second": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "year": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "zone": {
-          "$ref": "#/definitions/ZoneId"
-        }
-      }
-    },
-    "Chat": {
-      "type": "object",
-      "properties": {
-        "chatPartnerId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "chatPartnerImageMediaID": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "chatPartnerName": {
-          "type": "string"
-        },
-        "chatPartnerSpokenLangs": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "hostId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "lastTSperMember": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "members": {
+        "activeOnParties": {
           "type": "array",
           "items": {
             "type": "integer",
             "format": "int64"
           }
         },
-        "messages": {
+        "adminOnParties": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Message"
+            "type": "integer",
+            "format": "int64"
           }
         },
-        "muted": {
-          "type": "boolean"
-        },
-        "partyId": {
+        "clientId": {
           "type": "integer",
           "format": "int64"
         },
-        "requestId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "unreadMessage": {
-          "type": "boolean"
-        }
-      }
-    },
-    "Chronology": {
-      "type": "object",
-      "properties": {
-        "calendarType": {
+        "clientSecret": {
           "type": "string"
         },
-        "id": {
+        "email": {
           "type": "string"
-        }
-      }
-    },
-    "ZoneOffsetTransition": {
-      "type": "object",
-      "properties": {
-        "dateTimeAfter": {
-          "$ref": "#/definitions/LocalDateTime"
-        },
-        "dateTimeBefore": {
-          "$ref": "#/definitions/LocalDateTime"
-        },
-        "duration": {
-          "$ref": "#/definitions/Duration"
-        },
-        "gap": {
-          "type": "boolean"
-        },
-        "instant": {
-          "$ref": "#/definitions/Instant"
-        },
-        "offsetAfter": {
-          "$ref": "#/definitions/ZoneOffset"
-        },
-        "offsetBefore": {
-          "$ref": "#/definitions/ZoneOffset"
-        },
-        "overlap": {
-          "type": "boolean"
-        }
-      }
-    },
-    "ZoneOffsetTransitionRule": {
-      "type": "object",
-      "properties": {
-        "dayOfMonthIndicator": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "dayOfWeek": {
-          "type": "string",
-          "enum": [
-            "MONDAY",
-            "TUESDAY",
-            "WEDNESDAY",
-            "THURSDAY",
-            "FRIDAY",
-            "SATURDAY",
-            "SUNDAY"
-          ]
-        },
-        "localTime": {
-          "$ref": "#/definitions/LocalTime"
-        },
-        "midnightEndOfDay": {
-          "type": "boolean"
-        },
-        "month": {
-          "type": "string",
-          "enum": [
-            "JANUARY",
-            "FEBRUARY",
-            "MARCH",
-            "APRIL",
-            "MAY",
-            "JUNE",
-            "JULY",
-            "AUGUST",
-            "SEPTEMBER",
-            "OCTOBER",
-            "NOVEMBER",
-            "DECEMBER"
-          ]
-        },
-        "offsetAfter": {
-          "$ref": "#/definitions/ZoneOffset"
-        },
-        "offsetBefore": {
-          "$ref": "#/definitions/ZoneOffset"
-        },
-        "standardOffset": {
-          "$ref": "#/definitions/ZoneOffset"
-        },
-        "timeDefinition": {
-          "type": "string",
-          "enum": [
-            "UTC",
-            "WALL",
-            "STANDARD"
-          ]
-        }
-      }
-    },
-    "KeyAndPasswordVM": {
-      "type": "object",
-      "properties": {
-        "key": {
-          "type": "string"
-        },
-        "newPassword": {
-          "type": "string"
-        }
-      }
-    },
-    "LocalTime": {
-      "type": "object",
-      "properties": {
-        "hour": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "minute": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "nano": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "second": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "ZoneId": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "rules": {
-          "$ref": "#/definitions/ZoneRules"
-        }
-      }
-    },
-    "TemporalUnit": {
-      "type": "object",
-      "properties": {
-        "dateBased": {
-          "type": "boolean"
-        },
-        "duration": {
-          "$ref": "#/definitions/Duration"
-        },
-        "durationEstimated": {
-          "type": "boolean"
-        },
-        "timeBased": {
-          "type": "boolean"
-        }
-      }
-    },
-    "InputStream": {
-      "type": "object"
-    },
-    "Instant": {
-      "type": "object",
-      "properties": {
-        "epochSecond": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "nano": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "Request": {
-      "type": "object",
-      "properties": {
-        "chats": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Chat"
-          }
         },
         "id": {
           "type": "integer",
@@ -2882,108 +2742,34 @@
           "type": "integer",
           "format": "int64"
         },
-        "info": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/MediaItem"
-          }
-        },
-        "konfettiAdd": {
+        "lastActivityTS": {
           "type": "integer",
           "format": "int64"
         },
-        "konfettiAmountReward": {
-          "type": "integer",
-          "format": "int64"
+        "name": {
+          "type": "string"
         },
-        "konfettiAmountSupport": {
-          "type": "integer",
-          "format": "int64"
+        "pushActive": {
+          "type": "boolean"
         },
-        "konfettiCount": {
-          "type": "integer",
-          "format": "int64"
+        "pushID": {
+          "type": "string"
         },
-        "mediaItemIds": {
+        "pushSystem": {
+          "type": "string"
+        },
+        "reviewerOnParties": {
           "type": "array",
           "items": {
             "type": "integer",
             "format": "int64"
           }
         },
-        "partyId": {
-          "type": "integer",
-          "format": "int64"
-        },
         "spokenLangs": {
           "type": "array",
           "items": {
             "type": "string"
           }
-        },
-        "state": {
-          "type": "string",
-          "enum": [
-            "STATE_REVIEW",
-            "STATE_REJECTED",
-            "STATE_OPEN",
-            "STATE_PROCESSING",
-            "STATE_DONE"
-          ]
-        },
-        "time": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "title": {
-          "type": "string"
-        },
-        "titleMultiLang": {
-          "$ref": "#/definitions/MediaItem"
-        },
-        "titleMultiLangRef": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "userId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "userName": {
-          "type": "string"
-        }
-      }
-    },
-    "Duration": {
-      "type": "object",
-      "properties": {
-        "nano": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "negative": {
-          "type": "boolean"
-        },
-        "seconds": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "units": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/TemporalUnit"
-          }
-        },
-        "zero": {
-          "type": "boolean"
-        }
-      }
-    },
-    "View": {
-      "type": "object",
-      "properties": {
-        "contentType": {
-          "type": "string"
         }
       }
     },
@@ -3022,26 +2808,6 @@
         "userId": {
           "type": "integer",
           "format": "int64"
-        }
-      }
-    },
-    "ZoneRules": {
-      "type": "object",
-      "properties": {
-        "fixedOffset": {
-          "type": "boolean"
-        },
-        "transitionRules": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ZoneOffsetTransitionRule"
-          }
-        },
-        "transitions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ZoneOffsetTransition"
-          }
         }
       }
     },

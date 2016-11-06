@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 @ActiveProfiles("test")
-public class RequestServiceImplTestIt {
+public class RequestServiceImplItTest {
 
     private final TestHelper testHelper = new TestHelper();
 

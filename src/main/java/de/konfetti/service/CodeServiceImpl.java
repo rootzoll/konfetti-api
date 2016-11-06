@@ -74,7 +74,7 @@ public class CodeServiceImpl extends BaseService implements CodeService {
     }
 
     @Override
-    public RedeemResponse processCodeCoupon(User user, Code coupon) throws Exception {
+    public RedeemResponse processCodeCoupon(User user, Code coupon) {
         RedeemResponse result = new RedeemResponse();
         // redeem konfetti
         if (ACTION_TYPE_KONFETTI == coupon.getActionType()) {
@@ -104,7 +104,7 @@ public class CodeServiceImpl extends BaseService implements CodeService {
         return result;
     }
 
-    private List<ClientAction> addKonfettiOnParty(User user, Long partyId, Long konfettiAmount, List<ClientAction> actions) throws Exception {
+    private List<ClientAction> addKonfettiOnParty(User user, Long partyId, Long konfettiAmount, List<ClientAction> actions)  {
 
         final String userAccountName = AccountingTools.getAccountNameFromUserAndParty(user.getId(), partyId);
 
@@ -118,7 +118,9 @@ public class CodeServiceImpl extends BaseService implements CodeService {
         Long konfettiBefore = this.accountingService.getBalanceOfAccount(userAccountName);
         Long konfettiAfter = this.accountingService.addBalanceToAccount(TransactionType.COUPON, userAccountName, konfettiAmount);
 
-        if (konfettiBefore.equals(konfettiAfter)) throw new Exception("adding amount failed");
+        if (konfettiBefore.equals(konfettiAfter)) {
+            log.warn("addKonfettiOnParty, same amount as before! konfettiAmount: " + konfettiAmount + " , konfettiBefore : " + konfettiBefore + " , konfettiAfter : " + konfettiAfter);
+        }
 
         log.info("user(" + user.getId() + ") on party(" + partyId + ") +" + konfettiAmount + " konfetti");
 

@@ -13,7 +13,7 @@ import org.mockito.runners.MockitoJUnitRunner;
  * Created by catarata02 on 08.11.15.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class PartyServiceImplTestUnit {
+public class PartyServiceImplUnitTest {
 
     @Mock
     private PartyRepository partyRepository;

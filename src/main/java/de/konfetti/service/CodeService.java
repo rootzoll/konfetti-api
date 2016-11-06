@@ -17,5 +17,5 @@ public interface CodeService {
 
     Code findByCode(String code);
 
-    RedeemResponse processCodeCoupon(User user, Code code) throws Exception;
+    RedeemResponse processCodeCoupon(User user, Code code);
 }

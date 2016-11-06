@@ -26,7 +26,7 @@ public interface AccountingService {
 	boolean transferBetweenAccounts(TransactionType transactionType, String fromAccountName, String toAccountName, long amount) throws Exception;
 
 	// returns the resulting account balance
-	Long addBalanceToAccount(TransactionType transactionType, String accountName, long amount) throws Exception;
+	Long addBalanceToAccount(TransactionType transactionType, String accountName, long amount);
 
 	// returns the resulting account balance
 	Long removeBalanceFromAccount(TransactionType transactionType, String accountName, long amount) throws Exception;

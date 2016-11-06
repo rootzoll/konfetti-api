@@ -65,7 +65,7 @@ public class ControllerSecurityHelper {
 	}
 	
 	// if throws an Exception ==> security check failed
-	public void checkAdminLevelSecurity(HttpServletRequest req) throws Exception {
+	public boolean checkAdminLevelSecurity(HttpServletRequest req) throws Exception {
 		
 		if (!doneInit) doInit();
 		
@@ -108,7 +108,7 @@ public class ControllerSecurityHelper {
 
 			if (!correctIP) throw new Exception("ControllerSecurityHelper: Requesting IP("+requestingIP+") is not allowed for ADMIN-LEVEL SECURITY");
 		}
-		
+		return true;
 	}
 		
 	public Client getClientFromRequestWhileCheckAuth(HttpServletRequest req, ClientService clientService) throws Exception {

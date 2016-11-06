@@ -89,14 +89,19 @@ public class AccountingServiceImpl extends BaseService implements AccountingServ
 	}
 
 	@Override
-	public synchronized Long addBalanceToAccount(TransactionType transactionType, String accountName, long amount) throws Exception {
+	public synchronized Long addBalanceToAccount(TransactionType transactionType, String accountName, long amount)  {
+		Account account = null;
 
-		// check input
-		if (amount<=0) throw new Exception("addBalanceToAccount("+accountName+","+amount+") -> invalid amount");
+		try {
+			// check input
+			if (amount<=0) throw new Exception("addBalanceToAccount("+accountName+","+amount+") -> invalid amount");
 
-		// get account
-		Account account = accountRepository.findByName(accountName);
-		if (account==null) throw new Exception("addBalanceToAccount("+accountName+","+amount+") --> account does not exist");
+			// get account
+			account = accountRepository.findByName(accountName);
+			if (account==null) throw new Exception("addBalanceToAccount("+accountName+","+amount+") --> account does not exist");
+		} catch (Exception e) {
+			return Long.valueOf(0L);
+		}
 
 		// add amount and persist
 		account.addBalance(amount);

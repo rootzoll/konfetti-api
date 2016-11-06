@@ -3,6 +3,8 @@ package de.konfetti.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import de.konfetti.controller.mapper.PartyMapper;
+import de.konfetti.controller.vm.PartyResponse;
 import de.konfetti.data.*;
 import de.konfetti.data.mediaitem.MultiLang;
 import de.konfetti.service.*;
@@ -33,8 +35,10 @@ import static de.konfetti.data.enums.SendKonfettiModeEnum.*;
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping("konfetti/api/party")
+@RequestMapping(PartyController.REST_API_MAPPING)
 public class PartyController {
+
+    public static final String REST_API_MAPPING = "konfetti/api/party";
 
     private static final Gson GSON = new GsonBuilder().create();
 
@@ -65,6 +69,8 @@ public class PartyController {
     @Autowired
     private SimpMessagingTemplate webSocket;
 
+    private PartyMapper partyMapper;
+
     @Autowired
     public PartyController(
             final PartyService partyService,
@@ -87,6 +93,7 @@ public class PartyController {
         this.chatService = chatService;
         this.mediaService = mediaService;
         this.konfettiTransactionService = konfettiTransactionService;
+        partyMapper = new PartyMapper();
 
     }
 
@@ -111,10 +118,11 @@ public class PartyController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(method = RequestMethod.POST)
-    public Party createParty(@RequestBody @Valid final Party party, HttpServletRequest request) throws Exception {
+    public PartyResponse createParty(@RequestBody @Valid final PartyResponse partyResponse, HttpServletRequest request) throws Exception {
         controllerSecurityHelper.checkAdminLevelSecurity(request);
-        log.info("ADMIN: Creating PARTY(" + party.getId() + ")");
-        return partyService.create(party);
+        log.info("ADMIN: Creating PARTY(" + partyResponse.getId() + ")");
+        Party createdParty = partyService.create(partyMapper.fromPartyResponseToParty(partyResponse));
+        return partyMapper.fromPartyToPartyResponse(createdParty);
     }
 
     //---------------------------------------------------
@@ -123,10 +131,12 @@ public class PartyController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(method = RequestMethod.PUT)
-    public Party updateParty(@RequestBody @Valid final Party party, HttpServletRequest request) throws Exception {
+    public PartyResponse updateParty(@RequestBody @Valid final PartyResponse partyResponse, HttpServletRequest request) throws Exception {
         controllerSecurityHelper.checkAdminLevelSecurity(request);
-        log.info("ADMIN: Updating PARTY(" + party.getId() + ")");
-        return partyService.update(party);
+        log.info("ADMIN: Updating PARTY(" + partyResponse.getId() + ")");
+        Party party = partyMapper.fromPartyResponseToParty(partyResponse);
+        Party updatedParty = partyService.update(party);
+        return partyMapper.fromPartyToPartyResponse(updatedParty);
     }
 
     @CrossOrigin(origins = "*")
@@ -151,10 +161,11 @@ public class PartyController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{partyId}", method = RequestMethod.GET)
-    public Party getParty(@PathVariable long partyId, @RequestParam(value = "lastTS", defaultValue = "0") long lastTs, HttpServletRequest request) throws Exception {
+    public PartyResponse getParty(@PathVariable long partyId, @RequestParam(value = "lastTS", defaultValue = "0") long lastTs, HttpServletRequest request) throws Exception {
 
-        Party party = partyService.findById(partyId);
-        if (party == null) throw new Exception("was not able to load party with id(" + partyId + ") - NOT FOUND");
+        PartyResponse partyResponse = partyMapper.fromPartyToPartyResponse(partyService.findById(partyId));
+        if (partyResponse == null) throw new Exception("was not able to load party with id(" + partyId + ") - NOT FOUND");
+
 
         // if user/client is set by header -> add requests and notifications important to user
         try {
@@ -166,8 +177,8 @@ public class PartyController {
                 User user = userService.findById(client.getUserId());
                 if (user == null)
                     throw new Exception("was not able to load user with id(" + client.getUserId() + ") - NOT FOUND");
-                boolean userIsPartyAdmin = Helper.contains(user.getAdminOnParties(), party.getId());
-                boolean userIsPartyReviewer = Helper.contains(user.getReviewerOnParties(), party.getId());
+                boolean userIsPartyAdmin = Helper.contains(user.getAdminOnParties(), partyResponse.getId());
+                boolean userIsPartyReviewer = Helper.contains(user.getReviewerOnParties(), partyResponse.getId());
 
                 log.debug("is User(" + user.getId() + ") isPartyAdmin(" + userIsPartyAdmin + ") isPartyReviewer(" + userIsPartyReviewer + ")");
 
@@ -201,32 +212,32 @@ public class PartyController {
                     log.debug("after non admin/reviewer filtering --> requests(" + requests.size() + ")");
                 }
 
-                party.setRequests(new HashSet<Request>(requests));
-                party.setNotifications(new HashSet<Notification>(notifications));
+                partyResponse.setRequests(new HashSet<Request>(requests));
+                partyResponse.setNotifications(new HashSet<Notification>(notifications));
 
                 // add accounting info
                 log.debug("add accounting info");
                 final String userAccountName = AccountingTools.getAccountNameFromUserAndParty(client.getUserId(), partyId);
                 Long userBalance = accountingService.getBalanceOfAccount(userAccountName);
                 if (userBalance == null) userBalance = 0l;
-                party.setKonfettiCount(userBalance);
+                partyResponse.setKonfettiCount(userBalance);
 
                 // set how many konfetti can be send id feature is enabled
-                if (party.getSendKonfettiMode() == SENDKONFETTIMODE_DISABLED) {
+                if (partyResponse.getSendKonfettiMode() == SENDKONFETTIMODE_DISABLED) {
                     // is disabled - set to zero
-                    party.setSendKonfettiMaxAmount(0);
-                } else if (party.getSendKonfettiMode() == SENDKONFETTIMODE_ALL) {
+                    partyResponse.setSendKonfettiMaxAmount(0);
+                } else if (partyResponse.getSendKonfettiMode() == SENDKONFETTIMODE_ALL) {
                     // all konfetti can be spend
-                    party.setSendKonfettiMaxAmount(party.getKonfettiCount());
-                } else if (party.getSendKonfettiMode() == SENDKONFETTIMODE_JUSTEARNED) {
+                    partyResponse.setSendKonfettiMaxAmount(partyResponse.getKonfettiCount());
+                } else if (partyResponse.getSendKonfettiMode() == SENDKONFETTIMODE_JUSTEARNED) {
                     // just earned konfetti can be spend
-                    party.setSendKonfettiMaxAmount(this.accountingService.getBalanceEarnedOfAccount(userAccountName));
+                    partyResponse.setSendKonfettiMaxAmount(this.accountingService.getBalanceEarnedOfAccount(userAccountName));
                 } else {
-                    log.warn("Not implemented KonfettiSendMode of " + party.getSendKonfettiMode());
+                    log.warn("Not implemented KonfettiSendMode of " + partyResponse.getSendKonfettiMode());
                 }
 
-                party.setKonfettiTotal(-1l); // TODO: implement statistic later
-                party.setTopPosition(-1); // TODO: implement statistic later
+                partyResponse.setKonfettiTotal(-1l); // TODO: implement statistic later
+                partyResponse.setTopPosition(-1); // TODO: implement statistic later
 
                 // see if there is any new chat message for user TODO: find a more performat way
                 log.debug("see if there is any new chat message");
@@ -241,9 +252,9 @@ public class PartyController {
                         noti.setType(NotificationType.CHAT_NEW);
                         noti.setUserId(client.getUserId());
                         noti.setTimeStamp(System.currentTimeMillis());
-                        Set<Notification> notis = party.getNotifications();
+                        Set<Notification> notis = partyResponse.getNotifications();
                         notis.add(noti);
-                        party.setNotifications(notis);
+                        partyResponse.setNotifications(notis);
                     }
                 }
             }
@@ -251,12 +262,12 @@ public class PartyController {
             log.error("Was not able to get optional client info on request for party(" + partyId + "): " + e.getMessage(), e);
         }
 
-        return party;
+        return partyResponse;
     }
 
     @CrossOrigin(origins = "*")
     @RequestMapping(method = RequestMethod.GET)
-    public List<Party> getAllParties(
+    public List<PartyResponse> getAllParties(
             @RequestParam(value = "lat", defaultValue = "0.0") String latStr,
             @RequestParam(value = "lon", defaultValue = "0.0") String lonStr,
             HttpServletRequest request) throws Exception {
@@ -318,6 +329,7 @@ public class PartyController {
 //
 //		}
 
+        List<PartyResponse> partyResponses = new ArrayList<>();
         // try to personalize when client/user info is in header
         try {
 
@@ -342,9 +354,11 @@ public class PartyController {
                     userService.update(user);
                 }
 
+
                 // for all parties
                 for (final Party party : resultParties) {
-                    final String accountName = AccountingTools.getAccountNameFromUserAndParty(client.getUserId(), party.getId());
+                    PartyResponse partyResponse = new PartyResponse(party.getId());
+                    final String accountName = AccountingTools.getAccountNameFromUserAndParty(client.getUserId(), partyResponse.getId());
 
                     // add accounting info
                     Long userBalance = accountingService.getBalanceOfAccount(accountName);
@@ -352,7 +366,7 @@ public class PartyController {
                     // if user is new on party (has no account yet)
                     if (userBalance == null) {
                         userBalance = 0L;
-                        log.info("New User(" + client.getUserId() + ") active on Party(" + party.getId() + ")");
+                        log.info("New User(" + client.getUserId() + ") active on Party(" + partyResponse.getId() + ")");
                         // create account
                         if (!accountingService.createAccount(accountName)) {
                             log.warn("Was not able to create balance account(" + accountName + ")");
@@ -360,33 +374,30 @@ public class PartyController {
 
                         // make user member of party
                         Long[] activeParties = user.getActiveOnParties();
-                        activeParties = Helper.append(activeParties, party.getId());
+                        activeParties = Helper.append(activeParties, partyResponse.getId());
                         user.setActiveOnParties(activeParties);
                         userService.update(user);
 
                         // welcome user
-                        if (party.getWelcomeBalance() > 0) {
+                        if (partyResponse.getWelcomeBalance() > 0) {
                             // transfer welcome konfetti
-                            log.info("Transfer Welcome-Konfetti(" + party.getWelcomeBalance() + ") on Party(" + party.getId() + ") to User(" + client.getUserId() + ") with accountName(" + accountName + ")");
-                            try {
-                                userBalance = accountingService.addBalanceToAccount(TransactionType.USER_WELCOME, accountName, party.getWelcomeBalance());
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+                            log.info("Transfer Welcome-Konfetti(" + partyResponse.getWelcomeBalance() + ") on Party(" + partyResponse.getId() + ") to User(" + client.getUserId() + ") with accountName(" + accountName + ")");
+                            userBalance = accountingService.addBalanceToAccount(TransactionType.USER_WELCOME, accountName, partyResponse.getWelcomeBalance());
                         }
                         // show welcome notification
-                        log.info("NOTIFICATION Welcome Paty (" + party.getId() + ")");
-                        notificationService.create(NotificationType.PARTY_WELCOME, user.getId(), party.getId(), 0l);
+                        log.info("NOTIFICATION Welcome Paty (" + partyResponse.getId() + ")");
+                        notificationService.create(NotificationType.PARTY_WELCOME, user.getId(), partyResponse.getId(), 0l);
 
                         log.debug("userBalance(" + userBalance + ")");
                     } else {
                         log.debug("user known on party");
                     }
-                    party.setKonfettiCount(userBalance);
+                    partyResponse.setKonfettiCount(userBalance);
 
                     // disable statistics in this level
-                    party.setKonfettiTotal(-1l);
-                    party.setTopPosition(-1);
+                    partyResponse.setKonfettiTotal(-1L);
+                    partyResponse.setTopPosition(-1);
+                    partyResponses.add(partyResponse);
                 }
             }
         } catch (Exception e) {
@@ -394,7 +405,7 @@ public class PartyController {
             log.info("Was not able to get optional client info on request for party list: " + e.getMessage());
         }
         log.info("RESULT number of parties is " + resultParties.size());
-        return resultParties;
+        return partyResponses;
     }
 
     @CrossOrigin(origins = "*")
