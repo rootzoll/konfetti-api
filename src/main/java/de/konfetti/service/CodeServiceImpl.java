@@ -1,6 +1,7 @@
 package de.konfetti.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.konfetti.controller.mapper.UserMapper;
 import de.konfetti.controller.vm.RedeemResponse;
 import de.konfetti.data.*;
 import de.konfetti.utils.AccountingTools;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_ADMIN;
 import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
@@ -97,7 +99,9 @@ public class CodeServiceImpl extends BaseService implements CodeService {
             result.setFeedbackHtml("You are now REVIEWER on the following party.");
         } else if (ACTION_TYPE_ADMIN == coupon.getActionType()) {
             // promote user to admin
-            result.setActions(makeUserAdminOnParty(user, coupon.getPartyID(), result.getActions()));
+            Party foundParty = partyService.findById(coupon.getPartyID());
+            List<ClientAction> actions = makeUserAdminOnParty(user, foundParty, result.getActions());
+            result.setActions(actions);
             // TODO --> multi lang by lang set in user
             result.setFeedbackHtml("You are now ADMIN on the following party.");
         }
@@ -129,16 +133,19 @@ public class CodeServiceImpl extends BaseService implements CodeService {
         return actions;
     }
 
-    private List<ClientAction> makeUserAdminOnParty(User user, Long partyId, List<ClientAction> actions) {
-        Long[] arr = user.getAdminOnParties();
-        if (!Helper.contains(arr, partyId)) arr = Helper.append(arr, partyId);
-        user.setAdminOnParties(arr);
-        userService.update(user);
+    private List<ClientAction> makeUserAdminOnParty(User user, Party party, List<ClientAction> actions) {
+        Objects.nonNull(party);
 
-        log.info("user(" + user.getId() + ") is now ADMIN on party(" + partyId + ")");
-
+        List<Party> adminParties = user.getAdminParties();
+        if (adminParties.contains(party)){
+            log.warn("user(" + user.getId() + ") is ALREADY ADMIN on party(" + party.getId() + ")");
+        } else {
+            log.info("user(" + user.getId() + ") is now ADMIN on party(" + party.getId() + ")");
+            adminParties.add(party);
+            userService.update(user);
+        }
         actions = addUpdateUserAction(actions, user);
-        actions = addFocusPartyAction(actions, partyId);
+        actions = addFocusPartyAction(actions, party.getId());
         return actions;
     }
 
@@ -168,7 +175,7 @@ public class CodeServiceImpl extends BaseService implements CodeService {
     private List<ClientAction> addUpdateUserAction(List<ClientAction> actions, User actualUser) {
         String userJson = null;
         try {
-            userJson = new ObjectMapper().writeValueAsString(actualUser);
+            userJson = new ObjectMapper().writeValueAsString(new UserMapper().fromUserToUserResponse(actualUser));
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,5 +1,6 @@
 package de.konfetti.service;
 
+import de.konfetti.data.Party;
 import de.konfetti.data.User;
 import de.konfetti.data.UserRepository;
 import de.konfetti.utils.Helper;
@@ -63,19 +64,6 @@ public class UserServiceImpl extends BaseService implements UserService {
 
 	// TODO improve performance
 	@Override
-	public List<User> getAllUsersAdminOnParty(Long partyID) {
-		List<User> result = new ArrayList<User>();
-		List<User> all = userRepository.findAll();
-		for (User user : all) {
-			if (Helper.contains(user.getAdminOnParties(), partyID)) {
-				result.add(user);
-			}
-		}
-		return result;
-	}
-
-	// TODO improve performance
-	@Override
 	public List<User> getAllUsersReviewerOnParty(Long partyID) {
 		List<User> result = new ArrayList<User>();
 		List<User> all = userRepository.findAll();
@@ -85,11 +73,11 @@ public class UserServiceImpl extends BaseService implements UserService {
 				result.add(user);
 				continue;
 			}
-			// admin = reviewer
-			if (Helper.contains(user.getAdminOnParties(), partyID)) {
-				result.add(user);
-				continue;
-			}
+		}
+		// admin = reviewer
+		Party party = partyRepository.findOne(partyID);
+		if (party != null) {
+			result.addAll(party.getAdminUsers());
 		}
 		return result;
 	}

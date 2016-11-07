@@ -180,7 +180,7 @@ public class PartyController {
                 User user = userService.findById(client.getUserId());
                 if (user == null)
                     throw new Exception("was not able to load user with id(" + client.getUserId() + ") - NOT FOUND");
-                boolean userIsPartyAdmin = Helper.contains(user.getAdminOnParties(), partyResponse.getId());
+                boolean userIsPartyAdmin = Helper.userIsAdminOnParty(user, partyId);
                 boolean userIsPartyReviewer = Helper.contains(user.getReviewerOnParties(), partyResponse.getId());
 
                 log.debug("is User(" + user.getId() + ") isPartyAdmin(" + userIsPartyAdmin + ") isPartyReviewer(" + userIsPartyReviewer + ")");
@@ -571,7 +571,7 @@ public class PartyController {
             User user = userService.findById(client.getUserId());
 
             boolean userIsAuthor = (request.getUserId().equals(client.getUserId()));
-            boolean userIsPartyAdmin = Helper.contains(user.getAdminOnParties(), request.getPartyId());
+            boolean userIsPartyAdmin = Helper.userIsAdminOnParty(user, request.getPartyId());
             log.info("delete request(" + requestId + ") ... client is author(" + userIsAuthor + ") partyAdmin(" + userIsPartyAdmin + ")");
 
             if ((!userIsAuthor) && (!userIsPartyAdmin))
@@ -611,7 +611,7 @@ public class PartyController {
         Request request = requestService.findById(requestId);
         if (request != null) {
             User user = userService.findById(client.getUserId());
-            boolean userIsPartyAdmin = Helper.contains(user.getAdminOnParties(), request.getPartyId());
+            boolean userIsPartyAdmin = Helper.userIsAdminOnParty(user, request.getPartyId());
 
             // add chats to request (when user is host or member)
             List<Chat> chats = this.chatService.getAllByRequestId(request.getId());
@@ -736,7 +736,7 @@ public class PartyController {
                 User user = userService.findById(client.getUserId());
 
                 userIsAuthor = (request.getUserId().equals(client.getUserId()));
-                userIsPartyAdmin = Helper.contains(user.getAdminOnParties(), request.getPartyId());
+                userIsPartyAdmin = Helper.userIsAdminOnParty(user, request.getPartyId());
                 userIsPartyReviewer = Helper.contains(user.getReviewerOnParties(), request.getPartyId());
                 log.info("action request(" + requestId + ") ... client is author(" + userIsAuthor + ") partyAdmin(" + userIsPartyAdmin + ") partyReview(" + userIsPartyReviewer + ")");
 
