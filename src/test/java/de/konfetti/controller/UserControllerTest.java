@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.konfetti.Application;
 import de.konfetti.controller.vm.KeyAndPasswordVM;
+import de.konfetti.controller.vm.UserResponse;
 import de.konfetti.data.Party;
 import de.konfetti.data.User;
 import de.konfetti.data.UserRepository;
@@ -26,9 +27,12 @@ import java.util.List;
 import java.util.Locale;
 
 import static de.konfetti.utils.WiserAssertions.assertReceivedMessage;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
+import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
 
 /**
  * Created by relampago on 25.09.16.
@@ -47,10 +51,12 @@ public class UserControllerTest extends BaseControllerTest {
     @Autowired
     protected PartyService partyService;
 
+    private ObjectMapper objectMapper;
+
     @Before
     public void setUp() throws Exception {
         super.setUp();
-
+        objectMapper = new ObjectMapper();
     }
 
     @After
@@ -63,15 +69,25 @@ public class UserControllerTest extends BaseControllerTest {
         String testEmail = "testcreateuser@test.de";
         String testPassword = "createUser";
         // check user is created
+        createUser(testEmail, testPassword)
+                .statusCode(200)
+                .body("id", notNullValue())
+                .body("email", equalToIgnoringCase(testEmail))
+                .body("password", isEmptyOrNullString());
+    }
+
+    @Test
+    public void createUserWithExistingEmail() throws Exception {
+        String testEmail = "createuserwithexistingemail@test.de";
+        String testPassword = "createUser";
+        // check user is created
         createUser(testEmail, testPassword);
 
-        // check email was sent to the user
-//        MessageSourceResourceBundle.getBundle("messages", locale).getString(subjectKey);
-        assertReceivedMessage(wiser)
-                .from(emailFrom)
-                .to(testEmail)
-//                .withSubject(Message)
-        ;
+        // should fail
+        ValidatableResponse response = createUser(testEmail, testPassword);
+        response
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body(is("User already exists with this email"));
     }
 
     @Test

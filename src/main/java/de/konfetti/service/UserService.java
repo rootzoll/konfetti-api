@@ -12,7 +12,9 @@ public interface UserService {
 	User update(User user);
     
     User findById(long userId);
-    
+
+	User findByName(String name);
+
 	User findByMail(String mail);
 	
 	List<User> getAllUsersReviewerOnParty(Long partyID);

@@ -82,7 +82,7 @@ public class UserController {
     //---------------------------------------------------
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
+    @GetMapping(produces = "application/json")
     public List<UserResponse> getAllUsers(HttpServletRequest httpRequest) throws Exception {
         controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
         List<UserResponse> listOfUserResponses = userService.getAllUsers()
@@ -92,8 +92,8 @@ public class UserController {
     }
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(method = RequestMethod.POST, produces = "application/json")
-    public UserResponse createUser(
+    @PostMapping(produces = "application/json")
+    public ResponseEntity<UserResponse> createUser(
             @RequestParam(value = "mail", defaultValue = "") String email,
             @RequestParam(value = "pass", defaultValue = "") String pass,
             @RequestParam(value = "locale", defaultValue = "en") String locale) throws Exception {
@@ -110,7 +110,7 @@ public class UserController {
 
             // if email is set - check if email exists on other account
             if (userService.findByMail(email) != null) {
-                return new UserResponse(-1L);
+                return new ResponseEntity("User already exists with this email", HttpStatus.BAD_REQUEST);
             }
 
         }
@@ -149,11 +149,11 @@ public class UserController {
         UserResponse userResponse = userMapper.fromUserToUserResponse(user);
         userResponse.setClientId(client.getId());
         userResponse.setClientSecret(client.getSecret());
-        return userResponse;
+        return new ResponseEntity(userResponse, HttpStatus.OK);
     }
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/{userId}", method = RequestMethod.GET, produces = "application/json")
+    @GetMapping(value = "/{userId}", produces = "application/json")
     public UserResponse getUser(@PathVariable Long userId, HttpServletRequest httpRequest) throws Exception {
 
         User user = userService.findById(userId);
@@ -195,7 +195,7 @@ public class UserController {
     }
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/login", method = RequestMethod.GET, produces = "application/json")
+    @GetMapping(value = "/login", produces = "application/json")
     public UserResponse login(@RequestParam(value = "mail", defaultValue = "") String email,
                               @RequestParam(value = "pass", defaultValue = "") String pass) throws Exception {
 
@@ -246,8 +246,7 @@ public class UserController {
      * @return the ResponseEntity with status 200 (OK) if the e-mail was sent, or status 400 (Bad Request) if the e-mail address is not registered
      */
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/reset_password/init",
-            method = RequestMethod.POST,
+    @PostMapping(value = "/reset_password/init",
             produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<?> requestPasswordReset(@RequestBody String mail, HttpServletRequest request) {
         return userService.requestPasswordReset(mail)
@@ -264,8 +263,7 @@ public class UserController {
      * @return the ResponseEntity with status 200 (OK) if the password has been reset,
      * or status 400 (Bad Request) or 500 (Internal Server Error) if the password could not be reset
      */
-    @RequestMapping(value = "/reset_password/finish",
-            method = RequestMethod.POST,
+    @PostMapping(value = "/reset_password/finish",
             produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> finishPasswordReset(@RequestBody KeyAndPasswordVM keyAndPassword) {
         return userService.completePasswordReset(keyAndPassword.getNewPassword(), keyAndPassword.getKey())
@@ -275,11 +273,23 @@ public class UserController {
 
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/{userId}", method = RequestMethod.PUT, produces = "application/json")
-    public UserResponse updateUser(@RequestBody @Valid final User userInput, HttpServletRequest httpRequest) throws Exception {
-
+    @PutMapping(value = "/{userId}", produces = "application/json")
+    public ResponseEntity<UserResponse> updateUser(@RequestBody @Valid final User userInput, HttpServletRequest httpRequest) throws Exception {
         User user = userService.findById(userInput.getId());
         if (user == null) throw new Exception("NOT FOUND user(" + userInput.getId() + ")");
+
+        // check if other user exists with name / email
+        User byMail = userService.findByMail(userInput.getEMail());
+        if (byMail != null && byMail.getId() != userInput.getId()) {
+            return new ResponseEntity("Another user exists with this email : '" + userInput.getEMail() + "'", HttpStatus.BAD_REQUEST);
+        }
+        User byName = userService.findByName(userInput.getName());
+        if (byName != null
+                && byName.getId() != userInput.getId()
+                && userInput.getName().length() > 0
+                ) {
+            return new ResponseEntity("Another user exists with this name : '" + userInput.getName() + "'", HttpStatus.BAD_REQUEST);
+        }
 
         // check if user is allowed to read
         if (httpRequest.getHeader("X-CLIENT-ID") != null) {
@@ -335,12 +345,12 @@ public class UserController {
         // keep password hash just on server side
         user.setPassword("");
 
-        return userMapper.fromUserToUserResponse(user);
+        return new ResponseEntity(userMapper.fromUserToUserResponse(user), HttpStatus.OK);
     }
 
     @SuppressWarnings("deprecation")
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/coupons/{partyId}", method = RequestMethod.GET, produces = "application/json")
+    @GetMapping(value = "/coupons/{partyId}", produces = "application/json")
     public Boolean generateCodes(@PathVariable Long partyId,
                                  @RequestParam(value = "count", defaultValue = "0") Integer count,
                                  @RequestParam(value = "amount", defaultValue = "0") Integer amount,
@@ -403,12 +413,6 @@ public class UserController {
         return true;
     }
 
-    private void userIsAdminOnParty(Party party, User user) throws Exception {
-        party.getAdminUsers()
-                .stream().filter(user1 -> user1.getId().equals(user.getId()))
-                .findAny().orElseThrow(() -> new Exception("user needs to be admin on party"));
-    }
-
     private void checkEmailConfiguration() throws Exception {
         if (StringUtils.isEmpty(mailHost) && mailEnabled) {
             throw new Exception("eMail is not configured in properties file - cannot generate/send coupons");
@@ -416,7 +420,7 @@ public class UserController {
     }
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/coupons-admin/{partyId}", method = RequestMethod.GET, produces = "application/json")
+    @GetMapping(value = "/coupons-admin/{partyId}", produces = "application/json")
     public List<String> generateCodesAdmin(@PathVariable Long partyId,
                                            @RequestParam(value = "count", defaultValue = "0") Integer count,
                                            @RequestParam(value = "amount", defaultValue = "0") Integer amount,
@@ -445,7 +449,7 @@ public class UserController {
     }
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/codes-admin/{partyId}", method = RequestMethod.GET, produces = "application/json")
+    @GetMapping(value = "/codes-admin/{partyId}", produces = "application/json")
     public List<String> generateCodesAdmin(@PathVariable Long partyId,
                                            @RequestParam(value = "count", defaultValue = "1") Integer count,
                                            @RequestParam(value = "type", defaultValue = "admin") String type,
@@ -476,7 +480,7 @@ public class UserController {
     }
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/send/{partyId}", method = RequestMethod.GET, produces = "application/json")
+    @GetMapping(value = "/send/{partyId}", produces = "application/json")
     public ResponseSendKonfetti sendKonfetti(@PathVariable Long partyId,
                                              @RequestParam(value = "address", defaultValue = "") String address,
                                              @RequestParam(value = "amount", defaultValue = "0") Integer amount,
@@ -630,14 +634,14 @@ public class UserController {
     }
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/zip2gps/{country}/{code}", method = RequestMethod.GET, produces = "application/json")
+    @GetMapping(value = "/zip2gps/{country}/{code}", produces = "application/json")
     public ResponseZip2Gps zip2Gps(@PathVariable String country, @PathVariable String code) throws Exception {
         GpsConverter gpsConverter = new GpsConverter();
         return gpsConverter.fromZipCode(country, code);
     }
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/redeem/{code}", method = RequestMethod.GET, produces = "application/json")
+    @GetMapping(value = "/redeem/{code}", produces = "application/json")
     public RedeemResponse redeemCode(@PathVariable String code, @RequestParam(value = "locale", defaultValue = "en") String locale, HttpServletRequest httpRequest) throws Exception {
         if (StringUtils.isEmpty(code)) throw new Exception("code is not valid");
         // TODO implement reedem code feedback in locale

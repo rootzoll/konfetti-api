@@ -76,14 +76,11 @@ public class BaseControllerTest {
                 .header(ControllerSecurityHelper.HEADER_ADMIN_PASSWORD, "admin");
     }
 
-    protected void createUser(String email, String password) {
-        myGiven()
+    protected ValidatableResponse createUser(String email, String password) {
+        return myGiven()
                 .param("mail", email.toLowerCase()).param("pass", password)
                 .when().post(UserController.REST_API_MAPPING)
-                .then().statusCode(200)
-                .body("id", notNullValue())
-                .body("email", equalToIgnoringCase(email))
-                .body("password", isEmptyOrNullString())
+                .then()
         ;
     }
 

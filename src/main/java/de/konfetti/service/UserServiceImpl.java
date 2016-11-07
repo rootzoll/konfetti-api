@@ -32,7 +32,6 @@ public class UserServiceImpl extends BaseService implements UserService {
     
     @Override
     public User create() {
-    	
     	// user gets created
         User user = new User();
 
@@ -41,16 +40,18 @@ public class UserServiceImpl extends BaseService implements UserService {
         
         // return to caller
         return persited;
-        
     }
 
     @Override
     public User findById(long id) {
-    	
     	// gets the one with the given id
         return userRepository.findOne(id);
-    
     }
+
+	@Override
+	public User findByName(String name) {
+		return userRepository.findByName(name);
+	}
 
 	@Override
 	public User update(User user) {
