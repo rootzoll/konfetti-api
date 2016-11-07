@@ -129,19 +129,19 @@ public class ControllerSecurityHelper {
 			throw new Exception("ControllerSecurityHelper: X-CLIENT-ID id no Number ("+clientId+"/"+clientSecret+") from IP("+req.getRemoteAddr()+")");
 		}
 
-		log.info("clientId(" + clientId + ") clientSecret(" + clientSecret + ")");
+		log.trace("clientId(" + clientId + ") clientSecret(" + clientSecret + ")");
 		
 		// check if client exists
 		Client client = clientService.findById(clientIdLong);
 		if (client==null) {
-			log.info("CLIENT NOT FOUND");
+			log.trace("CLIENT NOT FOUND");
 			Thread.sleep(300); // security delay against brute force
 			throw new Exception("ControllerSecurityHelper: No client found with id ("+clientId+") from IP("+req.getRemoteAddr()+")");
 		}
 		
 		// check if client has correct secret
 		if (!clientSecret.equals(client.getSecret())) {
-			log.info("WRONG SECRET");
+			log.trace("WRONG SECRET");
 			Thread.sleep(300); // security delay against brute force
 			throw new Exception("ControllerSecurityHelper: Client("+clientId+") wrong secretGiven("+clientSecret+") should be secretIs("+client.getSecret()+") from IP("+req.getRemoteAddr()+")");
 		}
