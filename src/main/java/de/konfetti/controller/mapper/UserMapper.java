@@ -5,6 +5,9 @@ import de.konfetti.data.User;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by relampago on 05.11.16.
@@ -18,7 +21,8 @@ public class UserMapper {
         userResponse.setImageMediaID(user.getImageMediaID());
         userResponse.setSpokenLangs(new HashSet<>(Arrays.asList(user.getSpokenLangs())));
         userResponse.setActiveOnParties(new HashSet<>(Arrays.asList(user.getActiveOnParties())));
-        userResponse.setAdminOnParties(new HashSet<>(Arrays.asList(user.getAdminOnParties())));
+        Set<Long> adminOnParties = user.getAdminParties().stream().map(party -> party.getId()).collect(Collectors.toSet());
+        userResponse.setAdminOnParties(adminOnParties);
         userResponse.setReviewerOnParties(new HashSet<>(Arrays.asList(user.getReviewerOnParties())));
         userResponse.setLastActivityTS(user.getLastActivityTS());
         userResponse.setPushActive(user.getPushActive());

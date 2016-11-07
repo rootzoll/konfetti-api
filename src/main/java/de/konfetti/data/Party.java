@@ -7,6 +7,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
@@ -58,7 +59,7 @@ public class Party {
     private int meters;
 
     @ManyToMany(mappedBy = "adminParties")
-    private List<User> adminUsers;
+    private List<User> adminUsers = new ArrayList<>();
 
 
     /*

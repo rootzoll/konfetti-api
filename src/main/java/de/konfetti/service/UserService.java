@@ -15,8 +15,6 @@ public interface UserService {
     
 	User findByMail(String mail);
 	
-	List<User> getAllUsersAdminOnParty(Long partyID);
-
 	List<User> getAllUsersReviewerOnParty(Long partyID);
 
 	Long getNumberOfActiveUsers();

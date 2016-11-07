@@ -5,6 +5,8 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Entity
@@ -32,13 +34,12 @@ public class User {
     public Long[] activeOnParties = {};
 
 	// IDs of parties the user has admin privileges on
-    private Long[] adminOnParties = {};
     @ManyToMany
     @JoinTable(
             name = "user_party_admin",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "party_id", referencedColumnName = "id"))
-    private List<Party> adminParties;
+    private List<Party> adminParties = new ArrayList<>();
 
     // IDs of parties the user has reviewer privileges on
     private Long[] reviewerOnParties = {};
