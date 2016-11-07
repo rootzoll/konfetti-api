@@ -87,7 +87,7 @@ public class PartyServiceImplItTest {
 
         List<Party> visibleParties = partyRepository.findByVisibility(VISIBILITY_PUBLIC);
         assertThat("one visible Party found", visibleParties.size(), is(1));
-        assertThat("visible Party found", visibleParties.get(0), equalTo(visibleParty));
+        assertThat("visible Party found", visibleParties.get(0).getName(), equalTo(visibleParty.getName()));
     }
 
 }

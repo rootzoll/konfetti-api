@@ -1,6 +1,7 @@
 package de.konfetti.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.konfetti.controller.mapper.UserMapper;
 import de.konfetti.controller.vm.RedeemResponse;
 import de.konfetti.data.*;
 import de.konfetti.utils.AccountingTools;
@@ -174,7 +175,7 @@ public class CodeServiceImpl extends BaseService implements CodeService {
     private List<ClientAction> addUpdateUserAction(List<ClientAction> actions, User actualUser) {
         String userJson = null;
         try {
-            userJson = new ObjectMapper().writeValueAsString(actualUser);
+            userJson = new ObjectMapper().writeValueAsString(new UserMapper().fromUserToUserResponse(actualUser));
         } catch (Exception e) {
             e.printStackTrace();
         }
