@@ -1,0 +1,1 @@
+ALTER TABLE `media_item` ADD `comment` VARCHAR(512) NULL;

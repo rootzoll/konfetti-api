@@ -23,6 +23,7 @@ public class MediaMaker {
     public static final Property<MediaItem, Long> lastUpdateTS = newProperty();
     public static final Property<MediaItem, MediaItemTypeEnum> type = newProperty();
     public static final Property<MediaItem, MediaItemReviewEnum> reviewed = newProperty();
+    public static final Property<MediaItem, String> comment = newProperty();
     public static final Property<MediaItem, String> data = newProperty();
 
     public static final Instantiator<MediaItem> ExampleMediaItem = new Instantiator<MediaItem>() {
@@ -34,6 +35,7 @@ public class MediaMaker {
             mediaItem.setLastUpdateTS(propertyLookup.valueOf(lastUpdateTS, new Date().getTime()));
             mediaItem.setType(propertyLookup.valueOf(type, TYPE_TEXT));
             mediaItem.setReviewed(propertyLookup.valueOf(reviewed, REVIEWED_PUBLIC));
+            mediaItem.setComment(propertyLookup.valueOf(comment, "Test Comment"));
             mediaItem.setData(propertyLookup.valueOf(data, "Test Content"));
             return mediaItem;
         }

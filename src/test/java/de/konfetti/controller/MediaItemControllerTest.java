@@ -14,6 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static de.konfetti.data.enums.MediaItemReviewEnum.REVIEWED_PRIVATE;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.greaterThan;
+
 /**
  * Created by relampago on 11.10.16.
  */
@@ -35,7 +39,6 @@ public class MediaItemControllerTest extends BaseControllerTest {
         super.tearDown();
     }
 
-
     @Test
     public void createMedia() throws Exception {
         MediaItem mediaItem = testHelper.getMediaItem();
@@ -43,7 +46,13 @@ public class MediaItemControllerTest extends BaseControllerTest {
                 .contentType(ContentType.JSON)
                 .body(mediaItem)
                 .post(MediaItemController.REST_API_MAPPING)
-                .then().statusCode(HttpStatus.OK.value());
+                .then().statusCode(HttpStatus.OK.value())
+                .body("id", greaterThan(0))
+                .body("reviewed", is(REVIEWED_PRIVATE.name()))
+                .body("comment", is(mediaItem.getComment()))
+                .body("type", is(mediaItem.getType().name()))
+                .body("data", is(mediaItem.getData()))
+        ;
     }
 
     @Test

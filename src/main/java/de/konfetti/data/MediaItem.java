@@ -18,12 +18,14 @@ public class MediaItem {
     private Long id;
     
     // uploader
-    private Long userId = 0l;
+    private Long userId = 0L;
     
     // info if can be displayed to public
     private MediaItemReviewEnum reviewed = REVIEWED_PUBLIC;
     
-    private Long lastUpdateTS = 0l; 
+    private Long lastUpdateTS = 0L;
+
+    private String comment;
 
     @Enumerated(EnumType.STRING)
     private MediaItemTypeEnum type = TYPE_UNKOWN;
