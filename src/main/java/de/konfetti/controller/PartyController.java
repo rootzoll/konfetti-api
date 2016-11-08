@@ -181,7 +181,7 @@ public class PartyController {
                 if (user == null)
                     throw new Exception("was not able to load user with id(" + client.getUserId() + ") - NOT FOUND");
                 boolean userIsPartyAdmin = Helper.userIsAdminOnParty(user, partyId);
-                boolean userIsPartyReviewer = Helper.contains(user.getReviewerOnParties(), partyResponse.getId());
+                boolean userIsPartyReviewer = Helper.userIsReviewerOnParty(user, partyResponse.getId());
 
                 log.debug("is User(" + user.getId() + ") isPartyAdmin(" + userIsPartyAdmin + ") isPartyReviewer(" + userIsPartyReviewer + ")");
 
@@ -737,7 +737,7 @@ public class PartyController {
 
                 userIsAuthor = (request.getUserId().equals(client.getUserId()));
                 userIsPartyAdmin = Helper.userIsAdminOnParty(user, request.getPartyId());
-                userIsPartyReviewer = Helper.contains(user.getReviewerOnParties(), request.getPartyId());
+                userIsPartyReviewer = Helper.userIsReviewerOnParty(user, request.getPartyId());
                 log.info("action request(" + requestId + ") ... client is author(" + userIsAuthor + ") partyAdmin(" + userIsPartyAdmin + ") partyReview(" + userIsPartyReviewer + ")");
 
                 if ((!userIsAuthor) && (!userIsPartyAdmin) && (!userIsPartyReviewer))

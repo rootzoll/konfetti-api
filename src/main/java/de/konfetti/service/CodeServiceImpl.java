@@ -150,17 +150,22 @@ public class CodeServiceImpl extends BaseService implements CodeService {
     }
 
     private List<ClientAction> makeUserReviewerOnParty(User user, Long partyId, List<ClientAction> actions) {
+        Party foundParty = partyService.findById(partyId);
+        if (foundParty == null) {
+            return actions;
+        }
 
-        Long[] arr = user.getReviewerOnParties();
-        if (!Helper.contains(arr, partyId)) arr = Helper.append(arr, partyId);
-        user.setReviewerOnParties(arr);
-        userService.update(user);
+        if (foundParty.getReviewerUser().contains(user)){
+            log.debug("user : " + user.getName() + " is already reviewr on partyId : " + partyId);
+            return actions;
+        }
+        foundParty.getReviewerUser().add(user);
+        partyService.update(foundParty);
 
         log.info("user(" + user.getId() + ") is now REVIEWER on party(" + partyId + ")");
 
         actions = addUpdateUserAction(actions, user);
         actions = addFocusPartyAction(actions, partyId);
-
         return actions;
     }
 

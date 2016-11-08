@@ -4,41 +4,21 @@ import de.konfetti.data.User;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class Helper {
-
-    private static Properties prop = null;
-
 
     // static helper function to hash password
     public static final String hashPassword(String salt, String pass) {
         try {
-
             // get fresh instance
             MessageDigest md5Digest = MessageDigest.getInstance("MD5");
-
             // hash to new string
             return Arrays.toString(md5Digest.digest((salt + pass).getBytes()));
-
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-    }
-
-    public static <T> T nonnull(T value) {
-        if (value == null) {
-            throwIAE();
-        }
-        return value;
-    }
-
-    private static void throwIAE() {
-        throw new IllegalArgumentException();
     }
 
     // calculate the distance between two GPS coordinates in meters
@@ -81,9 +61,16 @@ public class Helper {
         return result.toArray(input);
     }
 
+    public static boolean userIsReviewerOnParty(User user, Long partyId) {
+        return user.getReviewerParties()
+                .stream().filter(party -> Objects.equals(party.getId(), partyId))
+                .map(party -> true)
+                .findAny().orElse(false);
+    }
+
     public static boolean userIsAdminOnParty(User user, Long partyId) {
         return user.getAdminParties()
-                .stream().filter(party -> party.getId() == partyId)
+                .stream().filter(party -> Objects.equals(party.getId(), partyId))
                 .map(party -> true)
                 .findAny().orElse(false);
     }

@@ -51,5 +51,5 @@ public class KonfettiTransactionServiceImpl extends BaseService implements Konfe
 		return konfettiTransactionRepository.findByToAccountAndTimestampGreaterThan(toAccount, time);
 	}
 
-    
+
 }

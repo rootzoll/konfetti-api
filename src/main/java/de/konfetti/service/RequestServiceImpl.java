@@ -10,8 +10,7 @@ import org.springframework.validation.annotation.Validated;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
-
-import static de.konfetti.utils.Helper.nonnull;
+import java.util.Objects;
 
 @Service
 @Validated
@@ -46,7 +45,7 @@ public class RequestServiceImpl extends BaseService implements RequestService {
 
     @Override
     public Request update(@NotNull Request request) {
-        nonnull(request);
+        Objects.nonNull(request);
 
         Party dbParty = getPartyOrThrowError(request.getPartyId());
 

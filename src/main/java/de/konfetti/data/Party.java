@@ -61,6 +61,8 @@ public class Party {
     @ManyToMany(mappedBy = "adminParties")
     private List<User> adminUsers = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "reviewerParties")
+    private List<User> reviewerUser = new ArrayList<>();
 
     /*
      * SEND KONFETTI
@@ -69,8 +71,8 @@ public class Party {
      * if any value is set on white list its activated
      * white list is a list of e-mail addresses only allowed to send to
      */
-    
     private SendKonfettiModeEnum sendKonfettiMode;
+
     private String[] sendKonfettiWhiteList = {};
 
 	public String[] getSendKonfettiWhiteList() {

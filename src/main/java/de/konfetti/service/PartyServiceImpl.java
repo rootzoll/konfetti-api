@@ -11,8 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
-
-import static de.konfetti.utils.Helper.nonnull;
+import java.util.Objects;
 
 @Service
 @Validated
@@ -25,18 +24,15 @@ public class PartyServiceImpl extends BaseService implements PartyService {
 
     @Override
     public Party create(@NotNull Party party) {
-
         // check input
-        nonnull(party);
+        Objects.nonNull(party);
 
         Long partyId = party.getId();
         if (partyId != null && partyId > 0) {
             throw new ServiceException(
                     String.format("The id cannot be set for create party"));
         }
-
         party.setId(null);
-
         return partyRepository.saveAndFlush(party);
     }
 

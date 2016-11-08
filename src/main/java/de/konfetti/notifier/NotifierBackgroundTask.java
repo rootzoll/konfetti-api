@@ -18,11 +18,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /*
  * A task that is scheduled to check in short periods 
@@ -43,7 +43,7 @@ public class NotifierBackgroundTask {
     private static final String PUSHTYPE_EMAIL = "email";
     private static final String PUSHTYPE_PUSH = "push";
 
-    private static long lastProcessingStart = 0l;
+    private static long lastProcessingStart = 0L;
 
     @Autowired
     private EMailManager eMailManager;
@@ -181,7 +181,7 @@ public class NotifierBackgroundTask {
      * Takes a notification and decides if it needs to be pushed
      *
      * @param notification
-     * @return
+     * @return boolean
      */
     private boolean shouldNotificationGetHigherAttention(Notification notification) {
         long oldInSeconds = (System.currentTimeMillis() - notification.getTimeStamp()) / 1000L;
@@ -199,28 +199,27 @@ public class NotifierBackgroundTask {
         // REVIEW WAITING ==> select one reviewer/admin by random
         if (NotificationType.REVIEW_WAITING == notification.getType()) {
             // get all reviewer and admins for party
-            List<User> reviewer = userService.getAllUsersReviewerOnParty(notification.getPartyId());
+            Stream<User> reviewer = userService.getAllUsersReviewerOnParty(notification.getPartyId());
 
             // filter all that dont have email or push active
             List<User> hasPush = new ArrayList<User>();
-            for (User user : reviewer) {
-                if ((user.getPushActive()) || ((user.getEMail() != null) && (user.getEMail().trim().length() > 2))) {
-                    hasPush.add(user);
-                }
-            }
-            reviewer = hasPush;
+            Stream<User> userWithPushOrEmailStream = reviewer
+                    .filter(user -> user.getPushActive()  || (
+                                    (!StringUtils.isEmpty(user.getEMail())) && (user.getEMail().trim().length() > 2))
+                    );
+
+            Optional<User> reviewableUser = userWithPushOrEmailStream.findAny();
+
             // no reviewers --> close notification
-            if (reviewer.size() <= 0) {
+            if (!reviewableUser.isPresent()) {
                 log.warn("Party(" + notification.getPartyId() + ") has no admin or reviewer to deliver notification to.");
                 markNotificationAsPushed(notification, PUSHTYPE_IGNORE);
                 return false;
             }
 
-            // find take one by random and set as new user reference in notification
-            int randomIndex = this.randomGenerator.nextInt(reviewer.size());
-            Long randomReviewerId = reviewer.get(randomIndex).getId();
-            log.debug("REVIEWER is user(" + randomReviewerId + ")");
-            notification.setUserId(randomReviewerId);
+            Long reviewerId = reviewableUser.get().getId();
+            log.debug("REVIEWER is user(" + reviewerId + ")");
+            notification.setUserId(reviewerId);
             return true;
         }
 
@@ -233,14 +232,13 @@ public class NotifierBackgroundTask {
 	/*
 	 * TODO maybe cache recently processed IDs if persistence gets more decoupled 
 	 */
-
     private boolean wasNotificationAlreadyGivenHigherAttention(Notification notification) {
         ValueWrapper cacheState = processedNotificationsCache.get(notification.getId());
         if (cacheState == null) {
             // no information on local cache - trust value from persistence
             return notification.getHigherPushDone();
         } else {
-            long oldInSeconds = (System.currentTimeMillis() - notification.getTimeStamp()) / 1000l;
+            long oldInSeconds = (System.currentTimeMillis() - notification.getTimeStamp()) / 1000L;
             log.warn("Cache has different state than Notification(" + notification.getId() + ") type(" + notification.getType() + ") old(" + oldInSeconds + ")secs from persistence: " + cacheState.get());
             return true;
         }

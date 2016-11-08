@@ -4,6 +4,7 @@ import de.konfetti.data.User;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface UserService {
 
@@ -17,7 +18,7 @@ public interface UserService {
 
 	User findByMail(String mail);
 	
-	List<User> getAllUsersReviewerOnParty(Long partyID);
+	Stream<User> getAllUsersReviewerOnParty(Long partyID);
 
 	Long getNumberOfActiveUsers();
 

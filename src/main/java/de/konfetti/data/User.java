@@ -20,16 +20,22 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
+
     // self written name (nick or real)
     private String name;
+
     // email
     private String eMail;
+
     // password
     private String password;
+
 	// image of user
 	private Long imageMediaID;
+
 	// list of languages the user speaks (e.g. 'de', 'en', 'ar')
     private String[] spokenLangs = {};
+
     // IDs of parties the user has an konfetti balance on
     public Long[] activeOnParties = {};
 
@@ -42,9 +48,16 @@ public class User {
     private List<Party> adminParties = new ArrayList<>();
 
     // IDs of parties the user has reviewer privileges on
-    private Long[] reviewerOnParties = {};
+    @ManyToMany
+    @JoinTable(
+            name = "user_party_review",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "party_id", referencedColumnName = "id"))
+    private List<Party> reviewerParties = new ArrayList<>();
+
     // time stamp when the user last was online (not more precise 1 minute)
     private Long lastActivityTS = 0l;
+
     private Boolean pushActive = false;
     
     private String pushSystem;
