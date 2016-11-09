@@ -109,13 +109,14 @@ public class CodeServiceImpl extends BaseService implements CodeService {
     }
 
     private List<ClientAction> addKonfettiOnParty(User user, Long partyId, Long konfettiAmount, List<ClientAction> actions)  {
-
+        Party party = partyService.findById(partyId);
+        Objects.nonNull(party);
         final String userAccountName = AccountingTools.getAccountNameFromUserAndParty(user.getId(), partyId);
 
         // add user to party if not already part of
-        if (!Helper.contains(user.activeOnParties, partyId)) {
-            user.activeOnParties = Helper.append(user.activeOnParties, partyId);
+        if (!user.getActiveParties().contains(party)) {
             this.accountingService.createAccount(userAccountName);
+            user.getActiveParties().add(party);
             this.userService.update(user);
         }
 
@@ -125,11 +126,8 @@ public class CodeServiceImpl extends BaseService implements CodeService {
         if (konfettiBefore.equals(konfettiAfter)) {
             log.warn("addKonfettiOnParty, same amount as before! konfettiAmount: " + konfettiAmount + " , konfettiBefore : " + konfettiBefore + " , konfettiAfter : " + konfettiAfter);
         }
-
         log.info("user(" + user.getId() + ") on party(" + partyId + ") +" + konfettiAmount + " konfetti");
-
         actions = addFocusPartyAction(actions, partyId);
-
         return actions;
     }
 

@@ -37,7 +37,12 @@ public class User {
     private String[] spokenLangs = {};
 
     // IDs of parties the user has an konfetti balance on
-    public Long[] activeOnParties = {};
+    @ManyToMany
+    @JoinTable(
+            name = "user_party_review",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "party_id", referencedColumnName = "id"))
+    private List<Party> activeParties = new ArrayList<>();
 
 	// IDs of parties the user has admin privileges on
     @ManyToMany

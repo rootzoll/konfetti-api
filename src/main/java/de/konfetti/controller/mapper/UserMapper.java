@@ -20,7 +20,8 @@ public class UserMapper {
         userResponse.setEMail(user.getEMail());
         userResponse.setImageMediaID(user.getImageMediaID());
         userResponse.setSpokenLangs(new HashSet<>(Arrays.asList(user.getSpokenLangs())));
-        userResponse.setActiveOnParties(new HashSet<>(Arrays.asList(user.getActiveOnParties())));
+        Set<Long> activeParties = user.getActiveParties().stream().map(party -> party.getId()).collect(Collectors.toSet());
+        userResponse.setActiveOnParties(activeParties);
         Set<Long> adminOnParties = user.getAdminParties().stream().map(party -> party.getId()).collect(Collectors.toSet());
         userResponse.setAdminOnParties(adminOnParties);
         Set<Long> reviewerOnParties = user.getReviewerParties().stream().map(party -> party.getId()).collect(Collectors.toSet());

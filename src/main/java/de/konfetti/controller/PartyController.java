@@ -343,8 +343,7 @@ public class PartyController {
                 // force add parties the user is member of (if not already in list)
                 User user = userService.findById(client.getUserId());
                 if (user != null) {
-                    Long[] mustHavePartyIds = user.getActiveOnParties();
-                    if (mustHavePartyIds.length > 0) {
+                    if (user.getActiveParties().size() > 0) {
                         // TODO: implement
                         log.warn("PartyController getAllParties(): TODO: mustHaveParty to add to partylist");
                     }
@@ -376,10 +375,10 @@ public class PartyController {
                         }
 
                         // make user member of party
-                        Long[] activeParties = user.getActiveOnParties();
-                        activeParties = Helper.append(activeParties, partyResponse.getId());
-                        user.setActiveOnParties(activeParties);
-                        userService.update(user);
+                        if (!user.getActiveParties().contains(party)) {
+                            user.getActiveParties().add(party);
+                            userService.update(user);
+                        }
 
                         // welcome user
                         if (partyResponse.getWelcomeBalance() > 0) {

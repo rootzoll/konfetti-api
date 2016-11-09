@@ -587,11 +587,9 @@ public class UserController {
             result.setTransferedToAccount(true);
 
             // check if other user is already active on party
-            Long[] activeParties = user.getActiveOnParties();
-            if (!Arrays.asList(activeParties).contains(party.getId())) {
+            if (!user.getActiveParties().contains(party)) {
                 // invite user to party
-                activeParties = Helper.append(activeParties, party.getId());
-                user.setActiveOnParties(activeParties);
+                user.getActiveParties().add(party);
                 userService.update(user);
             }
 

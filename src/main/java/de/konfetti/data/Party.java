@@ -58,6 +58,9 @@ public class Party {
     private Float lat;
     private int meters;
 
+    @ManyToMany(mappedBy = "activeParties")
+    private List<User> activeUsers = new ArrayList<>();
+
     @ManyToMany(mappedBy = "adminParties")
     private List<User> adminUsers = new ArrayList<>();
 
