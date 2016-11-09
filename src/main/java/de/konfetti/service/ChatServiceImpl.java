@@ -6,8 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,27 +42,18 @@ public class ChatServiceImpl extends BaseService implements ChatService {
 	
 	@Override
 	public List<Chat> getAllByUserAndParty(Long userId, Long partyId) {
-		// TODO improve performance
 		List<Chat> partyChats = chatRepository.findByPartyId(partyId);
-		List<Chat> res = new ArrayList<Chat>();
-		for (Chat chat : partyChats) {
-			boolean isRelevant = false;
-
-			// check if owner or member is user
-			if (chat.getHostId().equals(userId)) {
-				isRelevant = true;
-			}
-			Long[] members = chat.getMembers();
-			for (Long member : members) {
-				if (member.equals(userId)) {
-					isRelevant = true;
-				}
-			}
-			if (isRelevant) {
-				res.add(chat);
-			}
-		}
+		List<Chat> res = partyChats.stream()
+				.filter(chat -> (chat.getHostId().equals(userId))
+						|| userIsMemberOfChat(userId, chat.getMembers()))
+				.collect(Collectors.toList());
 		return res;
+	}
+
+	private boolean userIsMemberOfChat(Long userId, Long[] members) {
+		boolean isMember = Arrays.asList(members).stream()
+				.anyMatch(aLong -> aLong.equals(userId));
+		return isMember;
 	}
 
 	@Override

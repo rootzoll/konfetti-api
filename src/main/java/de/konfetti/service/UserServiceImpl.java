@@ -79,7 +79,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     // TODO improve performance
     @Override
     public Long getNumberOfActiveUsers() {
-        Long count = 0l;
+        Long count = 0L;
         List<User> all = userRepository.findAll();
         long tsAWeekAgo = System.currentTimeMillis() - (7l * 24l * 60l * 60l * 1000l);
         for (User user : all) {
