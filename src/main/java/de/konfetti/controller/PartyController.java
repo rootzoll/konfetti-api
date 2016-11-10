@@ -267,6 +267,28 @@ public class PartyController {
 
         return partyResponse;
     }
+    
+    /*
+     * just for admin to request all parties - without any geo filtering
+     */
+    @CrossOrigin(origins = "*")
+    @RequestMapping(value = "/all", method = RequestMethod.GET)
+    public List<PartyResponse> getAllPartiesAdmin(HttpServletRequest request) throws Exception {
+  
+    	// check admin auth
+        controllerSecurityHelper.checkAdminLevelSecurity(request);
+        log.info("ADMIN: Get all PARTIES ...");
+    	
+        // get all parties and map to response
+        List<PartyResponse> partyResponses = new ArrayList<>();
+        List<Party> allParties = partyService.getAllParties();
+        for (Party party : allParties) {
+        	partyResponses.add(partyMapper.fromPartyToPartyResponse(party));
+		}
+        
+        return partyResponses;
+    };		
+    		
 
     @CrossOrigin(origins = "*")
     @RequestMapping(method = RequestMethod.GET)
