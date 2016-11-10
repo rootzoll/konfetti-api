@@ -819,7 +819,7 @@ public class PartyController {
                         if (action.equals("reward")) {
                             // needed json data
                             if ((json == null) || (json.length() == 0)) throw new Exception("minning parameter json");
-                            List<Long> ids = new ArrayList<>();
+                            List<Long> ids = new ArrayList<Long>();
                             try {
                                 List<Integer> idsInts = (new ObjectMapper()).readValue(json, ids.getClass());
                                 int nInts = idsInts.size();

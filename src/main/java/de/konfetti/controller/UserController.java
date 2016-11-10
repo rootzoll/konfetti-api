@@ -263,14 +263,21 @@ public class UserController {
      * @return the ResponseEntity with status 200 (OK) if the password has been reset,
      * or status 400 (Bad Request) or 500 (Internal Server Error) if the password could not be reset
      */
-    @PostMapping(value = "/reset_password/finish",
-            produces = MediaType.TEXT_PLAIN_VALUE)
+    @CrossOrigin(origins = "*")
+    @PostMapping(value = "/reset_password/finish", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> finishPasswordReset(@RequestBody KeyAndPasswordVM keyAndPassword) {
         return userService.completePasswordReset(keyAndPassword.getNewPassword(), keyAndPassword.getKey())
                 .map(user -> new ResponseEntity<String>(HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
+    // use to quickly check if a user name is already in use - no auth needed
+    @CrossOrigin(origins = "*")
+    @GetMapping(value = "/check_free", produces = "application/json")
+    public Boolean checkUserNameStillFree(@RequestParam(value = "username", defaultValue = "") String name) {
+    	if ((name==null) || (name.length()==0)) return false;
+    	return (userService.findByName(name)==null);
+    }
 
     @CrossOrigin(origins = "*")
     @PutMapping(value = "/{userId}", produces = "application/json")
