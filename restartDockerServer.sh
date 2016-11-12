@@ -1,1 +1,1 @@
-mvn clean package -DskipTests && docker build --tag konfetti/api . && docker-compose up
+./mvnw clean package -DskipTests && docker build --tag konfetti/api . && docker-compose up

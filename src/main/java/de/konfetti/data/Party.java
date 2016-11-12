@@ -58,13 +58,13 @@ public class Party {
     private Float lat;
     private int meters;
 
-    @ManyToMany(mappedBy = "activeParties")
+    @ManyToMany(mappedBy = "activeParties", fetch = FetchType.EAGER)
     private List<User> activeUsers = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "adminParties")
+    @ManyToMany(mappedBy = "adminParties", fetch = FetchType.EAGER)
     private List<User> adminUsers = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "reviewerParties")
+    @ManyToMany(mappedBy = "reviewerParties", fetch = FetchType.EAGER)
     private List<User> reviewerUser = new ArrayList<>();
 
     /*

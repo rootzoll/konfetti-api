@@ -37,7 +37,6 @@ public class Notification {
     /*
      * METHODS 
      */
-    
 	public boolean needsManualDeletion() {
 		return REWARD_GOT.equals(this.type);
 	}
