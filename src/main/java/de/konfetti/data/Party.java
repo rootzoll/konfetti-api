@@ -4,6 +4,8 @@ import de.konfetti.data.enums.PartyReviewLevelEnum;
 import de.konfetti.data.enums.PartyVisibilityEnum;
 import de.konfetti.data.enums.SendKonfettiModeEnum;
 import lombok.Data;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 
@@ -58,13 +60,16 @@ public class Party {
     private Float lat;
     private int meters;
 
-    @ManyToMany(mappedBy = "activeParties", fetch = FetchType.EAGER)
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @ManyToMany(mappedBy = "activeParties")
     private List<User> activeUsers = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "adminParties", fetch = FetchType.EAGER)
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @ManyToMany(mappedBy = "adminParties")
     private List<User> adminUsers = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "reviewerParties", fetch = FetchType.EAGER)
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @ManyToMany(mappedBy = "reviewerParties")
     private List<User> reviewerUser = new ArrayList<>();
 
     /*
