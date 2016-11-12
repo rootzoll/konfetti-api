@@ -41,19 +41,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingGET",
+        "summary": "error",
+        "operationId": "errorUsingGET",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           },
           "401": {
@@ -71,19 +74,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingHEAD",
+        "summary": "error",
+        "operationId": "errorUsingHEAD",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           },
           "401": {
@@ -101,19 +107,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingPOST",
+        "summary": "error",
+        "operationId": "errorUsingPOST",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           },
           "201": {
@@ -134,19 +143,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingPUT",
+        "summary": "error",
+        "operationId": "errorUsingPUT",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           },
           "201": {
@@ -167,19 +179,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingDELETE",
+        "summary": "error",
+        "operationId": "errorUsingDELETE",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           },
           "401": {
@@ -197,19 +212,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingOPTIONS",
+        "summary": "error",
+        "operationId": "errorUsingOPTIONS",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           },
           "401": {
@@ -227,19 +245,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingPATCH",
+        "summary": "error",
+        "operationId": "errorUsingPATCH",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           },
           "401": {
@@ -333,6 +354,47 @@
           },
           "201": {
             "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/konfetti/api/account/check_free": {
+      "get": {
+        "tags": [
+          "user-controller"
+        ],
+        "summary": "checkUserNameStillFree",
+        "operationId": "checkUserNameStillFreeUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "description": "username",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "boolean"
+            }
           },
           "401": {
             "description": "Unauthorized"
@@ -1464,6 +1526,41 @@
         }
       }
     },
+    "/konfetti/api/party/all": {
+      "get": {
+        "tags": [
+          "party-controller"
+        ],
+        "summary": "getAllPartiesAdmin",
+        "operationId": "getAllPartiesAdminUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PartyResponse"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/konfetti/api/party/dashboard": {
       "get": {
         "tags": [
@@ -1947,6 +2044,75 @@
     }
   },
   "definitions": {
+    "LocalDateTime": {
+      "type": "object",
+      "properties": {
+        "chronology": {
+          "$ref": "#/definitions/Chronology"
+        },
+        "dayOfMonth": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "dayOfWeek": {
+          "type": "string",
+          "enum": [
+            "MONDAY",
+            "TUESDAY",
+            "WEDNESDAY",
+            "THURSDAY",
+            "FRIDAY",
+            "SATURDAY",
+            "SUNDAY"
+          ]
+        },
+        "dayOfYear": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "hour": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "minute": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "month": {
+          "type": "string",
+          "enum": [
+            "JANUARY",
+            "FEBRUARY",
+            "MARCH",
+            "APRIL",
+            "MAY",
+            "JUNE",
+            "JULY",
+            "AUGUST",
+            "SEPTEMBER",
+            "OCTOBER",
+            "NOVEMBER",
+            "DECEMBER"
+          ]
+        },
+        "monthValue": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "nano": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "second": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "year": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
     "ClientAction": {
       "type": "object",
       "properties": {
@@ -1961,18 +2127,22 @@
     "User": {
       "type": "object",
       "properties": {
-        "activeOnParties": {
+        "activeParties": {
           "type": "array",
           "items": {
-            "type": "integer",
-            "format": "int64"
+            "$ref": "#/definitions/Party"
           }
         },
-        "adminOnParties": {
+        "adminParties": {
           "type": "array",
           "items": {
-            "type": "integer",
-            "format": "int64"
+            "$ref": "#/definitions/Party"
+          }
+        },
+        "clients": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Client"
           }
         },
         "email": {
@@ -2011,11 +2181,10 @@
         "resetKey": {
           "type": "string"
         },
-        "reviewerOnParties": {
+        "reviewerParties": {
           "type": "array",
           "items": {
-            "type": "integer",
-            "format": "int64"
+            "$ref": "#/definitions/Party"
           }
         },
         "spokenLangs": {
@@ -2337,6 +2506,18 @@
     "Party": {
       "type": "object",
       "properties": {
+        "activeUsers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/User"
+          }
+        },
+        "adminUsers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/User"
+          }
+        },
         "contact": {
           "type": "string"
         },
@@ -2373,6 +2554,12 @@
             "REVIEWLEVEL_EVERYTHING",
             "REVIEWLEVEL_TASKS"
           ]
+        },
+        "reviewerUser": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/User"
+          }
         },
         "sendKonfettiMode": {
           "type": "string",
@@ -2492,6 +2679,122 @@
         }
       }
     },
+    "Chronology": {
+      "type": "object",
+      "properties": {
+        "calendarType": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "Client": {
+      "type": "object",
+      "properties": {
+        "clientId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "secret": {
+          "type": "string"
+        },
+        "user": {
+          "$ref": "#/definitions/User"
+        }
+      }
+    },
+    "ZoneOffsetTransition": {
+      "type": "object",
+      "properties": {
+        "dateTimeAfter": {
+          "$ref": "#/definitions/LocalDateTime"
+        },
+        "dateTimeBefore": {
+          "$ref": "#/definitions/LocalDateTime"
+        },
+        "duration": {
+          "$ref": "#/definitions/Duration"
+        },
+        "gap": {
+          "type": "boolean"
+        },
+        "instant": {
+          "$ref": "#/definitions/Instant"
+        },
+        "offsetAfter": {
+          "$ref": "#/definitions/ZoneOffset"
+        },
+        "offsetBefore": {
+          "$ref": "#/definitions/ZoneOffset"
+        },
+        "overlap": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ZoneOffsetTransitionRule": {
+      "type": "object",
+      "properties": {
+        "dayOfMonthIndicator": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "dayOfWeek": {
+          "type": "string",
+          "enum": [
+            "MONDAY",
+            "TUESDAY",
+            "WEDNESDAY",
+            "THURSDAY",
+            "FRIDAY",
+            "SATURDAY",
+            "SUNDAY"
+          ]
+        },
+        "localTime": {
+          "$ref": "#/definitions/LocalTime"
+        },
+        "midnightEndOfDay": {
+          "type": "boolean"
+        },
+        "month": {
+          "type": "string",
+          "enum": [
+            "JANUARY",
+            "FEBRUARY",
+            "MARCH",
+            "APRIL",
+            "MAY",
+            "JUNE",
+            "JULY",
+            "AUGUST",
+            "SEPTEMBER",
+            "OCTOBER",
+            "NOVEMBER",
+            "DECEMBER"
+          ]
+        },
+        "offsetAfter": {
+          "$ref": "#/definitions/ZoneOffset"
+        },
+        "offsetBefore": {
+          "$ref": "#/definitions/ZoneOffset"
+        },
+        "standardOffset": {
+          "$ref": "#/definitions/ZoneOffset"
+        },
+        "timeDefinition": {
+          "type": "string",
+          "enum": [
+            "UTC",
+            "WALL",
+            "STANDARD"
+          ]
+        }
+      }
+    },
     "KeyAndPasswordVM": {
       "type": "object",
       "properties": {
@@ -2503,11 +2806,62 @@
         }
       }
     },
+    "LocalTime": {
+      "type": "object",
+      "properties": {
+        "hour": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "minute": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "nano": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "second": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
     "ZoneId": {
       "type": "object"
     },
+    "TemporalUnit": {
+      "type": "object",
+      "properties": {
+        "dateBased": {
+          "type": "boolean"
+        },
+        "duration": {
+          "$ref": "#/definitions/Duration"
+        },
+        "durationEstimated": {
+          "type": "boolean"
+        },
+        "timeBased": {
+          "type": "boolean"
+        }
+      }
+    },
     "InputStream": {
       "type": "object"
+    },
+    "Instant": {
+      "type": "object",
+      "properties": {
+        "epochSecond": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "nano": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
     },
     "Request": {
       "type": "object",
@@ -2595,6 +2949,31 @@
         },
         "userName": {
           "type": "string"
+        }
+      }
+    },
+    "Duration": {
+      "type": "object",
+      "properties": {
+        "nano": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "negative": {
+          "type": "boolean"
+        },
+        "seconds": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "units": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TemporalUnit"
+          }
+        },
+        "zero": {
+          "type": "boolean"
         }
       }
     },
@@ -2776,6 +3155,9 @@
     "MediaItem": {
       "type": "object",
       "properties": {
+        "comment": {
+          "type": "string"
+        },
         "data": {
           "type": "string"
         },
@@ -2808,6 +3190,26 @@
         "userId": {
           "type": "integer",
           "format": "int64"
+        }
+      }
+    },
+    "ZoneRules": {
+      "type": "object",
+      "properties": {
+        "fixedOffset": {
+          "type": "boolean"
+        },
+        "transitionRules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ZoneOffsetTransitionRule"
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ZoneOffsetTransition"
+          }
         }
       }
     },

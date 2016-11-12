@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -138,13 +137,12 @@ public class UserController {
         String[] langs = {locale};
         user.setSpokenLangs(langs);
         user.setLastActivityTS(System.currentTimeMillis());
-        userService.update(user);
 
         // create new client
         Client client = clientService.create(user);
+        user.getClients().add(client);
 
-        // keep password hash just on server side
-        user.setPassword("");
+        userService.update(user);
 
         UserResponse userResponse = userMapper.fromUserToUserResponse(user);
         userResponse.setClientId(client.getId());
@@ -218,18 +216,14 @@ public class UserController {
             throw new Exception("User and/or Passwort not valid.");
         }
 
-        // update activity on user
-        if (!user.wasUserActiveInLastMinutes(1)) {
-            log.info("Updating ActivityTS of user(" + user.getId() + ")");
-            user.setLastActivityTS(System.currentTimeMillis());
-            userService.update(user);
-        }
-
         // create new client for session
         Client client = clientService.create(user);
+        user.getClients().add(client);
 
-        // keep password hash just on server side
-        user.setPassword("");
+        // update activity on user
+        log.info("Updating ActivityTS of user(" + user.getId() + ")");
+        user.setLastActivityTS(System.currentTimeMillis());
+        userService.update(user);
 
         UserResponse userResponse = userMapper.fromUserToUserResponse(user);
         // set client data on user and return

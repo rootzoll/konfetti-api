@@ -30,7 +30,7 @@ public class ClientServiceImpl extends BaseService implements ClientService {
 
         // persist
         Client persited = clientRepository.saveAndFlush(client);
-        
+
         // return to caller
 		log.info("Client(" + persited.getId() + ") CREATED");
 		return persited;

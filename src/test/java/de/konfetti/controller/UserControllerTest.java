@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.konfetti.Application;
 import de.konfetti.controller.vm.KeyAndPasswordVM;
-import de.konfetti.controller.vm.UserResponse;
+import de.konfetti.data.ClientRepository;
 import de.konfetti.data.Party;
 import de.konfetti.data.User;
 import de.konfetti.data.UserRepository;
@@ -49,6 +49,9 @@ public class UserControllerTest extends BaseControllerTest {
     protected UserRepository userRepository;
 
     @Autowired
+    protected ClientRepository clientRepository;
+
+    @Autowired
     protected PartyService partyService;
 
     private ObjectMapper objectMapper;
@@ -69,11 +72,19 @@ public class UserControllerTest extends BaseControllerTest {
         String testEmail = "testcreateuser@test.de";
         String testPassword = "createUser";
         // check user is created
-        createUser(testEmail, testPassword)
-                .statusCode(200)
+        ValidatableResponse validatableResponse = createUser(testEmail, testPassword)
+                .statusCode(200);
+
+        validatableResponse
                 .body("id", notNullValue())
                 .body("email", equalToIgnoringCase(testEmail))
-                .body("password", isEmptyOrNullString());
+                .body("password", isEmptyOrNullString())
+                .body("clientId", is(1))
+        ;
+
+        // make sure client object is persisted and linked with user object
+        assertThat(userRepository.findByEMail("testcreateuser@test.de").getClients().size(), greaterThan(0));
+        assertThat(clientRepository.findAll().get(0).getUser(), notNullValue());
     }
 
     @Test

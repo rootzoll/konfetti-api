@@ -6,7 +6,6 @@ import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 @Entity
@@ -36,8 +35,8 @@ public class User {
 	// list of languages the user speaks (e.g. 'de', 'en', 'ar')
     private String[] spokenLangs = {};
 
-    @OneToMany(mappedBy = "user")
-    private List<Client> clients;
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private List<Client> clients = new ArrayList<>();
 
     // IDs of parties the user has an konfetti balance on
     @ManyToMany

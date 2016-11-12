@@ -145,7 +145,7 @@ public class ChatController {
     		if ((!userIsHost) && (!userIsMember)) throw new Exception("not host or member on chat("+chatId+")");
 
 			// B) find biggest message TS of delivered messages and remember
-        	long biggestTS = 0l;
+        	long biggestTS = 0L;
         	for (Message message : messages) {
     			if (message.getTime()>biggestTS) biggestTS = message.getTime();
     		}
