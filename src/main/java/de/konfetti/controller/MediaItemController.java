@@ -59,7 +59,7 @@ public class MediaItemController {
     		// A) check that chat is just hosted by user
     		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     		if (client==null) throw new Exception("client is NULL");
-        	template.setUserId(client.getUserId());
+        	template.setUserId(client.getUser().getId());
     	} else {
     		// B) check for trusted application with administrator privilege
         	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);

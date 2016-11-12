@@ -2,10 +2,12 @@ package de.konfetti.service;
 
 import de.konfetti.data.Client;
 import de.konfetti.data.ClientRepository;
+import de.konfetti.data.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -18,11 +20,12 @@ public class ClientServiceImpl extends BaseService implements ClientService {
     }
     
     @Override
-    public Client create(Long userId) {
-    	
-    	// client gets created
+    public Client create(User user) {
+        Objects.nonNull(user);
+
+        // client gets created
         Client client = new Client();
-        client.setUserId(userId);
+        client.setUser(user);
         client.setSecret(UUID.randomUUID().toString());
 
         // persist
@@ -31,7 +34,6 @@ public class ClientServiceImpl extends BaseService implements ClientService {
         // return to caller
 		log.info("Client(" + persited.getId() + ") CREATED");
 		return persited;
-        
     }
 
     @Override

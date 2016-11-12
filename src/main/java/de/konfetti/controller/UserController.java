@@ -141,7 +141,7 @@ public class UserController {
         userService.update(user);
 
         // create new client
-        Client client = clientService.create(user.getId());
+        Client client = clientService.create(user);
 
         // keep password hash just on server side
         user.setPassword("");
@@ -175,7 +175,7 @@ public class UserController {
                 return new UserResponse(0L);
             }
 
-            if (!client.getUserId().equals(user.getId()))
+            if (!client.getUser().getId().equals(user.getId()))
                 throw new Exception("client(" + client.getId() + ") is not allowed to read user(" + userId + ")");
 
             // update activity on user
@@ -226,7 +226,7 @@ public class UserController {
         }
 
         // create new client for session
-        Client client = clientService.create(user.getId());
+        Client client = clientService.create(user);
 
         // keep password hash just on server side
         user.setPassword("");
@@ -303,7 +303,7 @@ public class UserController {
 
             // A) check that user is himself
             Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
-            if (!client.getUserId().equals(user.getId()))
+            if (!client.getUser().getId().equals(user.getId()))
                 throw new Exception("client(" + client.getId() + ") is not allowed to read user(" + user.getId() + ")");
 
             // B) check if email got changed
@@ -378,8 +378,8 @@ public class UserController {
         // get user from HTTP request
         Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
         if (client == null) throw new Exception("invalid/missing client on request");
-        User user = userService.findById(client.getUserId());
-        if (user == null) throw new Exception("missing user with id(" + client.getUserId() + ")");
+        User user = userService.findById(client.getUser().getId());
+        if (user == null) throw new Exception("missing user with id(" + client.getUser().getId() + ")");
 
         // check if user is admin for party
         if (!Helper.userIsAdminOnParty(user, partyId)) {
@@ -395,7 +395,7 @@ public class UserController {
         // generate codes
         List<String> codes = new ArrayList<String>();
         for (int i = 0; i < count; i++) {
-            Code code = this.codeService.createKonfettiCoupon(partyId, client.getUserId(), new Long(amount));
+            Code code = this.codeService.createKonfettiCoupon(partyId, client.getUser().getId(), new Long(amount));
             System.out.println("Generated CouponCode: " + code.getCode());
             codes.add(code.getCode());
         }
@@ -509,8 +509,8 @@ public class UserController {
         // get user from HTTP request
         Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
         if (client == null) throw new Exception("invalid/missing client on request");
-        User user = userService.findById(client.getUserId());
-        if (user == null) throw new Exception("missing user with id(" + client.getUserId() + ")");
+        User user = userService.findById(client.getUser().getId());
+        if (user == null) throw new Exception("missing user with id(" + client.getUser().getId() + ")");
 
         log.info("- sending userID(" + user.getId() + ")");
 
@@ -524,7 +524,7 @@ public class UserController {
         }
 
         // get users konfetti balance
-        final String accountName = AccountingTools.getAccountNameFromUserAndParty(client.getUserId(), party.getId());
+        final String accountName = AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), party.getId());
         Long userBalance = accountingService.getBalanceOfAccount(accountName);
 
         // check amount of sending
@@ -570,7 +570,7 @@ public class UserController {
             result.setTransferedToAccount(false);
 
             // generate coupon
-            Code code = this.codeService.createKonfettiCoupon(party.getId(), client.getUserId(), new Long(amount));
+            Code code = this.codeService.createKonfettiCoupon(party.getId(), client.getUser().getId(), new Long(amount));
             if (code == null) throw new Exception("Was not able to generate coupon for transfering konfetti.");
             log.info("- generated single coupon with code: " + code.getCode());
 
@@ -655,8 +655,8 @@ public class UserController {
         // get user from HTTP request
         Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
         if (client == null) throw new Exception("invalid/missing client on request");
-        User user = userService.findById(client.getUserId());
-        if (user == null) throw new Exception("missing user with id(" + client.getUserId() + ")");
+        User user = userService.findById(client.getUser().getId());
+        if (user == null) throw new Exception("missing user with id(" + client.getUser().getId() + ")");
 
         // try to redeemcode
         Code coupon = this.codeService.redeemByCode(code);

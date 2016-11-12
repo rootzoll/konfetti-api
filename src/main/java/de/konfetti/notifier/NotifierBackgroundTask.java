@@ -43,8 +43,6 @@ public class NotifierBackgroundTask {
     private static final String PUSHTYPE_EMAIL = "email";
     private static final String PUSHTYPE_PUSH = "push";
 
-    private static long lastProcessingStart = 0L;
-
     @Autowired
     private EMailManager eMailManager;
 
@@ -92,17 +90,10 @@ public class NotifierBackgroundTask {
      */
     @Scheduled(fixedRate = 5000)
     public void periodicStartUpTimer() {
-        // prepare start
-        lastProcessingStart = System.currentTimeMillis();
-
         // start notifier background task loop and catch all problems
         try {
             // do the actual work
             runNotifierBackgroundTaskThread();
-
-            // statistics
-            //long timeSinceStartupInSeconds = (System.currentTimeMillis() - lastProcessingStart) / 1000l;
-            //log.info("Ended NotifierBackgroundTask loop in " + timeSinceStartupInSeconds + " seconds.");
         } catch (Exception e) {
             log.error("EXCEPTION on NotifierBackgroundTask loop: ", e);
             e.printStackTrace();

@@ -14,16 +14,16 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    // every client belongs to one user
-    private Long userId;
-    
+    @ManyToOne()
+    @JoinColumn(name = "user_id", nullable = true)
+    private User user;
+
     // every client of a user has a different secret for authentification
     private String secret;
         
     /*
      * METHODS 
      */
-    
     @JsonProperty("clientId")
     public Long getId() {
         return id;
@@ -33,12 +33,12 @@ public class Client {
         this.id = id;
     }
 
-    public Long getUserId() {
-        return this.userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getSecret() {

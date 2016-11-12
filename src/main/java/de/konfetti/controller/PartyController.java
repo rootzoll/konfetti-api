@@ -177,9 +177,9 @@ public class PartyController {
             if (client != null) {
                 log.debug("getParty - adding info for client(" + client.getId() + ")");
 
-                User user = userService.findById(client.getUserId());
+                User user = userService.findById(client.getUser().getId());
                 if (user == null)
-                    throw new Exception("was not able to load user with id(" + client.getUserId() + ") - NOT FOUND");
+                    throw new Exception("was not able to load user with id(" + client.getUser().getId() + ") - NOT FOUND");
                 boolean userIsPartyAdmin = Helper.userIsAdminOnParty(user, partyId);
                 boolean userIsPartyReviewer = Helper.userIsReviewerOnParty(user, partyResponse.getId());
 
@@ -195,9 +195,9 @@ public class PartyController {
                 }
 
                 List<Request> requests = requestService.getAllPartyRequests(partyId);
-                List<Notification> notifications = notificationService.getAllNotificationsSince(client.getUserId(), partyId, lastTs);
+                List<Notification> notifications = notificationService.getAllNotificationsSince(client.getUser().getId(), partyId, lastTs);
                 // TODO Causes Exception see https://github.com/rootzoll/konfetti-app/issues/32
-                // notificationService.deleteAllNotificationsOlderThan(client.getUserId(), partyId, lastTs);
+                // notificationService.deleteAllNotificationsOlderThan(client.getUser().getId(), partyId, lastTs);
                 if (requests == null) requests = new ArrayList<>();
                 if (notifications == null) notifications = new ArrayList<>();
 
@@ -220,7 +220,7 @@ public class PartyController {
 
                 // add accounting info
                 log.debug("add accounting info");
-                final String userAccountName = AccountingTools.getAccountNameFromUserAndParty(client.getUserId(), partyId);
+                final String userAccountName = AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), partyId);
                 Long userBalance = accountingService.getBalanceOfAccount(userAccountName);
                 if (userBalance == null) userBalance = 0L;
                 partyResponse.setKonfettiCount(userBalance);
@@ -244,16 +244,16 @@ public class PartyController {
 
                 // see if there is any new chat message for user TODO: find a more performat way
                 log.debug("see if there is any new chat message");
-                List<Chat> allPartyChatsUserIsPartOf = chatService.getAllByUserAndParty(client.getUserId(), partyId);
+                List<Chat> allPartyChatsUserIsPartOf = chatService.getAllByUserAndParty(client.getUser().getId(), partyId);
                 for (Chat chat : allPartyChatsUserIsPartOf) {
-                    if (!chat.hasUserSeenLatestMessage(client.getUserId())) {
+                    if (!chat.hasUserSeenLatestMessage(client.getUser().getId())) {
                         // create temporary notification (a notification that is not in DB)
                         Notification noti = new Notification();
                         noti.setId(-System.currentTimeMillis());
                         noti.setPartyId(partyId);
                         noti.setRef(chat.getRequestId());
                         noti.setType(NotificationType.CHAT_NEW);
-                        noti.setUserId(client.getUserId());
+                        noti.setUserId(client.getUser().getId());
                         noti.setTimeStamp(System.currentTimeMillis());
                         Set<Notification> notis = partyResponse.getNotifications();
                         notis.add(noti);
@@ -363,7 +363,7 @@ public class PartyController {
             if (client != null) {
 
                 // force add parties the user is member of (if not already in list)
-                User user = userService.findById(client.getUserId());
+                User user = userService.findById(client.getUser().getId());
                 if (user != null) {
                     if (user.getActiveParties().size() > 0) {
                         // TODO: implement
@@ -382,7 +382,7 @@ public class PartyController {
                 // for all parties
                 for (final Party party : resultParties) {
                     PartyResponse partyResponse = partyMapper.fromPartyToPartyResponse(party);
-                    final String accountName = AccountingTools.getAccountNameFromUserAndParty(client.getUserId(), partyResponse.getId());
+                    final String accountName = AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), partyResponse.getId());
 
                     // add accounting info
                     Long userBalance = accountingService.getBalanceOfAccount(accountName);
@@ -390,7 +390,7 @@ public class PartyController {
                     // if user is new on party (has no account yet)
                     if (userBalance == null) {
                         userBalance = 0L;
-                        log.info("New User(" + client.getUserId() + ") active on Party(" + partyResponse.getId() + ")");
+                        log.info("New User(" + client.getUser().getId() + ") active on Party(" + partyResponse.getId() + ")");
                         // create account
                         if (!accountingService.createAccount(accountName)) {
                             log.warn("Was not able to create balance account(" + accountName + ")");
@@ -405,7 +405,7 @@ public class PartyController {
                         // welcome user
                         if (partyResponse.getWelcomeBalance() > 0) {
                             // transfer welcome konfetti
-                            log.info("Transfer Welcome-Konfetti(" + partyResponse.getWelcomeBalance() + ") on Party(" + partyResponse.getId() + ") to User(" + client.getUserId() + ") with accountName(" + accountName + ")");
+                            log.info("Transfer Welcome-Konfetti(" + partyResponse.getWelcomeBalance() + ") on Party(" + partyResponse.getId() + ") to User(" + client.getUser().getId() + ") with accountName(" + accountName + ")");
                             userBalance = accountingService.addBalanceToAccount(TransactionType.USER_WELCOME, accountName, partyResponse.getWelcomeBalance());
                         }
                         // show welcome notification
@@ -445,9 +445,9 @@ public class PartyController {
         if (httpRequest.getHeader("X-CLIENT-ID") != null) {
             // A) check if user is owner of notification
             Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
-            boolean userIsOwner = (noti.getUserId().equals(client.getUserId()));
+            boolean userIsOwner = (noti.getUserId().equals(client.getUser().getId()));
             if (!userIsOwner)
-                throw new Exception("cannot action notification(" + notiId + ") - user is not noti owner / client.userID(" + client.getUserId() + ") != notiUserId(" + noti.getUserId() + ")");
+                throw new Exception("cannot action notification(" + notiId + ") - user is not noti owner / client.userID(" + client.getUser().getId() + ") != notiUserId(" + noti.getUserId() + ")");
         } else {
             // B) check for trusted application with administrator privilege
             controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
@@ -480,8 +480,8 @@ public class PartyController {
         // get user info
         Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
         if (client == null) throw new Exception("client not found");
-        User user = userService.findById(client.getUserId());
-        if (user == null) throw new Exception("user(" + client.getUserId() + ") not found");
+        User user = userService.findById(client.getUser().getId());
+        if (user == null) throw new Exception("user(" + client.getUser().getId() + ") not found");
 
         // check if request has minimal konfetti
         if (request.getKonfettiCount() < 0) throw new Exception("invalid konfetti on request");
@@ -489,14 +489,14 @@ public class PartyController {
             throw new Exception("not enough konfetti on request - is(" + request.getKonfettiAdd() + ") needed(" + party.getNewRequestMinKonfetti() + ")");
 
         // check if user has minimal konfetti
-        Long userBalance = accountingService.getBalanceOfAccount(AccountingTools.getAccountNameFromUserAndParty(client.getUserId(), party.getId()));
+        Long userBalance = accountingService.getBalanceOfAccount(AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), party.getId()));
         if (userBalance == null) userBalance = 0L;
         if (userBalance < request.getKonfettiCount())
             throw new Exception("not enough konfetti on userbalance - is(" + userBalance + ") needed(" + request.getKonfettiCount() + ")");
 
         // write data better set by server
         request.setTime(System.currentTimeMillis());
-        request.setUserId(client.getUserId());
+        request.setUserId(client.getUser().getId());
         request.setPartyId(partyId);
 
         // set state based on party settings
@@ -522,7 +522,7 @@ public class PartyController {
         mediaItem.setData(json);
         mediaItem.setReviewed(REVIEWED_PUBLIC);
         mediaItem.setType(TYPE_MULTILANG);
-        mediaItem.setUserId(client.getUserId());
+        mediaItem.setUserId(client.getUser().getId());
         mediaItem = mediaService.create(mediaItem);
         log.info("multilang stored with id(" + mediaItem.getId() + ")");
         request.setTitleMultiLangRef(mediaItem.getId());
@@ -538,7 +538,7 @@ public class PartyController {
                     log.error("new request has non existing media items on it - security clearing all mediaitems on request");
                     break;
                 }
-                if (!item.getUserId().equals(client.getUserId())) {
+                if (!item.getUserId().equals(client.getUser().getId())) {
                     request.setMediaItemIds(null);
                     log.error("new request has media items other users on it - security clearing all mediaitems on request");
                     break;
@@ -551,7 +551,7 @@ public class PartyController {
         // transfer balance to request account
         accountingService.createAccount(AccountingTools.getAccountNameFromRequest(persistent.getId()));
         if (request.getKonfettiCount() > 0) {
-            accountingService.transferBetweenAccounts(TransactionType.TASK_CREATION, AccountingTools.getAccountNameFromUserAndParty(client.getUserId(), partyId), AccountingTools.getAccountNameFromRequest(persistent.getId()), request.getKonfettiCount());
+            accountingService.transferBetweenAccounts(TransactionType.TASK_CREATION, AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), partyId), AccountingTools.getAccountNameFromRequest(persistent.getId()), request.getKonfettiCount());
         }
 
         // store notification
@@ -589,9 +589,9 @@ public class PartyController {
         if (httpRequest.getHeader("X-CLIENT-ID") != null) {
             // A) client for user (party admin or reeuest author)
             Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
-            User user = userService.findById(client.getUserId());
+            User user = userService.findById(client.getUser().getId());
 
-            boolean userIsAuthor = (request.getUserId().equals(client.getUserId()));
+            boolean userIsAuthor = (request.getUserId().equals(client.getUser().getId()));
             boolean userIsPartyAdmin = Helper.userIsAdminOnParty(user, request.getPartyId());
             log.info("delete request(" + requestId + ") ... client is author(" + userIsAuthor + ") partyAdmin(" + userIsPartyAdmin + ")");
 
@@ -631,7 +631,7 @@ public class PartyController {
 
         Request request = requestService.findById(requestId);
         if (request != null) {
-            User user = userService.findById(client.getUserId());
+            User user = userService.findById(client.getUser().getId());
             boolean userIsPartyAdmin = Helper.userIsAdminOnParty(user, request.getPartyId());
 
             // add chats to request (when user is host or member)
@@ -640,14 +640,14 @@ public class PartyController {
             List<Chat> relevantChats = new ArrayList<Chat>();
             for (Chat chat : chats) {
                 if (!chat.chatContainsMessages()) continue;
-                if (chat.getHostId().equals(client.getUserId())) {
-                    chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getMembers()[0], client.getUserId());
+                if (chat.getHostId().equals(client.getUser().getId())) {
+                    chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getMembers()[0], client.getUser().getId());
                     relevantChats.add(chat);
-                } else if (Helper.contains(chat.getMembers(), client.getUserId())) {
-                    chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getHostId(), client.getUserId());
+                } else if (Helper.contains(chat.getMembers(), client.getUser().getId())) {
+                    chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getHostId(), client.getUser().getId());
                     relevantChats.add(chat);
                 } else if (userIsPartyAdmin) {
-                    chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getMembers()[0], client.getUserId());
+                    chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getMembers()[0], client.getUser().getId());
                     relevantChats.add(chat);
                 }
             }
@@ -705,7 +705,7 @@ public class PartyController {
             if (upvoteAmount > 0L) {
                 log.info("Upvoting request(" + requestId + ") with amount(" + upvoteAmount + ") ...");
                 // check if user has enough balance
-                String userAccountname = AccountingTools.getAccountNameFromUserAndParty(client.getUserId(), partyId);
+                String userAccountname = AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), partyId);
                 Long userBalance = accountingService.getBalanceOfAccount(userAccountname);
                 if (userBalance == null)
                     throw new Exception("not able to get account balance of account(" + userAccountname + ")");
@@ -754,9 +754,9 @@ public class PartyController {
                 // A) client for user (party admin, reviewer or request author)
 
                 Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
-                User user = userService.findById(client.getUserId());
+                User user = userService.findById(client.getUser().getId());
 
-                userIsAuthor = (request.getUserId().equals(client.getUserId()));
+                userIsAuthor = (request.getUserId().equals(client.getUser().getId()));
                 userIsPartyAdmin = Helper.userIsAdminOnParty(user, request.getPartyId());
                 userIsPartyReviewer = Helper.userIsReviewerOnParty(user, request.getPartyId());
                 log.info("action request(" + requestId + ") ... client is author(" + userIsAuthor + ") partyAdmin(" + userIsPartyAdmin + ") partyReview(" + userIsPartyReviewer + ")");

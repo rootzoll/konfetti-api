@@ -76,7 +76,7 @@ public class ChatController {
 
     		// A) check that chat is just hosted by user
     		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
-    		boolean userIsHost = (template.getHostId().equals(client.getUserId()));
+    		boolean userIsHost = (template.getHostId().equals(client.getUser().getId()));
     		if (!userIsHost) throw new Exception("user cannot create chat for other users");
 
         	// B) check if request is set and and set correct party id from request
@@ -134,10 +134,10 @@ public class ChatController {
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
 			// A) check that user is host or member of chat
     		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
-    		boolean userIsHost = (chat.getHostId().equals(client.getUserId()));
+    		boolean userIsHost = (chat.getHostId().equals(client.getUser().getId()));
     		boolean userIsMember = false;
     		for (Long memeberId : chat.getMembers()) {
-				if (client.getUserId().equals(memeberId)) {
+				if (client.getUser().getId().equals(memeberId)) {
 					userIsMember = true;
 					break;
 				}
@@ -149,8 +149,8 @@ public class ChatController {
         	for (Message message : messages) {
     			if (message.getTime()>biggestTS) biggestTS = message.getTime();
     		}
-        	if (biggestTS>chat.getLastTSforMember(client.getUserId())) {
-        		chat.setLastTSforMember(client.getUserId(), biggestTS);
+        	if (biggestTS>chat.getLastTSforMember(client.getUser().getId())) {
+        		chat.setLastTSforMember(client.getUser().getId(), biggestTS);
         		chatService.update(chat);
         	}
 
@@ -158,13 +158,13 @@ public class ChatController {
     		if (userIsHost) {
     			// show member as chat partner
     			if (chat.getMembers().length==1) {
-    				setChatPartnerInfoOn(userService, chat, chat.getMembers()[0], client.getUserId());
+    				setChatPartnerInfoOn(userService, chat, chat.getMembers()[0], client.getUser().getId());
     			} else {
 					log.warn("Cannot set ChatPartnerInfo on chats with more than one member.");
 				}
     		} else {
     			// show host as chat partner
-    			setChatPartnerInfoOn(userService, chat, chat.getHostId(), client.getUserId());
+    			setChatPartnerInfoOn(userService, chat, chat.getHostId(), client.getUser().getId());
     		}
 		} else {
 			// B) check for trusted application with administrator privilege
@@ -192,10 +192,10 @@ public class ChatController {
     		
     		// A) check that user is host or member of chat
     		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
-    		boolean userIsHost = (chat.getHostId().equals(client.getUserId()));
+    		boolean userIsHost = (chat.getHostId().equals(client.getUser().getId()));
     		boolean userIsMember = false;
     		for (Long memeberId : chat.getMembers()) {
-				if (client.getUserId().equals(memeberId)) {
+				if (client.getUser().getId().equals(memeberId)) {
 					userIsMember = true;
 					break;
 				}
@@ -203,12 +203,12 @@ public class ChatController {
     		if ((!userIsHost) && (!userIsMember)) throw new Exception("not host or member on chat("+chatId+")");
     	
     		// make sure userId is correct
-        	template.setUserId(client.getUserId());
+        	template.setUserId(client.getUser().getId());
         	
         	// B) set last TS for posting user to this message TS
-        	long lastTSofUser = chat.getLastTSforMember(client.getUserId());
+        	long lastTSofUser = chat.getLastTSforMember(client.getUser().getId());
         	if (lastTSofUser<messageTS) {
-        		chat.setLastTSforMember(client.getUserId(), messageTS);
+        		chat.setLastTSforMember(client.getUser().getId(), messageTS);
         		chatService.update(chat);
         	} else {
 				log.warn("strange: messageTS <= lastTSofUser");
@@ -218,7 +218,7 @@ public class ChatController {
     		receivers = new HashSet<Long>();
     		receivers.addAll(Arrays.asList(chat.getMembers()));
     		receivers.add(chat.getHostId());
-    		receivers.remove(client.getUserId());
+    		receivers.remove(client.getUser().getId());
     		
     	} else {
     		
@@ -302,10 +302,10 @@ public class ChatController {
     		
     		// A) check that user is host or member of chat
     		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
-    		boolean userIsHost = (chat.getHostId().equals(client.getUserId()));
+    		boolean userIsHost = (chat.getHostId().equals(client.getUser().getId()));
     		boolean userIsMember = false;
     		for (Long memeberId : chat.getMembers()) {
-				if (client.getUserId().equals(memeberId)) {
+				if (client.getUser().getId().equals(memeberId)) {
 					userIsMember = true;
 					break;
 				}

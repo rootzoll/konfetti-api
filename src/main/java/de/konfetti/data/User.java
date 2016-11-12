@@ -36,6 +36,9 @@ public class User {
 	// list of languages the user speaks (e.g. 'de', 'en', 'ar')
     private String[] spokenLangs = {};
 
+    @OneToMany(mappedBy = "user")
+    private List<Client> clients;
+
     // IDs of parties the user has an konfetti balance on
     @ManyToMany
     @JoinTable(
