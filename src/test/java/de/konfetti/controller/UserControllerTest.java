@@ -79,7 +79,7 @@ public class UserControllerTest extends BaseControllerTest {
                 .body("id", notNullValue())
                 .body("email", equalToIgnoringCase(testEmail))
                 .body("password", isEmptyOrNullString())
-                .body("clientId", is(1))
+                .body("clientId", greaterThan(0))
         ;
 
         // make sure client object is persisted and linked with user object
