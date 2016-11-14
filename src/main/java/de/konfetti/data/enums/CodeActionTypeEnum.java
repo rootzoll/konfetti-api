@@ -5,7 +5,7 @@ package de.konfetti.data.enums;
  */
 public enum CodeActionTypeEnum {
 
-    ACTION_TYPE_KONFETTI(0), ACTION_TYPE_ADMIN(1), ACTION_TYPE_REVIEWER(2);
+    ACTION_TYPE_KONFETTI(0), ACTION_TYPE_ADMIN(1), ACTION_TYPE_REVIEWER(2), ACTION_TYPE_USER(3);
 
     private int ordinal;
 

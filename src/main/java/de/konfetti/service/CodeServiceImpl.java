@@ -5,18 +5,16 @@ import de.konfetti.controller.mapper.UserMapper;
 import de.konfetti.controller.vm.RedeemResponse;
 import de.konfetti.data.*;
 import de.konfetti.utils.AccountingTools;
-import de.konfetti.utils.Helper;
 import de.konfetti.utils.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_ADMIN;
-import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
-import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_REVIEWER;
+import static de.konfetti.data.enums.CodeActionTypeEnum.*;
 
 @Slf4j
 @Service
@@ -78,32 +76,37 @@ public class CodeServiceImpl extends BaseService implements CodeService {
     @Override
     public RedeemResponse processCodeCoupon(User user, Code coupon) {
         RedeemResponse result = new RedeemResponse();
+        Party foundParty = partyService.findById(coupon.getPartyID());
         // redeem konfetti
         if (ACTION_TYPE_KONFETTI == coupon.getActionType()) {
             // add konfetti to party
             result.setActions(addKonfettiOnParty(user, coupon.getPartyID(), coupon.getAmount(), result.getActions()));
 
             // get GPS from party
-            Party party = this.partyService.findById(coupon.getPartyID());
             ClientAction gpsInfo = new ClientAction();
             gpsInfo.command = "gpsInfo";
-            gpsInfo.json = "{\"lat\":" + party.getLat() + ", \"lon\":" + party.getLon() + "}";
+            gpsInfo.json = "{\"lat\":" + foundParty.getLat() + ", \"lon\":" + foundParty.getLon() + "}";
             result.getActions().add(gpsInfo);
 
             // TODO --> multi lang by lang set in user
             result.setFeedbackHtml("You got now " + coupon.getAmount() + " konfetti to create a task with or upvote other ideas.");
         } else if (ACTION_TYPE_REVIEWER == coupon.getActionType()) {
             // promote user to reviewer
-            result.setActions(makeUserReviewerOnParty(user, coupon.getPartyID(), result.getActions()));
+            result.setActions(makeUserReviewerOnParty(user, foundParty, result.getActions()));
             // TODO --> multi lang by lang set in user
             result.setFeedbackHtml("You are now REVIEWER on the following party.");
         } else if (ACTION_TYPE_ADMIN == coupon.getActionType()) {
             // promote user to admin
-            Party foundParty = partyService.findById(coupon.getPartyID());
             List<ClientAction> actions = makeUserAdminOnParty(user, foundParty, result.getActions());
             result.setActions(actions);
             // TODO --> multi lang by lang set in user
             result.setFeedbackHtml("You are now ADMIN on the following party.");
+        }  else if (ACTION_TYPE_USER == coupon.getActionType()) {
+            // promote user to admin
+            List<ClientAction> actions = makeUserNormaloOnParty(user, foundParty, result.getActions());
+            result.setActions(actions);
+            // TODO --> multi lang by lang set in user
+            result.setFeedbackHtml("You are now USER on the following party.");
         }
         return result;
     }
@@ -134,6 +137,7 @@ public class CodeServiceImpl extends BaseService implements CodeService {
     private List<ClientAction> makeUserAdminOnParty(User user, Party party, List<ClientAction> actions) {
         Objects.nonNull(party);
 
+        user.setReviewerParties(new ArrayList<>());
         List<Party> adminParties = user.getAdminParties();
         if (adminParties.contains(party)){
             log.warn("user(" + user.getId() + ") is ALREADY ADMIN on party(" + party.getId() + ")");
@@ -147,23 +151,39 @@ public class CodeServiceImpl extends BaseService implements CodeService {
         return actions;
     }
 
-    private List<ClientAction> makeUserReviewerOnParty(User user, Long partyId, List<ClientAction> actions) {
-        Party foundParty = partyService.findById(partyId);
-        if (foundParty == null) {
+    private List<ClientAction> makeUserReviewerOnParty(User user, Party party, List<ClientAction> actions) {
+        Objects.nonNull(party);
+
+        user.setAdminParties(new ArrayList<>());
+        if (user.getReviewerParties().contains(party)){
+            log.debug("user : " + user.getName() + " is already reviewer on partyId : " + party.getId());
             return actions;
         }
 
-        if (foundParty.getReviewerUser().contains(user)){
-            log.debug("user : " + user.getName() + " is already reviewr on partyId : " + partyId);
-            return actions;
-        }
-        foundParty.getReviewerUser().add(user);
-        partyService.update(foundParty);
+        user.getReviewerParties().add(party);
+        userService.update(user);
 
-        log.info("user(" + user.getId() + ") is now REVIEWER on party(" + partyId + ")");
+        log.info("user(" + user.getId() + ") is now REVIEWER on party(" + party.getId() + ")");
 
         actions = addUpdateUserAction(actions, user);
-        actions = addFocusPartyAction(actions, partyId);
+        actions = addFocusPartyAction(actions, party.getId());
+        return actions;
+    }
+
+
+    private List<ClientAction> makeUserNormaloOnParty(User user, Party party, List<ClientAction> actions) {
+        Objects.nonNull(party);
+
+        // remove admin und reviewer from user
+        user.setAdminParties(new ArrayList<>());
+        user.setReviewerParties(new ArrayList<>());
+
+        log.info("user(" + user.getId() + ") is now USER on party(" + party.getId() + ")");
+
+        userService.update(user);
+
+        actions = addUpdateUserAction(actions, user);
+        actions = addFocusPartyAction(actions, party.getId());
         return actions;
     }
 
