@@ -98,7 +98,7 @@ public class UserControllerTest extends BaseControllerTest {
         ValidatableResponse response = createUser(testEmail, testPassword);
         response
                 .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body(is("User already exists with this email"));
+                .body(is("\"User already exists with this email\""));
     }
 
     @Test
