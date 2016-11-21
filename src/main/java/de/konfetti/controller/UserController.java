@@ -109,7 +109,7 @@ public class UserController {
 
             // if email is set - check if email exists on other account
             if (userService.findByMail(email) != null) {
-                return new ResponseEntity("User already exists with this email", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity("\"User already exists with this email\"", HttpStatus.BAD_REQUEST);
             }
 
         }
