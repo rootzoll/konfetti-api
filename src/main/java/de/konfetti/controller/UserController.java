@@ -134,20 +134,26 @@ public class UserController {
         }
 
         // set default spoken lang
+        log.info("set default spoken lang");
         String[] langs = {locale};
         user.setSpokenLangs(langs);
         user.setLastActivityTS(System.currentTimeMillis());
 
         // create new client
+        log.info("create new client");
         Client client = clientService.create(user);
         user.getClients().add(client);
 
+        log.info("update user");
         userService.update(user);
 
+        log.info("mapping user response");
         UserResponse userResponse = userMapper.fromUserToUserResponse(user);
         userResponse.setClientId(client.getId());
         userResponse.setClientSecret(client.getSecret());
-        return new ResponseEntity(userResponse, HttpStatus.OK);
+        
+        log.info("return");
+        return new ResponseEntity<UserResponse>(userResponse, HttpStatus.OK);
     }
 
     @CrossOrigin(origins = "*")
