@@ -33,12 +33,12 @@ public class KonfettiTransactionServiceImpl extends BaseService implements Konfe
 
 	@Override
 	public List<KonfettiTransaction> getAllTransactionsToAccount(String toAccount) {
-		return getAllTransactionsToAccountSinceTS(toAccount, null);
+		return getAllTransactionsToAccountSinceTS(toAccount, Long.valueOf(1L));
 	}
 
 	@Override
 	public List<KonfettiTransaction> getAllTransactionsFromAccount(String fromAccount) {
-		return getAllTransactionsFromAccountSinceTS(fromAccount, null);
+		return getAllTransactionsFromAccountSinceTS(fromAccount, Long.valueOf(1L));
 	}
 
 	@Override
