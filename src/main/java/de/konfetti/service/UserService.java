@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 public interface UserService {
 
-    User create();
+    User create(String email, String password, String locale);
 
 	User update(User user);
     
@@ -16,7 +16,7 @@ public interface UserService {
 
 	User findByName(String name);
 
-	User findByMail(String mail);
+	User findByMailIgnoreCase(String mail);
 	
 	Stream<User> getAllUsersReviewerOnParty(Long partyID);
 

@@ -108,20 +108,16 @@ public class UserController {
             createWithCredentials = true;
 
             // if email is set - check if email exists on other account
-            if (userService.findByMail(email) != null) {
+            if (userService.findByMailIgnoreCase(email) != null) {
                 return new ResponseEntity("\"User already exists with this email\"", HttpStatus.BAD_REQUEST);
             }
 
         }
 
         // create new user
-        User user = userService.create();
+        User user = userService.create(email, pass, locale);
 
         if (createWithCredentials) {
-            user.setEMail(email.toLowerCase());
-            String passMD5 = Helper.hashPassword(this.passwordSalt, pass);
-            user.setPassword(passMD5);
-            log.info("Create new User with eMail(" + email + ") and passwordhash(" + passMD5 + ")");
             // TODO --> email multi lang by lang set in user
             try {
                 if (!mailService.sendMail(email, "rest.user.created.subject", "username: " + email + "\npass: " + pass + "\n\nkeep email or write password down", null, user.getSpokenLangs())) {
@@ -132,12 +128,6 @@ public class UserController {
                 log.warn("EXCEPTION was not able to send eMail on account creation to(" + email + ")");
             }
         }
-
-        // set default spoken lang
-        log.info("set default spoken lang");
-        String[] langs = {locale};
-        user.setSpokenLangs(langs);
-        user.setLastActivityTS(System.currentTimeMillis());
 
         // create new client
         log.info("create new client");
@@ -203,17 +193,18 @@ public class UserController {
     public UserResponse login(@RequestParam(value = "mail", defaultValue = "") String email,
                               @RequestParam(value = "pass", defaultValue = "") String pass) throws Exception {
 
+        pass = pass != null? pass.trim(): pass;
+
         // check user and input data
-        User user = userService.findByMail(email.toLowerCase());
+        User user = userService.findByMailIgnoreCase(email);
         if (user == null) {
             log.warn("LOGIN FAIL: user not found with mail(" + email + ")");
             throw new Exception("User and/or Passwort not valid.");
         }
-        if ((pass == null) || (pass.trim().length() == 0)) {
+        if ((pass == null) || (pass.length() == 0)) {
             log.warn("LOGIN FAIL: password is null or zero length");
             throw new Exception("User and/or Passwort not valid.");
         }
-        pass = pass.trim();
 
         // check password
         String passMD5 = Helper.hashPassword(this.passwordSalt, pass);
@@ -286,7 +277,7 @@ public class UserController {
         if (user == null) throw new Exception("NOT FOUND user(" + userInput.getId() + ")");
 
         // check if other user exists with name / email
-        User byMail = userService.findByMail(userInput.getEMail());
+        User byMail = userService.findByMailIgnoreCase(userInput.getEMail());
         if (byMail != null && byMail.getId() != userInput.getId()) {
             return new ResponseEntity("Another user exists with this email : '" + userInput.getEMail() + "'", HttpStatus.BAD_REQUEST);
         }
@@ -562,7 +553,7 @@ public class UserController {
         ResponseSendKonfetti result = new ResponseSendKonfetti();
 
         // check if user with that address has already an account
-        User toUser = userService.findByMail(address);
+        User toUser = userService.findByMailIgnoreCase(address);
         if (toUser == null) {
             // receiver has no account
             // GENERATE SINGLE COUPON and SEND BY EMAIL

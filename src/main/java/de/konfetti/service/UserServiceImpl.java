@@ -32,15 +32,20 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public User create() {
-        // user gets created
+    public User create(String email, String password, String locale) {
         User user = new User();
+        user.setEMail(email.toLowerCase().trim());
+        String passMD5 = Helper.hashPassword(this.passwordSalt, password.trim());
+        user.setPassword(passMD5);
 
-        // user gets persisted and returned to user  
-        User persited = userRepository.saveAndFlush(user);
+        // set default spoken lang
+        log.info("set default spoken lang");
+        String[] langs = {locale};
+        user.setSpokenLangs(langs);
+        user.setLastActivityTS(System.currentTimeMillis());
 
-        // return to caller
-        return persited;
+        log.info("Create new User with eMail(" + email + ") and passwordhash(" + passMD5 + ")");
+        return userRepository.saveAndFlush(user);
     }
 
     @Override
@@ -60,8 +65,8 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public User findByMail(String mail) {
-        return userRepository.findByEMail(mail);
+    public User findByMailIgnoreCase(String email) {
+        return userRepository.findByEMail(email.toLowerCase());
     }
 
     @Override
