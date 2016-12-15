@@ -1055,6 +1055,7 @@ public class PartyController {
         List<Party> foundParties = partyService.findByName("Helferverein Nord e.V.");
         if (CollectionUtils.isEmpty(foundParties)) {
             log.debug("Creating Test Parties : Creating test parties..");
+
             Party partyOne = new Party();
             partyOne.setName("Helferverein Nord e.V.");
             partyOne.setContact("http://pankowhilft.blogsport.de");
@@ -1068,6 +1069,7 @@ public class PartyController {
             partyOne.setWelcomeBalance(Long.parseLong("100"));
             partyOne.setSendKonfettiMode(SENDKONFETTIMODE_ALL);
             Party partyOnePersisted = partyService.create(partyOne);
+
             Party partyTwo = new Party();
             partyTwo.setName("Helferverein Süd e.V.");
             partyTwo.setContact("http://muenchen.blogsport.de");
@@ -1081,6 +1083,7 @@ public class PartyController {
             partyTwo.setWelcomeBalance(Long.parseLong("10"));
             partyTwo.setSendKonfettiMode(SENDKONFETTIMODE_ALL);
             Party partyTwoPersisted = partyService.create(partyTwo);
+
             return Arrays.asList(partyOnePersisted, partyTwoPersisted);
         }
         log.debug("Creating Test Parties : Parties exist already, doing nothing..");
