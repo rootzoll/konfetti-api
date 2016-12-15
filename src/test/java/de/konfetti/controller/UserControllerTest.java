@@ -54,12 +54,10 @@ public class UserControllerTest extends BaseControllerTest {
     @Autowired
     protected PartyService partyService;
 
-    private ObjectMapper objectMapper;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        objectMapper = new ObjectMapper();
     }
 
     @After
@@ -72,7 +70,7 @@ public class UserControllerTest extends BaseControllerTest {
         String testEmail = "testcreateuser@test.de";
         String testPassword = "createUser";
         // check user is created
-        ValidatableResponse validatableResponse = createUser(testEmail, testPassword)
+        ValidatableResponse validatableResponse = insertUser(testEmail, testPassword)
                 .statusCode(200);
 
         validatableResponse
@@ -92,10 +90,10 @@ public class UserControllerTest extends BaseControllerTest {
         String testEmail = "createuserwithexistingemail@test.de";
         String testPassword = "createUser";
         // check user is created
-        createUser(testEmail, testPassword);
+        insertUser(testEmail, testPassword);
 
         // should fail
-        ValidatableResponse response = createUser(testEmail, testPassword);
+        ValidatableResponse response = insertUser(testEmail, testPassword);
         response
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .body(is("\"User already exists with this email\""));
@@ -104,7 +102,7 @@ public class UserControllerTest extends BaseControllerTest {
     @Test
     public void testRequestPasswordReset() throws Exception {
         User user = testHelper.getUser("testRequestPasswordReset");
-        createUser(user.getEMail(), user.getPassword());
+        insertUser(user.getEMail(), user.getPassword());
         myGiven()
                 .contentType(ContentType.TEXT)
                 .body(user.getEMail())
@@ -118,7 +116,7 @@ public class UserControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void testRquestPasswordFinish() throws Exception {
+    public void testRequestPasswordFinish() throws Exception {
         User user = testHelper.getUser("testRquestPasswordFinish");
         String resetKey = "123456";
         user.setResetKey(resetKey);
@@ -136,7 +134,7 @@ public class UserControllerTest extends BaseControllerTest {
     @Test
     public void login() throws Exception {
         User user = testHelper.getUser("testLogin");
-        createUser(user.getEMail(), user.getPassword());
+        insertUser(user.getEMail(), user.getPassword());
         myGiven()
                 .param("mail", user.getEMail())
                 .param("pass", user.getPassword())
@@ -166,7 +164,7 @@ public class UserControllerTest extends BaseControllerTest {
     @Test
     public void loginWrongPassword() throws Exception {
         User user = testHelper.getUser("testLoginWrongPassword");
-        createUser(user.getEMail(), user.getPassword());
+        insertUser(user.getEMail(), user.getPassword());
         myGiven()
                 .param("mail", user.getEMail())
                 .param("pass", "wrongPassword")
@@ -178,7 +176,7 @@ public class UserControllerTest extends BaseControllerTest {
     @Test
     public void loginEmailNotExisting() throws Exception {
         User user = testHelper.getUser("testLoginEmailNotExisting");
-        createUser(user.getEMail(), user.getPassword());
+        insertUser(user.getEMail(), user.getPassword());
         myGiven()
                 .param("mail", "wrongEmail@test.de")
                 .param("pass", user.getPassword())
@@ -214,7 +212,7 @@ public class UserControllerTest extends BaseControllerTest {
         assertThat(listOfCodes, hasSize(1));
 
         String email = "redeemadmincode@test.de";
-        createUser(email, "test123");
+        insertUser(email, "test123");
         User createdUser = userRepository.findByEMail(email);
 
         ValidatableResponse responseRedeemCode = myGiven()
