@@ -3,6 +3,7 @@ package de.konfetti.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.konfetti.Application;
 import de.konfetti.controller.vm.PartyResponse;
+import de.konfetti.controller.vm.RequestVm;
 import de.konfetti.controller.vm.UserResponse;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.subethamail.wiser.Wiser;
@@ -101,6 +103,19 @@ public class BaseControllerTest {
                 .when().post(PartyController.REST_API_MAPPING)
                 .then();
         return objectMapper.readValue(validatableResponse.extract().response().prettyPrint(), PartyResponse.class);
+    }
+
+    protected RequestVm insertRequest(RequestVm requestVm, UserResponse userResponse) throws IOException {
+        ValidatableResponse validatableResponse = myGivenUser(userResponse)
+                .contentType(ContentType.JSON)
+                .body(requestVm)
+                .pathParam("partyId", requestVm.getPartyId())
+                .pathParam("langCode", "en")
+                .when().post(PartyController.REST_API_MAPPING + "/{partyId}/{langCode}/request")
+                .then().statusCode(HttpStatus.OK.value());
+
+        RequestVm requestVmResponse = objectMapper.readValue(validatableResponse.extract().response().prettyPrint(), RequestVm.class);
+        return requestVmResponse;
     }
 
 

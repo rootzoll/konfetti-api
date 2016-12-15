@@ -63,8 +63,8 @@ public class RequestVmMaker {
             requestVm.setChats(propertyLookup.valueOf(chats, new ArrayList<>()));
             requestVm.setInfo(propertyLookup.valueOf(info, new ArrayList<>()));
 //            requestVm.setTitleMultiLang(propertyLookup.valueOf(titleMultiLang, nullMediaItem));
-            requestVm.setKonfettiAmountSupport(propertyLookup.valueOf(konfettiAmountSupport, nullLongValue));
-            requestVm.setKonfettiAmountReward(propertyLookup.valueOf(konfettiAmountReward, nullLongValue));
+            requestVm.setKonfettiAmountSupport(propertyLookup.valueOf(konfettiAmountSupport, Long.valueOf(0L)));
+            requestVm.setKonfettiAmountReward(propertyLookup.valueOf(konfettiAmountReward, Long.valueOf(0L)));
             return requestVm;
         }
     };
