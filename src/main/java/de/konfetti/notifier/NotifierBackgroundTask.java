@@ -3,6 +3,7 @@ package de.konfetti.notifier;
 import com.google.common.cache.CacheBuilder;
 import de.konfetti.data.Notification;
 import de.konfetti.data.NotificationType;
+import de.konfetti.data.Party;
 import de.konfetti.data.User;
 import de.konfetti.service.NotificationService;
 import de.konfetti.service.UserService;
@@ -18,9 +19,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -38,6 +39,7 @@ import java.util.stream.Stream;
  */
 @Slf4j
 @Component
+@Transactional
 public class NotifierBackgroundTask {
 
     private static final String PUSHTYPE_IGNORE = "ignore";
@@ -179,7 +181,13 @@ public class NotifierBackgroundTask {
      */
     private boolean shouldNotificationGetHigherAttention(Notification notification) {
         long oldInSeconds = (System.currentTimeMillis() - notification.getTimeStamp()) / 1000L;
-        log.info("Notification seconds(" + oldInSeconds + ") id(" + notification.getId() + ") party(" + notification.getParty().getId() + ") user(" + notification.getUser().getId() + ") type(" + notification.getType() + ")");
+        Party party = notification.getParty();
+        if (party == null){
+            log.warn("party is null for notification with id : " + notification.getId() + " , mark corrupt notifcation as pushed");
+            markNotificationAsPushed(notification, PUSHTYPE_IGNORE);
+            return false;
+        }
+        log.info("Notification seconds(" + oldInSeconds + ") id(" + notification.getId() + ") party(" + party.getId() + ") type(" + notification.getType() + ")");
 		
 		/*
 		 * SIMPLE HIGHER ATTENTION CASES
@@ -193,20 +201,19 @@ public class NotifierBackgroundTask {
         // REVIEW WAITING ==> select one reviewer/admin by random
         if (NotificationType.REVIEW_WAITING == notification.getType()) {
             // get all reviewer and admins for party
-            Stream<User> reviewer = userService.getAllUsersReviewerOnParty(notification.getParty().getId());
+            Stream<User> reviewer = userService.getAllUsersReviewerOnParty(party.getId());
 
             // filter all that dont have email or push active
-            List<User> hasPush = new ArrayList<User>();
             Stream<User> userWithPushOrEmailStream = reviewer
-                    .filter(user -> user.getPushActive()  || (
-                                    (!StringUtils.isEmpty(user.getEMail())) && (user.getEMail().trim().length() > 2))
+                    .filter(userX -> userX.getPushActive()  || (
+                                    (!StringUtils.isEmpty(userX.getEMail())) && (userX.getEMail().trim().length() > 2))
                     );
 
             Optional<User> reviewableUser = userWithPushOrEmailStream.findAny();
 
             // no reviewers --> close notification
             if (!reviewableUser.isPresent()) {
-                log.warn("Party(" + notification.getParty().getId() + ") has no admin or reviewer to deliver notification to.");
+                log.warn("Party(" + party.getId() + ") has no admin or reviewer to deliver notification to.");
                 markNotificationAsPushed(notification, PUSHTYPE_IGNORE);
                 return false;
             }
