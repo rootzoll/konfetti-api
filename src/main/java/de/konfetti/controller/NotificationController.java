@@ -43,9 +43,9 @@ public class NotificationController {
         if (httpRequest.getHeader("X-CLIENT-ID") != null) {
             // A) check if user is owner of notification
             Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
-            boolean userIsOwner = (noti.getUserId().equals(client.getUser().getId()));
+            boolean userIsOwner = (noti.getUser().getId().equals(client.getUser().getId()));
             if (!userIsOwner)
-                throw new Exception("cannot action notification(" + notiId + ") - user is not noti owner / client.userID(" + client.getUser().getId() + ") != notiUserId(" + noti.getUserId() + ")");
+                throw new Exception("cannot action notification(" + notiId + ") - user is not noti owner / client.userID(" + client.getUser().getId() + ") != notiUserId(" + noti.getUser().getId() + ")");
         } else {
             // B) check for trusted application with administrator privilege
             controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
