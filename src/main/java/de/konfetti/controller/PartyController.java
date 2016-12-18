@@ -247,7 +247,7 @@ public class PartyController {
                     log.warn("Not implemented KonfettiSendMode of " + partyResponse.getSendKonfettiMode());
                 }
 
-                partyResponse.setKonfettiTotal(-1l); // TODO: implement statistic later
+                partyResponse.setKonfettiTotal(-1L); // TODO: implement statistic later
                 partyResponse.setTopPosition(-1); // TODO: implement statistic later
 
                 // see if there is any new chat message for user TODO: find a more performat way
@@ -439,42 +439,6 @@ public class PartyController {
         return partyResponses;
     }
 
-    @CrossOrigin(origins = "*")
-    @RequestMapping(value = "/{partyId}/notification/{notiId}", method = RequestMethod.GET)
-    public Notification getNotification(@PathVariable long partyId, @PathVariable long notiId, @RequestParam(value = "action", defaultValue = "no") String action, HttpServletRequest httpRequest) throws Exception {
-        log.info("PartyController getNotification(" + notiId + ") action(" + action + ") ...");
-
-        // get notification
-        Notification noti = notificationService.findById(notiId);
-        if (noti == null) throw new Exception("notification(" + notiId + ") not found");
-
-        // check if user is allowed to work on notification
-        if (httpRequest.getHeader("X-CLIENT-ID") != null) {
-            // A) check if user is owner of notification
-            Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
-            boolean userIsOwner = (noti.getUserId().equals(client.getUser().getId()));
-            if (!userIsOwner)
-                throw new Exception("cannot action notification(" + notiId + ") - user is not noti owner / client.userID(" + client.getUser().getId() + ") != notiUserId(" + noti.getUserId() + ")");
-        } else {
-            // B) check for trusted application with administrator privilege
-            controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
-        }
-
-        // Action
-        if (action.equals("delete")) {
-            if (notiId >= 0L) {
-                notificationService.delete(notiId);
-                log.info("Notification(" + notiId + ") DELETED");
-            } else {
-                log.warn("Client should not try to delete temporaray notifications with id<0");
-            }
-        }
-        return noti;
-    }
-
-    //---------------------------------------------------
-    // NOTIFICATION Controller
-    //---------------------------------------------------
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{partyId}/{langCode}/request", method = RequestMethod.POST)
