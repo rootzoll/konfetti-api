@@ -91,48 +91,61 @@ public class UserController {
     }
 
     @CrossOrigin(origins = "*")
+    @PostMapping(value = "registerGuest", produces = "application/json")
+    public ResponseEntity<UserResponse> registerGuest(
+            @RequestParam(value = "locale", defaultValue = "en") String locale) throws Exception {
+        log.debug("registerGuest");
+
+        // create new user
+        User user = userService.createGuest(locale);
+
+        // create new client
+        log.info("create new client");
+        Client client = clientService.create(user);
+        user.getClients().add(client);
+
+        log.info("update user");
+        userService.update(user);
+
+        log.info("mapping user response");
+        UserResponse userResponse = userMapper.fromUserToUserResponse(user);
+        userResponse.setClientId(client.getId());
+        userResponse.setClientSecret(client.getSecret());
+
+        log.info("return");
+        return new ResponseEntity<>(userResponse, HttpStatus.OK);
+    }
+
+    @CrossOrigin(origins = "*")
     @PostMapping(produces = "application/json")
     public ResponseEntity<UserResponse> createUser(
             @RequestParam(value = "mail", defaultValue = "") String email,
             @RequestParam(value = "pass", defaultValue = "") String pass,
             @RequestParam(value = "locale", defaultValue = "en") String locale) throws Exception {
 
-        boolean createWithCredentials = false;
         if ((email != null) && (email.length() > 1)) {
-
             // check if credentials are available
             if ((pass == null) || (pass.trim().length() == 0)) {
                 throw new Exception("password needs to be set");
             }
             pass = pass.trim();
-            createWithCredentials = true;
-
             // if email is set - check if email exists on other account
             if (userService.findByMailIgnoreCase(email) != null) {
                 return new ResponseEntity("\"User already exists with this email\"", HttpStatus.BAD_REQUEST);
             }
-
-        }
-
-        // TODO: remove when anonymouse login is allowed again -> what about email and username integrity on database
-        //       then? craete UUIDs for temporary users until they register..?
-        if (!createWithCredentials) {
-            return new ResponseEntity("\"Anonymous Login not allowed, user email to register\"", HttpStatus.BAD_REQUEST);
         }
 
         // create new user
         User user = userService.create(email, pass, locale);
 
-        if (createWithCredentials) {
-            // TODO --> email multi lang by lang set in user
-            try {
-                if (!mailService.sendMail(email, "rest.user.created.subject", "username: " + email + "\npass: " + pass + "\n\nkeep email or write password down", null, user.getSpokenLangs())) {
-                    log.warn("was not able to send eMail on account creation to(" + email + ")");
-                }
-            } catch (Exception e) {
-                // TODO check why there gets an exception thrown later
-                log.warn("EXCEPTION was not able to send eMail on account creation to(" + email + ")");
+        // TODO --> email multi lang by lang set in user
+        try {
+            if (!mailService.sendMail(email, "rest.user.created.subject", "username: " + email + "\npass: " + pass + "\n\nkeep email or write password down", null, user.getSpokenLangs())) {
+                log.warn("was not able to send eMail on account creation to(" + email + ")");
             }
+        } catch (Exception e) {
+            // TODO check why there gets an exception thrown later
+            log.warn("EXCEPTION was not able to send eMail on account creation to(" + email + ")");
         }
 
         // create new client
@@ -147,9 +160,9 @@ public class UserController {
         UserResponse userResponse = userMapper.fromUserToUserResponse(user);
         userResponse.setClientId(client.getId());
         userResponse.setClientSecret(client.getSecret());
-        
+
         log.info("return");
-        return new ResponseEntity<UserResponse>(userResponse, HttpStatus.OK);
+        return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
     @CrossOrigin(origins = "*")
@@ -199,7 +212,7 @@ public class UserController {
     public UserResponse login(@RequestParam(value = "mail", defaultValue = "") String email,
                               @RequestParam(value = "pass", defaultValue = "") String pass) throws Exception {
 
-        pass = pass != null? pass.trim(): pass;
+        pass = pass != null ? pass.trim() : pass;
 
         // check user and input data
         User user = userService.findByMailIgnoreCase(email);
@@ -272,8 +285,8 @@ public class UserController {
     @CrossOrigin(origins = "*")
     @GetMapping(value = "/check_free", produces = "application/json")
     public Boolean checkUserNameStillFree(@RequestParam(value = "username", defaultValue = "") String name) {
-    	if ((name==null) || (name.length()==0)) return false;
-    	return (userService.findByName(name)==null);
+        if ((name == null) || (name.length() == 0)) return false;
+        return (userService.findByName(name) == null);
     }
 
     @CrossOrigin(origins = "*")

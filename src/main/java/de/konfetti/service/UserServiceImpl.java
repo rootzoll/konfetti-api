@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
@@ -45,6 +47,20 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setLastActivityTS(System.currentTimeMillis());
 
         log.info("Create new User with eMail(" + email + ") and passwordhash(" + passMD5 + ")");
+        return userRepository.saveAndFlush(user);
+    }
+
+    @Override
+    public User createGuest(String locale) {
+        User user = new User();
+
+        // set default spoken lang
+        log.info("set default spoken lang");
+        String[] langs = {locale};
+        user.setSpokenLangs(langs);
+        user.setLastActivityTS(System.currentTimeMillis());
+
+        log.info("Create new Guest ");
         return userRepository.saveAndFlush(user);
     }
 
