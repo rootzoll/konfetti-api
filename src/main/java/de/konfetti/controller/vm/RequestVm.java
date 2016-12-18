@@ -1,11 +1,10 @@
 package de.konfetti.controller.vm;
 
-import de.konfetti.data.Chat;
 import de.konfetti.data.MediaItem;
 import de.konfetti.data.enums.RequestStateEnum;
 import lombok.Data;
 
-import javax.persistence.*;
+import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +50,7 @@ public class RequestVm {
     private long konfettiAdd;
 
     @Transient // --> for delivery
-    private List<Chat> chats = new ArrayList<Chat>();
+    private List<ChatDto> chats = new ArrayList<ChatDto>();
 
     @Transient // --> for delivery
     private List<MediaItem> info = new ArrayList<MediaItem>();

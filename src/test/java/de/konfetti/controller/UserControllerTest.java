@@ -70,7 +70,7 @@ public class UserControllerTest extends BaseControllerTest {
         String testEmail = "testcreateuser@test.de";
         String testPassword = "createUser";
         // check user is created
-        ValidatableResponse validatableResponse = insertUser(testEmail, testPassword)
+        ValidatableResponse validatableResponse = postUser(testEmail, testPassword)
                 .statusCode(200);
 
         validatableResponse
@@ -89,11 +89,12 @@ public class UserControllerTest extends BaseControllerTest {
     public void createUserWithExistingEmail() throws Exception {
         String testEmail = "createuserwithexistingemail@test.de";
         String testPassword = "createUser";
+
         // check user is created
-        insertUser(testEmail, testPassword);
+        postUser(testEmail, testPassword);
 
         // should fail
-        ValidatableResponse response = insertUser(testEmail, testPassword);
+        ValidatableResponse response = postUser(testEmail, testPassword);
         response
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .body(is("\"User already exists with this email\""));
@@ -102,7 +103,7 @@ public class UserControllerTest extends BaseControllerTest {
     @Test
     public void testRequestPasswordReset() throws Exception {
         User user = testHelper.getUser("testRequestPasswordReset");
-        insertUser(user.getEMail(), user.getPassword());
+        postUser(user.getEMail(), user.getPassword());
         myGiven()
                 .contentType(ContentType.TEXT)
                 .body(user.getEMail())
@@ -134,7 +135,7 @@ public class UserControllerTest extends BaseControllerTest {
     @Test
     public void login() throws Exception {
         User user = testHelper.getUser("testLogin");
-        insertUser(user.getEMail(), user.getPassword());
+        postUser(user.getEMail(), user.getPassword());
         myGiven()
                 .param("mail", user.getEMail())
                 .param("pass", user.getPassword())
@@ -164,7 +165,7 @@ public class UserControllerTest extends BaseControllerTest {
     @Test
     public void loginWrongPassword() throws Exception {
         User user = testHelper.getUser("testLoginWrongPassword");
-        insertUser(user.getEMail(), user.getPassword());
+        postUser(user.getEMail(), user.getPassword());
         myGiven()
                 .param("mail", user.getEMail())
                 .param("pass", "wrongPassword")
@@ -176,7 +177,7 @@ public class UserControllerTest extends BaseControllerTest {
     @Test
     public void loginEmailNotExisting() throws Exception {
         User user = testHelper.getUser("testLoginEmailNotExisting");
-        insertUser(user.getEMail(), user.getPassword());
+        postUser(user.getEMail(), user.getPassword());
         myGiven()
                 .param("mail", "wrongEmail@test.de")
                 .param("pass", user.getPassword())
@@ -212,7 +213,7 @@ public class UserControllerTest extends BaseControllerTest {
         assertThat(listOfCodes, hasSize(1));
 
         String email = "redeemadmincode@test.de";
-        insertUser(email, "test123");
+        postUser(email, "test123");
         User createdUser = userRepository.findByEMail(email);
 
         ValidatableResponse responseRedeemCode = myGiven()

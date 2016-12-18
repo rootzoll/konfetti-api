@@ -84,10 +84,11 @@ public class PartyControllerTest extends BaseControllerTest {
         ;
     }
 
+
     @Test
     public void createRequest() throws IOException {
         PartyResponse party = make(an(ExamplePartyResponse).but(with(PartyResponseMaker.name, "createRequest")));
-        PartyResponse partyResponse = insertParty(party);
+        PartyResponse partyResponse = createParty(party);
         UserResponse userResponse = createUser("createRequest", "createRequestPassword");
 
         RequestVm requestToSend = make(an(ExampleRequestVm)
@@ -109,11 +110,10 @@ public class PartyControllerTest extends BaseControllerTest {
     }
 
 
-
     @Test
     public void updateRequest() throws IOException {
         PartyResponse party = make(an(ExamplePartyResponse).but(with(PartyResponseMaker.name, "updateRequest")));
-        PartyResponse partyResponse = insertParty(party);
+        PartyResponse partyResponse = createParty(party);
         UserResponse userResponse = createUser("updateRequest", "updateRequestPassword");
 
         RequestVm requestToSend = make(an(ExampleRequestVm)
@@ -121,7 +121,7 @@ public class PartyControllerTest extends BaseControllerTest {
                 .but(with(partyId, partyResponse.getId()))
         );
 
-        RequestVm requestVmUpdate = insertRequest(requestToSend, userResponse);
+        RequestVm requestVmUpdate = createRequest(requestToSend, userResponse);
 
         requestVmUpdate.setTitle("changedTitle");
         requestVmUpdate.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
@@ -138,12 +138,6 @@ public class PartyControllerTest extends BaseControllerTest {
 
         RequestVm requestVmUpdateResponse = objectMapper.readValue(validatableResponse.extract().response().prettyPrint(), RequestVm.class);
         assertRequestVmEqual(requestVmUpdate, requestVmUpdateResponse);
-    }
-
-    private UserResponse createUser(String email, String password) throws IOException {
-        ValidatableResponse userResponse = insertUser(email, password);
-        String jsonResponse = userResponse.extract().response().print();
-        return objectMapper.readValue(jsonResponse, UserResponse.class);
     }
 
     private void assertRequestVmEqual(RequestVm expecteRequestVm, RequestVm actualRequestVm) throws IOException {

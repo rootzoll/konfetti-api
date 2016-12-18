@@ -88,7 +88,7 @@ public class BaseControllerTest {
                 ;
     }
 
-    protected ValidatableResponse insertUser(String email, String password) {
+    protected ValidatableResponse postUser(String email, String password) {
         return myGiven()
                 .param("mail", email.toLowerCase()).param("pass", password)
                 .when().post(UserController.REST_API_MAPPING)
@@ -96,8 +96,8 @@ public class BaseControllerTest {
         ;
     }
 
-    protected PartyResponse insertParty(PartyResponse party) throws IOException {
-        ValidatableResponse validatableResponse = myGiven()
+    protected PartyResponse createParty(PartyResponse party) throws IOException {
+        ValidatableResponse validatableResponse = myGivenAdmin()
                 .contentType(ContentType.JSON)
                 .body(party)
                 .when().post(PartyController.REST_API_MAPPING)
@@ -105,7 +105,7 @@ public class BaseControllerTest {
         return objectMapper.readValue(validatableResponse.extract().response().prettyPrint(), PartyResponse.class);
     }
 
-    protected RequestVm insertRequest(RequestVm requestVm, UserResponse userResponse) throws IOException {
+    protected RequestVm createRequest(RequestVm requestVm, UserResponse userResponse) throws IOException {
         ValidatableResponse validatableResponse = myGivenUser(userResponse)
                 .contentType(ContentType.JSON)
                 .body(requestVm)
@@ -118,6 +118,11 @@ public class BaseControllerTest {
         return requestVmResponse;
     }
 
+    protected UserResponse createUser(String email, String password) throws IOException {
+        ValidatableResponse userResponse = postUser(email, password);
+        String jsonResponse = userResponse.extract().response().print();
+        return objectMapper.readValue(jsonResponse, UserResponse.class);
+    }
 
 }
 

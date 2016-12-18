@@ -2,12 +2,16 @@ package de.konfetti.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import de.konfetti.controller.mapper.ChatMapper;
+import de.konfetti.controller.vm.ChatDto;
 import de.konfetti.data.*;
 import de.konfetti.service.*;
 import de.konfetti.utils.PushManager;
 import de.konfetti.websocket.CommandMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +25,10 @@ import static de.konfetti.data.enums.RequestStateEnum.STATE_PROCESSING;
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping("konfetti/api/chat")
+@RequestMapping(ChatController.REST_API_MAPPING)
 public class ChatController {
+
+	public static final String REST_API_MAPPING = "konfetti/api/chat";
 
 	private static final Gson GSON = new GsonBuilder().create();
 
@@ -51,25 +57,25 @@ public class ChatController {
     // CHAT Controller
     //---------------------------------------------------
 
-	public static Chat setChatPartnerInfoOn(UserService userService, Chat chat, Long chatPartnerUserId, Long selfId) {
+	public static ChatDto setChatPartnerInfoOn(UserService userService, ChatDto chatDto, Long chatPartnerUserId, Long selfId) {
 		User user = userService.findById(chatPartnerUserId);
 		if (user == null) {
 			log.warn("Cannot set ChatPartnerInfo for user(" + chatPartnerUserId + ") - NOT FOUND");
-			return chat;
+			return chatDto;
 		}
-		chat.setChatPartnerId(user.getId());
-		chat.setChatPartnerName(user.getName());
+		chatDto.setChatPartnerId(user.getId());
+		chatDto.setChatPartnerName(user.getName());
 		if ((user.getImageMediaID() != null) && (user.getImageMediaID() > 0))
-			chat.setChatPartnerImageMediaID(user.getImageMediaID());
+			chatDto.setChatPartnerImageMediaID(user.getImageMediaID());
 		if ((user.getSpokenLangs() != null) && (user.getSpokenLangs().length > 0))
-			chat.setChatPartnerSpokenLangs(user.getSpokenLangs());
-		chat.setUnreadMessage(!chat.hasUserSeenLatestMessage(selfId));
-		return chat;
+			chatDto.setChatPartnerSpokenLangs(user.getSpokenLangs());
+		chatDto.setUnreadMessage(!chatDto.hasUserSeenLatestMessage(selfId));
+		return chatDto;
 	}
 
 	@CrossOrigin(origins = "*")
     @RequestMapping(method = RequestMethod.POST, produces = "application/json")
-    public Chat createChat(@RequestBody @Valid final Chat template, HttpServletRequest httpRequest) throws Exception {
+    public ResponseEntity<ChatDto> createChat(@RequestBody @Valid final ChatDto template, HttpServletRequest httpRequest) throws Exception {
 
     	// check if user is allowed to create
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
@@ -104,23 +110,25 @@ public class ChatController {
 			User memberUser = userService.findById(memberId);
 			if (memberUser==null) throw new Exception("member("+memberId+") on new chat does NOT EXIST");
 		}
-    	// create new user
-    	Chat chat = chatService.create(template);
+    	// create new chat
+		ChatMapper chatMapper = new ChatMapper();
+    	Chat chat = chatService.create(chatMapper.fromChatDto(template));
 
+    	ChatDto chatDto = chatMapper.toChatDto(chat);
 		// add transient chat partner info
 		if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
     		if (chat.getMembers().length==1) {
-				setChatPartnerInfoOn(userService, chat, chat.getMembers()[0], 0l);
+				setChatPartnerInfoOn(userService, chatDto, chat.getMembers()[0], 0L);
 			} else {
 				log.warn("Cannot set ChatPartnerInfo on chats with more than one member.");
 			}
     	}
-        return chat;
+        return new ResponseEntity<>(chatDto, HttpStatus.OK);
     }
     
     @CrossOrigin(origins = "*")
     @RequestMapping(value="/{chatId}", method = RequestMethod.GET, produces = "application/json")
-    public Chat getChat(@PathVariable Long chatId, @RequestParam(value="lastTS",defaultValue="0") Long lastTS, HttpServletRequest httpRequest) throws Exception {
+    public ResponseEntity<ChatDto> getChat(@PathVariable Long chatId, @RequestParam(value="lastTS",defaultValue="0") Long lastTS, HttpServletRequest httpRequest) throws Exception {
 
     	// try to load message and chat
     	Chat chat = chatService.findById(chatId);
@@ -128,7 +136,8 @@ public class ChatController {
 
     	// load messages of chat
     	List<Message> messages = messageService.getAllMessagesOfChatSince(chat.getId(),lastTS);
-    	chat.setMessages(messages);
+
+    	ChatDto chatDto = null;
 
     	// check if user is allowed to get data
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
@@ -150,27 +159,31 @@ public class ChatController {
     			if (message.getTime()>biggestTS) biggestTS = message.getTime();
     		}
         	if (biggestTS>chat.getLastTSforMember(client.getUser().getId())) {
-        		chat.setLastTSforMember(client.getUser().getId(), biggestTS);
+				chat.setLastTSforMember(client.getUser().getId(), biggestTS);
         		chatService.update(chat);
         	}
 
 			// C) add transient chat partner info
+			ChatMapper chatMapper = new ChatMapper();
+			chatDto =  chatMapper.toChatDto(chat);
+			chatDto.setMessages(messages);
+
     		if (userIsHost) {
     			// show member as chat partner
     			if (chat.getMembers().length==1) {
-    				setChatPartnerInfoOn(userService, chat, chat.getMembers()[0], client.getUser().getId());
+    				setChatPartnerInfoOn(userService, chatDto, chat.getMembers()[0], client.getUser().getId());
     			} else {
 					log.warn("Cannot set ChatPartnerInfo on chats with more than one member.");
 				}
     		} else {
     			// show host as chat partner
-    			setChatPartnerInfoOn(userService, chat, chat.getHostId(), client.getUser().getId());
+    			setChatPartnerInfoOn(userService, chatDto, chat.getHostId(), client.getUser().getId());
     		}
 		} else {
 			// B) check for trusted application with administrator privilege
         	controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
     	}
-		return chat;
+		return new ResponseEntity<>(chatDto, HttpStatus.OK);
     }
     
     //---------------------------------------------------

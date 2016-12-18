@@ -1,42 +1,47 @@
-package de.konfetti.data;
+package de.konfetti.controller.vm;
 
+import de.konfetti.data.Message;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
+/**
+ * Created by relampago on 18.12.16.
+ */
 @Data
-@Entity
-public class Chat {
-	
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ChatDto {
+
     private Long id;
-    
-    // the request this chat belongs to (if possible keep optional)
+
     private Long requestId;
-    
-    // the party this chat belongs to - request --> party (if possible keep optional)
+
     private Long partyId;
-    
-    // the admin / initiator of the chat ... the userId
+
     private Long hostId;
-    
-    // other userIds part of the chat
+
     private Long[] members = {};
-    
-    // true if the author dont want chat to be displayed anymore
+
     private Boolean muted = false;
-    
-    // remember which TS was the last message received per member
+
     private HashMap<Long, Long> lastTSperMember = new HashMap<Long, Long>();
+
+    private List<Message> messages = new ArrayList<>();
+
+    private Long chatPartnerId;
+
+    private String chatPartnerName;
+
+    private Long chatPartnerImageMediaID;
+
+    private String[] chatPartnerSpokenLangs = new String[]{};
+
+    private boolean unreadMessage;
 
     public Long getLastTSforMember(Long userId) {
         Long lastTS = this.lastTSperMember.get(userId);
-        if (lastTS==null) lastTS = 0l;
+        if (lastTS==null) lastTS = 0L;
         return lastTS;
     }
 

@@ -3,8 +3,8 @@ package de.konfetti.maker.dto;
 import com.natpryce.makeiteasy.Instantiator;
 import com.natpryce.makeiteasy.Property;
 import com.natpryce.makeiteasy.PropertyLookup;
+import de.konfetti.controller.vm.ChatDto;
 import de.konfetti.controller.vm.RequestVm;
-import de.konfetti.data.Chat;
 import de.konfetti.data.MediaItem;
 import de.konfetti.data.enums.RequestStateEnum;
 
@@ -33,7 +33,7 @@ public class RequestVmMaker {
     public static final Property<RequestVm, String[]> spokenLangs = newProperty();
     public static final Property<RequestVm, Long> konfettiCount = newProperty();
     public static final Property<RequestVm, Long> konfettiAdd = newProperty();
-    public static final Property<RequestVm, List<Chat>> chats = newProperty();
+    public static final Property<RequestVm, List<ChatDto>> chats = newProperty();
     public static final Property<RequestVm, List<MediaItem>> info = newProperty();
 //    public static final Property<RequestVm, MediaItem> titleMultiLang = newProperty();
     public static final Property<RequestVm, Long> konfettiAmountSupport = newProperty();

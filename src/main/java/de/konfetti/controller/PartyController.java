@@ -3,9 +3,11 @@ package de.konfetti.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import de.konfetti.controller.mapper.ChatMapper;
 import de.konfetti.controller.mapper.NotificationMapper;
 import de.konfetti.controller.mapper.PartyMapper;
 import de.konfetti.controller.mapper.RequestMapper;
+import de.konfetti.controller.vm.ChatDto;
 import de.konfetti.controller.vm.NotificationDto;
 import de.konfetti.controller.vm.PartyResponse;
 import de.konfetti.controller.vm.RequestVm;
@@ -642,20 +644,24 @@ public class PartyController {
         // add chats to request (when user is host or member)
         List<Chat> chats = this.chatService.getAllByRequestId(requestReponse.getId());
         if (chats == null) chats = new ArrayList<Chat>();
-        List<Chat> relevantChats = new ArrayList<Chat>();
+        List<ChatDto> relevantChats = new ArrayList<ChatDto>();
+        ChatDto chatDto = new ChatDto();
+        ChatMapper chatMapper = new ChatMapper();
         for (Chat chat : chats) {
             if (!chat.chatContainsMessages()) continue;
-            if (chat.getHostId().equals(client.getUser().getId())) {
-                chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getMembers()[0], client.getUser().getId());
-                relevantChats.add(chat);
+            chatDto = chatMapper.toChatDto(chat);
+            if (chatDto.getHostId().equals(client.getUser().getId())) {
+                chatDto = ChatController.setChatPartnerInfoOn(userService, chatDto, chat.getMembers()[0], client.getUser().getId());
+                relevantChats.add(chatDto);
             } else if (Helper.contains(chat.getMembers(), client.getUser().getId())) {
-                chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getHostId(), client.getUser().getId());
-                relevantChats.add(chat);
+                chatDto = ChatController.setChatPartnerInfoOn(userService, chatDto, chat.getHostId(), client.getUser().getId());
+                relevantChats.add(chatDto);
             } else if (userIsPartyAdmin) {
-                chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getMembers()[0], client.getUser().getId());
-                relevantChats.add(chat);
+                chatDto = ChatController.setChatPartnerInfoOn(userService, chatDto, chat.getMembers()[0], client.getUser().getId());
+                relevantChats.add(chatDto);
             }
         }
+
         requestReponse.setChats(relevantChats);
 
         // add media items to request

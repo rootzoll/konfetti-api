@@ -2,7 +2,6 @@ package de.konfetti.maker.dto;
 
 import com.natpryce.makeiteasy.Instantiator;
 import com.natpryce.makeiteasy.Property;
-import com.natpryce.makeiteasy.PropertyLookup;
 import de.konfetti.controller.vm.PartyResponse;
 import de.konfetti.data.enums.PartyReviewLevelEnum;
 import de.konfetti.data.enums.PartyVisibilityEnum;
@@ -27,22 +26,19 @@ public class PartyResponseMaker {
     public static final Property<PartyResponse, Float> lat = newProperty();
     public static final Property<PartyResponse, Integer> meters = newProperty();
 
-    public static final Instantiator<PartyResponse> ExamplePartyResponse = new Instantiator<PartyResponse>() {
-        @Override
-        public PartyResponse instantiate(PropertyLookup<PartyResponse> propertyLookup) {
-            PartyResponse partyResponse = new PartyResponse(null);
-            partyResponse.setName(propertyLookup.valueOf(name, "testParty"));
-            partyResponse.setDetailText(propertyLookup.valueOf(detailText, "testPartyDetailsText"));
-            partyResponse.setContact(propertyLookup.valueOf(contact, "testPartyContact"));
-            partyResponse.setVisibility(propertyLookup.valueOf(visibility, VISIBILITY_PUBLIC));
-            partyResponse.setReviewLevel(propertyLookup.valueOf(reviewLevel, REVIEWLEVEL_NONE));
-            partyResponse.setNewRequestMinKonfetti(propertyLookup.valueOf(newRequestMinKonfetti, Integer.parseInt("0")));
-            partyResponse.setWelcomeBalance(propertyLookup.valueOf(welcomeBalance, Long.parseLong("0")));
-            partyResponse.setLon(propertyLookup.valueOf(lon, Float.parseFloat("0")));
-            partyResponse.setLat(propertyLookup.valueOf(lat, Float.parseFloat("0")));
-            partyResponse.setMeters(propertyLookup.valueOf(meters, Integer.parseInt("10000")));
-            return partyResponse;
-        }
+    public static final Instantiator<PartyResponse> ExamplePartyResponse = propertyLookup -> {
+        PartyResponse partyResponse = new PartyResponse(null);
+        partyResponse.setName(propertyLookup.valueOf(name, "testParty"));
+        partyResponse.setDetailText(propertyLookup.valueOf(detailText, "testPartyDetailsText"));
+        partyResponse.setContact(propertyLookup.valueOf(contact, "testPartyContact"));
+        partyResponse.setVisibility(propertyLookup.valueOf(visibility, VISIBILITY_PUBLIC));
+        partyResponse.setReviewLevel(propertyLookup.valueOf(reviewLevel, REVIEWLEVEL_NONE));
+        partyResponse.setNewRequestMinKonfetti(propertyLookup.valueOf(newRequestMinKonfetti, Integer.parseInt("0")));
+        partyResponse.setWelcomeBalance(propertyLookup.valueOf(welcomeBalance, Long.parseLong("0")));
+        partyResponse.setLon(propertyLookup.valueOf(lon, Float.parseFloat("0")));
+        partyResponse.setLat(propertyLookup.valueOf(lat, Float.parseFloat("0")));
+        partyResponse.setMeters(propertyLookup.valueOf(meters, Integer.parseInt("10000")));
+        return partyResponse;
     };
 
 }
