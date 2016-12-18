@@ -1,8 +1,6 @@
 package de.konfetti.service;
 
-import de.konfetti.data.Notification;
-import de.konfetti.data.NotificationRepository;
-import de.konfetti.data.NotificationType;
+import de.konfetti.data.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,12 +20,11 @@ public class NotificationServiceImpl extends BaseService implements Notification
     }
     
     @Override
-	public Notification create(NotificationType type, Long userId, Long partyId, Long ref) {
+	public Notification create(NotificationType type, User user, Party party, Long ref) {
 
-		// user gets created
         Notification notification = new Notification();
-        notification.setUserId(userId);
-        notification.setPartyId(partyId);
+        notification.setUser(user);
+        notification.setParty(party);
         notification.setType(type);
         notification.setRef(ref);
         notification.setTimeStamp(System.currentTimeMillis());

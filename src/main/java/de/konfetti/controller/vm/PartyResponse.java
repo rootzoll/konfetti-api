@@ -1,6 +1,5 @@
 package de.konfetti.controller.vm;
 
-import de.konfetti.data.Notification;
 import de.konfetti.data.enums.PartyReviewLevelEnum;
 import de.konfetti.data.enums.PartyVisibilityEnum;
 import de.konfetti.data.enums.SendKonfettiModeEnum;
@@ -58,7 +57,7 @@ public class PartyResponse {
 
     private Set<RequestVm> requests = new HashSet<>();
 
-    private Set<Notification> notifications = new HashSet<>();
+    private Set<NotificationDto> notifications = new HashSet<>();
 
     public PartyResponse(Long id) {
         this.id = id;

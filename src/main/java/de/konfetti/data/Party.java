@@ -74,6 +74,9 @@ public class Party {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "party")
     private List<Request> requests;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "party")
+    private List<Notification> notifications;
+
     /*
      * SEND KONFETTI
      * feature to send konfetti to other users

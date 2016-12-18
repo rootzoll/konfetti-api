@@ -20,7 +20,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -138,7 +141,7 @@ public class NotifierBackgroundTask {
                                 log.info(" -> OK - PUSH SEND BY EMAIL");
                                 markNotificationAsPushed(notification, typeOfPush);
                                 // remember last notification to user for short period of time
-                                this.spamBlockerPerUserCache.put(notification.getUserId(), notification);
+                                this.spamBlockerPerUserCache.put(notification.getUser().getId(), notification);
                             } else {
                                 log.warn(" -> SEND NOT SUPPORTED PUSH: " + typeOfPush);
                                 markNotificationAsPushed(notification, PUSHTYPE_FAIL);
@@ -151,7 +154,7 @@ public class NotifierBackgroundTask {
                             log.info(" -> OK - PUSH SEND BY EMAIL");
                             markNotificationAsPushed(notification, typeOfPush);
                             // remember last notification to user for short period of time
-                            this.spamBlockerPerUserCache.put(notification.getUserId(), notification);
+                            this.spamBlockerPerUserCache.put(notification.getUser().getId(), notification);
                             // not supported push
                         } else {
                             log.warn(" -> SEND TO PUSH: " + typeOfPush);
@@ -176,7 +179,7 @@ public class NotifierBackgroundTask {
      */
     private boolean shouldNotificationGetHigherAttention(Notification notification) {
         long oldInSeconds = (System.currentTimeMillis() - notification.getTimeStamp()) / 1000L;
-        log.info("Notification seconds(" + oldInSeconds + ") id(" + notification.getId() + ") party(" + notification.getPartyId() + ") user(" + notification.getUserId() + ") type(" + notification.getType() + ")");
+        log.info("Notification seconds(" + oldInSeconds + ") id(" + notification.getId() + ") party(" + notification.getParty().getId() + ") user(" + notification.getUser().getId() + ") type(" + notification.getType() + ")");
 		
 		/*
 		 * SIMPLE HIGHER ATTENTION CASES
@@ -190,7 +193,7 @@ public class NotifierBackgroundTask {
         // REVIEW WAITING ==> select one reviewer/admin by random
         if (NotificationType.REVIEW_WAITING == notification.getType()) {
             // get all reviewer and admins for party
-            Stream<User> reviewer = userService.getAllUsersReviewerOnParty(notification.getPartyId());
+            Stream<User> reviewer = userService.getAllUsersReviewerOnParty(notification.getParty().getId());
 
             // filter all that dont have email or push active
             List<User> hasPush = new ArrayList<User>();
@@ -203,14 +206,14 @@ public class NotifierBackgroundTask {
 
             // no reviewers --> close notification
             if (!reviewableUser.isPresent()) {
-                log.warn("Party(" + notification.getPartyId() + ") has no admin or reviewer to deliver notification to.");
+                log.warn("Party(" + notification.getParty().getId() + ") has no admin or reviewer to deliver notification to.");
                 markNotificationAsPushed(notification, PUSHTYPE_IGNORE);
                 return false;
             }
 
             Long reviewerId = reviewableUser.get().getId();
             log.debug("REVIEWER is user(" + reviewerId + ")");
-            notification.setUserId(reviewerId);
+            notification.setUser(userService.findById(reviewerId));
             return true;
         }
 
@@ -261,14 +264,14 @@ public class NotifierBackgroundTask {
      */
     private boolean userNotFeelingSpammedYet(Notification notification) {
         // Check if user was active recently
-        User user = userService.findById(notification.getUserId());
+        User user = userService.findById(notification.getUser().getId());
         if (user.wasUserActiveInLastMinutes(3)) {
             log.info("User(" + user.getId() + ") was/is active on App ... wait with push.");
             return false;
         }
 
         // Check Pushes send ..
-        ValueWrapper inCache = spamBlockerPerUserCache.get(notification.getUserId());
+        ValueWrapper inCache = spamBlockerPerUserCache.get(notification.getUser().getId());
 
         // if no notification recently --> go ahead
         if (inCache == null) return true;
@@ -294,7 +297,7 @@ public class NotifierBackgroundTask {
      * @return
      */
     private String getTypeOfPushForUser(Notification notification) {
-        User user = userService.findById(notification.getUserId());
+        User user = userService.findById(notification.getUser().getId());
 
         // check for push notification
         if ((user.getPushActive()) && (PushManager.getInstance().isAvaliable())) {
@@ -320,7 +323,7 @@ public class NotifierBackgroundTask {
      * @return
      */
     private boolean sendPushMail(Notification notification) {
-        User user = userService.findById(notification.getUserId());
+        User user = userService.findById(notification.getUser().getId());
         // TODO multi lang --- see user setting
         if (eMailManager.sendMail(user.getEMail(), "notifier.party.events", "Open Konfetti App so see more :D", null, null)) {
             log.info("OK - PUSH SEND BY EMAIL (" + user.getEMail() + ")");
@@ -338,7 +341,7 @@ public class NotifierBackgroundTask {
      * @return
      */
     private boolean sendPushPush(Notification notification) {
-        User user = userService.findById(notification.getUserId());
+        User user = userService.findById(notification.getUser().getId());
         // TODO multi lang --- see user setting
         PushManager.getInstance().sendNotification(
                 PushManager.PLATFORM_ANDROID,

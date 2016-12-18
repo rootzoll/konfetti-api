@@ -2,10 +2,7 @@ package de.konfetti.data;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Data
@@ -14,12 +11,14 @@ public class Notification {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    // every notification belongs to one user
-    private Long userId;
-    
-    // >0 if belonging to a party
-    private Long partyId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "party_id", nullable = false)
+    private Party party;
     
     // type (see CONST above)
 	private NotificationType type;

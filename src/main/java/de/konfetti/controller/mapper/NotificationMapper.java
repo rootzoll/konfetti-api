@@ -11,8 +11,8 @@ public class NotificationMapper {
     public NotificationDto toNotificationDto(Notification notification) {
         NotificationDto notificationDto = new NotificationDto();
         notificationDto.setId(notification.getId());
-        notificationDto.setUserId(notification.getUserId());
-        notificationDto.setPartyId(notification.getPartyId());
+        notificationDto.setUserId(notification.getUser().getId());
+        notificationDto.setPartyId(notification.getParty().getId());
         notificationDto.setType(notification.getType());
         notificationDto.setRef(notification.getRef());
         notificationDto.setTimeStamp(notification.getTimeStamp());

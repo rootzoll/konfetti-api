@@ -3,8 +3,10 @@ package de.konfetti.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import de.konfetti.controller.mapper.NotificationMapper;
 import de.konfetti.controller.mapper.PartyMapper;
 import de.konfetti.controller.mapper.RequestMapper;
+import de.konfetti.controller.vm.NotificationDto;
 import de.konfetti.controller.vm.PartyResponse;
 import de.konfetti.controller.vm.RequestVm;
 import de.konfetti.data.*;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static de.konfetti.data.NotificationType.*;
 import static de.konfetti.data.enums.MediaItemReviewEnum.REVIEWED_PUBLIC;
@@ -224,7 +227,10 @@ public class PartyController {
                 }
 
                 partyResponse.setRequests(new HashSet<RequestVm>(requests));
-                partyResponse.setNotifications(new HashSet<Notification>(notifications));
+                NotificationMapper notificationMapper = new NotificationMapper();
+                HashSet<Notification> foundNotification = new HashSet<>(notifications);
+                Set<NotificationDto> notificationDtos = foundNotification.stream().map(notification -> notificationMapper.toNotificationDto(notification)).collect(Collectors.toSet());
+                partyResponse.setNotifications(notificationDtos);
 
                 // add accounting info
                 log.debug("add accounting info");
@@ -253,18 +259,21 @@ public class PartyController {
                 // see if there is any new chat message for user TODO: find a more performat way
                 log.debug("see if there is any new chat message");
                 List<Chat> allPartyChatsUserIsPartOf = chatService.getAllByUserAndParty(client.getUser().getId(), partyId);
+                Party party = partyService.findById(partyId);
                 for (Chat chat : allPartyChatsUserIsPartOf) {
                     if (!chat.hasUserSeenLatestMessage(client.getUser().getId())) {
                         // create temporary notification (a notification that is not in DB)
                         Notification noti = new Notification();
                         noti.setId(-System.currentTimeMillis());
-                        noti.setPartyId(partyId);
+                        noti.setParty(party);
                         noti.setRef(chat.getRequestId());
                         noti.setType(NotificationType.CHAT_NEW);
-                        noti.setUserId(client.getUser().getId());
+                        noti.setUser(client.getUser());
                         noti.setTimeStamp(System.currentTimeMillis());
-                        Set<Notification> notis = partyResponse.getNotifications();
-                        notis.add(noti);
+
+                        // add mapped NotificationDto to partyResponse
+                        Set<NotificationDto> notis = partyResponse.getNotifications();
+                        notis.add(notificationMapper.toNotificationDto(noti));
                         partyResponse.setNotifications(notis);
                     }
                 }
@@ -417,7 +426,7 @@ public class PartyController {
                         }
                         // show welcome notification
                         log.info("NOTIFICATION Welcome Paty (" + partyResponse.getId() + ")");
-                        notificationService.create(NotificationType.PARTY_WELCOME, user.getId(), partyResponse.getId(), 0L);
+                        notificationService.create(NotificationType.PARTY_WELCOME, user, party, 0L);
 
                         log.debug("userBalance(" + userBalance + ")");
                     } else {
@@ -452,9 +461,9 @@ public class PartyController {
         if (httpRequest.getHeader("X-CLIENT-ID") != null) {
             // A) check if user is owner of notification
             Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
-            boolean userIsOwner = (noti.getUserId().equals(client.getUser().getId()));
+            boolean userIsOwner = (noti.getUser().getId().equals(client.getUser().getId()));
             if (!userIsOwner)
-                throw new Exception("cannot action notification(" + notiId + ") - user is not noti owner / client.userID(" + client.getUser().getId() + ") != notiUserId(" + noti.getUserId() + ")");
+                throw new Exception("cannot action notification(" + notiId + ") - user is not noti owner / client.userID(" + client.getUser().getId() + ") != notiUserId(" + noti.getUser().getId() + ")");
         } else {
             // B) check for trusted application with administrator privilege
             controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
@@ -566,7 +575,7 @@ public class PartyController {
         }
 
         // store notification
-        notificationService.create(REVIEW_WAITING, null, party.getId(), requestVm.getId());
+        notificationService.create(REVIEW_WAITING, null, party, requestVm.getId());
 
         // publish info about update on public channel
         CommandMessage msg = new CommandMessage();
@@ -634,7 +643,11 @@ public class PartyController {
                 if ((payIn.getType() == TransactionType.TASK_SUPPORT) && (!AccountingTools.getAccountNameFromUserAndParty(request.getUser().getId(), request.getParty().getId()).equals(payIn.getFromAccount()))) {
                     // make payback
                     accountingService.transferBetweenAccounts(TransactionType.TASK_SUPPORT, AccountingTools.getAccountNameFromRequest(requestId), payIn.getFromAccount(), payIn.getAmount());
-                    notificationService.create(PAYBACK, AccountingTools.getUserIdFromAccountName(payIn.getFromAccount()), AccountingTools.getPartyIdFromAccountName(payIn.getFromAccount()), payIn.getAmount());
+                    Long userIdFromAccountName = AccountingTools.getUserIdFromAccountName(payIn.getFromAccount());
+                    User user = userService.findById(userIdFromAccountName);
+                    Long partyIdFromAccountName = AccountingTools.getPartyIdFromAccountName(payIn.getFromAccount());
+                    Party party = partyService.findById(partyIdFromAccountName);
+                    notificationService.create(PAYBACK, user, party, payIn.getAmount());
                 }
             }
         }
@@ -817,7 +830,7 @@ public class PartyController {
 
                 if (fromReview) {
                     // send notification to author
-                    notificationService.create(NotificationType.REVIEW_OK, request.getUser().getId(), request.getParty().getId(), request.getId());
+                    notificationService.create(NotificationType.REVIEW_OK, request.getUser(), request.getParty(), request.getId());
                     // delete any waiting notification finding a reviewer
                     notificationService.deleteByTypeAndReference(REVIEW_WAITING, request.getId());
                 }
@@ -860,7 +873,7 @@ public class PartyController {
                         notificationService.deleteByTypeAndReference(REVIEW_WAITING, request.getId());
 
                         // send notification to author
-                        notificationService.create(REVIEW_FAIL, request.getUser().getId(), request.getParty().getId(), request.getId());
+                        notificationService.create(REVIEW_FAIL, request.getUser(), request.getParty(), request.getId());
                     } else
                         // do reward
                         if (action.equals("reward")) {
@@ -902,30 +915,35 @@ public class PartyController {
                                     throw new Exception("reward(" + requestBalance + ") is not splitting up correctly to " + ids.size() + " --> " + rewardPerPerson);
 
                                 // transfer reward to users
-                                for (Long rewardId : ids) {
-                                    log.info("making transfere reward to userId(" + rewardId + ") ...");
-                                    if (rewardId == null) {
+                                for (Long userRewardId : ids) {
+                                    log.info("making transfere reward to userId(" + userRewardId + ") ...");
+                                    if (userRewardId == null) {
                                         log.warn("skipping a NULL rewardId");
                                         continue;
                                     }
-                                    if (rewardId.equals(request.getUser().getId())) {
+                                    if (userRewardId.equals(request.getUser().getId())) {
                                         log.warn("ignoring the author self-rewrad");
                                         continue;
                                     }
-                                    final String rewardeeAccountName = AccountingTools.getAccountNameFromUserAndParty(rewardId, request.getParty().getId());
+                                    final String rewardeeAccountName = AccountingTools.getAccountNameFromUserAndParty(userRewardId, request.getParty().getId());
                                     if (!accountingService.transferBetweenAccounts(TransactionType.TASK_REWARD, requestAccountName, rewardeeAccountName, rewardPerPerson)) {
                                         log.error("FAIL payout reward(" + rewardPerPerson + ") from(" + requestAccountName + ") to " + rewardeeAccountName);
                                     } else {
                                         log.info("OK payout reward(" + rewardPerPerson + ") from(" + requestAccountName + ") to " + rewardeeAccountName);
                                         // send notification to author
-                                        notificationService.create(REWARD_GOT, rewardId, request.getParty().getId(), request.getId());
+                                        User userReward = userService.findById(userRewardId);
+                                        notificationService.create(REWARD_GOT, userReward, request.getParty(), request.getId());
                                     }
                                 }
                                 // notification to all supporters of request about finish
                                 List<KonfettiTransaction> allPayIns = konfettiTransactionService.getAllTransactionsToAccount(AccountingTools.getAccountNameFromRequest(requestId));
                                 for (KonfettiTransaction payIn : allPayIns) {
                                     if ((payIn.getType() == TransactionType.TASK_SUPPORT) && (!AccountingTools.getAccountNameFromUserAndParty(request.getUser().getId(), request.getParty().getId()).equals(payIn.getFromAccount()))) {
-                                        notificationService.create(SUPPORT_WIN, AccountingTools.getUserIdFromAccountName(payIn.getFromAccount()), AccountingTools.getPartyIdFromAccountName(payIn.getFromAccount()), request.getId());
+                                        Long userIdFromAccountName = AccountingTools.getUserIdFromAccountName(payIn.getFromAccount());
+                                        User user = userService.findById(userIdFromAccountName);
+                                        Long partyIdFromAccountName = AccountingTools.getPartyIdFromAccountName(payIn.getFromAccount());
+                                        Party party = partyService.findById(partyIdFromAccountName);
+                                        notificationService.create(SUPPORT_WIN, user, party, request.getId());
                                     }
                                 }
                             }

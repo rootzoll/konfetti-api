@@ -80,6 +80,9 @@ public class User {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private List<Request> requests;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private List<Notification> notifications;
     
 	public boolean wasUserActiveInLastMinutes(int minutes) {
 		long minutesSinceLastActivity = Math.round((System.currentTimeMillis() - this.lastActivityTS) / (60d*1000d));

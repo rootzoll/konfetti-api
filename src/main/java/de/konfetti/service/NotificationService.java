@@ -2,12 +2,14 @@ package de.konfetti.service;
 
 import de.konfetti.data.Notification;
 import de.konfetti.data.NotificationType;
+import de.konfetti.data.Party;
+import de.konfetti.data.User;
 
 import java.util.List;
 
 public interface NotificationService {
 
-	Notification create(NotificationType type, Long userId, Long partyId, Long ref);
+	Notification create(NotificationType type, User user, Party party, Long ref);
 
     void delete(long notiId);
     
