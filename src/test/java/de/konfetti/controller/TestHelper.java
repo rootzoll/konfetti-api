@@ -1,19 +1,17 @@
 package de.konfetti.controller;
 
 import de.konfetti.data.*;
-import de.konfetti.maker.PartyMaker;
-import de.konfetti.maker.UserMaker;
+import de.konfetti.maker.entity.PartyMaker;
+import de.konfetti.maker.entity.UserMaker;
 
 import java.util.Date;
 
-import static com.natpryce.makeiteasy.MakeItEasy.an;
-import static com.natpryce.makeiteasy.MakeItEasy.make;
-import static com.natpryce.makeiteasy.MakeItEasy.with;
+import static com.natpryce.makeiteasy.MakeItEasy.*;
 import static de.konfetti.data.enums.CodeActionTypeEnum.ACTION_TYPE_KONFETTI;
-import static de.konfetti.maker.MediaMaker.ExampleMediaItem;
-import static de.konfetti.maker.PartyMaker.ExampleParty;
-import static de.konfetti.maker.UserMaker.ExampleUser;
-import static de.konfetti.maker.UserMaker.name;
+import static de.konfetti.maker.entity.MediaMaker.ExampleMediaItem;
+import static de.konfetti.maker.entity.PartyMaker.ExampleParty;
+import static de.konfetti.maker.entity.UserMaker.ExampleUser;
+import static de.konfetti.maker.entity.UserMaker.name;
 
 public class TestHelper {
 	
@@ -53,12 +51,11 @@ public class TestHelper {
 
     }
 
-    public Request getTestRequest1(Party party){
+    public Request getTestRequest1(Party party, User user){
         Request request = new Request();
         request.setTitle("testPartyTitle1");
-        request.setKonfettiAdd(10);
-        request.setKonfettiCount(20);
-        request.setPartyId(party.getId());
+        request.setParty(party);
+        request.setUser(user);
         return request;
     }
 
@@ -72,12 +69,6 @@ public class TestHelper {
         code.setUserID(userId);
         return code;
     }
-
-//    public boolean equalPartys(Party actual, Party expected) {
-//        if (actual.getName() != null ? !actual.getName().equals(expected.getName()) : expected.getName() != null) return false;
-//        if (actual.getAddress() != null ? !actual.getAddress().equals(expected.getAddress()) : expected.getAddress() != null) return false;
-//        return !(actual.getPerson() != null ? !actual.getPerson().equals(expected.getPerson()) : expected.getPerson() != null);
-//    }
 
     public boolean equalRequests(Request actual, Request expected){
         // TODO: repair to work again -> link between party and requests

@@ -1,19 +1,33 @@
 package de.konfetti.controller.mapper;
 
 import de.konfetti.controller.vm.RequestVm;
+import de.konfetti.data.Party;
 import de.konfetti.data.Request;
+import de.konfetti.data.User;
+import de.konfetti.service.PartyService;
+import de.konfetti.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by relampago on 17.12.16.
  */
+@Service
 public class RequestMapper {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private PartyService partyService;
+
 
     public RequestVm toRequestVm(Request request) {
         RequestVm requestVm = new RequestVm();
         requestVm.setId(request.getId());
-        requestVm.setUserId(request.getUserId());
-        requestVm.setUserName(request.getUserName());
-        requestVm.setPartyId(request.getPartyId());
+        requestVm.setUserId(request.getUser().getId());
+        requestVm.setUserName(request.getUser().getName());
+        requestVm.setPartyId(request.getParty().getId());
         requestVm.setState(request.getState());
         requestVm.setTitle(request.getTitle());
         requestVm.setTitleMultiLangRef(request.getTitleMultiLangRef());
@@ -23,11 +37,13 @@ public class RequestMapper {
     }
 
     public Request fromRequestVm(RequestVm requestVm) {
+        User user = userService.findById(requestVm.getUserId());
+        Party party = partyService.findById(requestVm.getPartyId());
+
         Request request = new Request();
         request.setId(requestVm.getId());
-        request.setUserId(requestVm.getUserId());
-        request.setUserName(requestVm.getUserName());
-        request.setPartyId(requestVm.getPartyId());
+        request.setUser(user);
+        request.setParty(party);
         request.setState(requestVm.getState());
         request.setTitle(requestVm.getTitle());
         request.setTitleMultiLangRef(requestVm.getTitleMultiLangRef());
@@ -35,4 +51,5 @@ public class RequestMapper {
         request.setMediaItemIds(requestVm.getMediaItemIds());
         return request;
     }
+
 }

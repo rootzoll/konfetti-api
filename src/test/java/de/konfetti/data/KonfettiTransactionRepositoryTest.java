@@ -20,8 +20,10 @@ public class KonfettiTransactionRepositoryTest extends BaseTest {
 	public void findByFromAccountOrToAccount() throws Exception {
 		val first = konfettiTransactionRepository.save(new KonfettiTransaction(1L, "test1", "test2"));
 		val second = konfettiTransactionRepository.save(new KonfettiTransaction(1L, "test2", "test1"));
+
 		konfettiTransactionRepository.save(new KonfettiTransaction(1L, "test3", "test2"));
 		konfettiTransactionRepository.save(new KonfettiTransaction(1L, "test2", "test3"));
+
 		val result = konfettiTransactionRepository.findByFromAccountOrToAccount("test1", "test1");
 		MatcherAssert.assertThat(result, Matchers.contains(first, second));
 	}

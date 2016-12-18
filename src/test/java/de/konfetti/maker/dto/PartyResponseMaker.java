@@ -1,10 +1,9 @@
-package de.konfetti.maker;
+package de.konfetti.maker.dto;
 
 import com.natpryce.makeiteasy.Instantiator;
 import com.natpryce.makeiteasy.Property;
 import com.natpryce.makeiteasy.PropertyLookup;
 import de.konfetti.controller.vm.PartyResponse;
-import de.konfetti.data.Party;
 import de.konfetti.data.enums.PartyReviewLevelEnum;
 import de.konfetti.data.enums.PartyVisibilityEnum;
 

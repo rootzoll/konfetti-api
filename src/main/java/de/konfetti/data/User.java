@@ -77,6 +77,9 @@ public class User {
 
     @Column(name = "reset_date", nullable = true)
     private ZonedDateTime resetDate = null;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private List<Request> requests;
     
 	public boolean wasUserActiveInLastMinutes(int minutes) {
 		long minutesSinceLastActivity = Math.round((System.currentTimeMillis() - this.lastActivityTS) / (60d*1000d));
