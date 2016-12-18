@@ -7,8 +7,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import static de.konfetti.data.NotificationType.REWARD_GOT;
-
 @Entity
 @Data
 public class Notification {
@@ -33,13 +31,6 @@ public class Notification {
 	private Long timeStamp;
 
 	private Boolean higherPushDone = Boolean.FALSE;
-
-    /*
-     * METHODS 
-     */
-	public boolean needsManualDeletion() {
-		return REWARD_GOT.equals(this.type);
-	}
 
 }
 
