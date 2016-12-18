@@ -83,7 +83,7 @@ public class ChatController {
         	if (template.getRequestId()==null) throw new Exception("request reference is not set");
         	Request request = requestService.findById(template.getRequestId());
         	if (request==null) throw new Exception("request("+template.getRequestId()+") not found");
-        	template.setPartyId(request.getPartyId());
+        	template.setPartyId(request.getParty().getId());
 
         	// C) check if request is open for chats (not done or processing)
         	if (STATE_DONE.equals(request.getState())) throw new Exception("no chat possible on DONE request");

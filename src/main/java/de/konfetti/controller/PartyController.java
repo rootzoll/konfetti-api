@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.konfetti.controller.mapper.PartyMapper;
+import de.konfetti.controller.mapper.RequestMapper;
 import de.konfetti.controller.vm.PartyResponse;
+import de.konfetti.controller.vm.RequestVm;
 import de.konfetti.data.*;
 import de.konfetti.data.mediaitem.MultiLang;
 import de.konfetti.service.*;
@@ -15,8 +17,10 @@ import de.konfetti.websocket.CommandMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -72,6 +76,9 @@ public class PartyController {
     @Autowired
     private MediaRepository mediaRepository;
 
+    @Autowired
+    private RequestMapper requestMapper;
+
     private PartyMapper partyMapper;
 
     @Autowired
@@ -124,8 +131,8 @@ public class PartyController {
     public PartyResponse createParty(@RequestBody @Valid final PartyResponse partyResponse, HttpServletRequest request) throws Exception {
         controllerSecurityHelper.checkAdminLevelSecurity(request);
         log.info("ADMIN: Creating PARTY(" + partyResponse.getId() + ")");
-        Party createdParty = partyService.create(partyMapper.fromPartyResponseToParty(partyResponse));
-        return partyMapper.fromPartyToPartyResponse(createdParty);
+        Party createdParty = partyService.create(partyMapper.fromPartyResponse(partyResponse));
+        return partyMapper.toPartyResponse(createdParty);
     }
 
     //---------------------------------------------------
@@ -137,9 +144,9 @@ public class PartyController {
     public PartyResponse updateParty(@RequestBody @Valid final PartyResponse partyResponse, HttpServletRequest request) throws Exception {
         controllerSecurityHelper.checkAdminLevelSecurity(request);
         log.info("ADMIN: Updating PARTY(" + partyResponse.getId() + ")");
-        Party party = partyMapper.fromPartyResponseToParty(partyResponse);
+        Party party = partyMapper.fromPartyResponse(partyResponse);
         Party updatedParty = partyService.update(party);
-        return partyMapper.fromPartyToPartyResponse(updatedParty);
+        return partyMapper.toPartyResponse(updatedParty);
     }
 
     @CrossOrigin(origins = "*")
@@ -166,8 +173,9 @@ public class PartyController {
     @RequestMapping(value = "/{partyId}", method = RequestMethod.GET)
     public PartyResponse getParty(@PathVariable long partyId, @RequestParam(value = "lastTS", defaultValue = "0") long lastTs, HttpServletRequest request) throws Exception {
 
-        PartyResponse partyResponse = partyMapper.fromPartyToPartyResponse(partyService.findById(partyId));
-        if (partyResponse == null) throw new Exception("was not able to load party with id(" + partyId + ") - NOT FOUND");
+        PartyResponse partyResponse = partyMapper.toPartyResponse(partyService.findById(partyId));
+        if (partyResponse == null)
+            throw new Exception("was not able to load party with id(" + partyId + ") - NOT FOUND");
 
 
         // if user/client is set by header -> add requests and notifications important to user
@@ -194,7 +202,7 @@ public class PartyController {
                     log.debug("user was active within last minute - no need to update last acivity TS");
                 }
 
-                List<Request> requests = requestService.getAllPartyRequests(partyId);
+                List<RequestVm> requests = requestService.getAllPartyRequests(partyId);
                 List<Notification> notifications = notificationService.getAllNotificationsSince(client.getUser().getId(), partyId, lastTs);
                 // TODO Causes Exception see https://github.com/rootzoll/konfetti-app/issues/32
                 // notificationService.deleteAllNotificationsOlderThan(client.getUser().getId(), partyId, lastTs);
@@ -205,17 +213,17 @@ public class PartyController {
 
                 // if not reviewer or admin then return just public and own requests
                 if ((!userIsPartyAdmin) && (!userIsPartyReviewer)) {
-                    List<Request> filteredRequests = new ArrayList<>();
-                    for (Request r : requests) {
-                        if ((r.getUserId().equals(user.getId())) || (r.getState().equals(STATE_DONE)) || (r.getState().equals(STATE_PROCESSING)) || (r.getState().equals(STATE_OPEN))) {
-                            filteredRequests.add(r);
+                    List<RequestVm> filteredRequests = new ArrayList<>();
+                    for (RequestVm requestIter : requests) {
+                        if ((requestIter.getUserId().equals(user.getId())) || (requestIter.getState().equals(STATE_DONE)) || (requestIter.getState().equals(STATE_PROCESSING)) || (requestIter.getState().equals(STATE_OPEN))) {
+                            filteredRequests.add(requestIter);
                         }
                     }
                     requests = filteredRequests;
                     log.debug("after non admin/reviewer filtering --> requests(" + requests.size() + ")");
                 }
 
-                partyResponse.setRequests(new HashSet<Request>(requests));
+                partyResponse.setRequests(new HashSet<RequestVm>(requests));
                 partyResponse.setNotifications(new HashSet<Notification>(notifications));
 
                 // add accounting info
@@ -267,28 +275,27 @@ public class PartyController {
 
         return partyResponse;
     }
-    
+
     /*
      * just for admin to request all parties - without any geo filtering
      */
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public List<PartyResponse> getAllPartiesAdmin(HttpServletRequest request) throws Exception {
-  
     	// check admin auth
         controllerSecurityHelper.checkAdminLevelSecurity(request);
         log.info("ADMIN: Get all PARTIES ...");
-    	
+
         // get all parties and map to response
         List<PartyResponse> partyResponses = new ArrayList<>();
         List<Party> allParties = partyService.getAllParties();
         for (Party party : allParties) {
-        	partyResponses.add(partyMapper.fromPartyToPartyResponse(party));
-		}
-        
+            partyResponses.add(partyMapper.toPartyResponse(party));
+        }
+
         return partyResponses;
-    };		
-    		
+    }
+
 
     @CrossOrigin(origins = "*")
     @RequestMapping(method = RequestMethod.GET)
@@ -381,7 +388,7 @@ public class PartyController {
 
                 // for all parties
                 for (final Party party : resultParties) {
-                    PartyResponse partyResponse = partyMapper.fromPartyToPartyResponse(party);
+                    PartyResponse partyResponse = partyMapper.toPartyResponse(party);
                     final String accountName = AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), partyResponse.getId());
 
                     // add accounting info
@@ -471,7 +478,7 @@ public class PartyController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{partyId}/{langCode}/request", method = RequestMethod.POST)
-    public Request createRequest(@PathVariable long partyId, @PathVariable String langCode, @RequestBody @Valid final Request request, HttpServletRequest httpRequest) throws Exception {
+    public RequestVm createRequest(@PathVariable long partyId, @PathVariable String langCode, @RequestBody @Valid final RequestVm requestVm, HttpServletRequest httpRequest) throws Exception {
 
         // load party for background info
         Party party = partyService.findById(partyId);
@@ -484,38 +491,38 @@ public class PartyController {
         if (user == null) throw new Exception("user(" + client.getUser().getId() + ") not found");
 
         // check if request has minimal konfetti
-        if (request.getKonfettiCount() < 0) throw new Exception("invalid konfetti on request");
-        if (request.getKonfettiCount() < party.getNewRequestMinKonfetti())
-            throw new Exception("not enough konfetti on request - is(" + request.getKonfettiAdd() + ") needed(" + party.getNewRequestMinKonfetti() + ")");
+        if (requestVm.getKonfettiCount() < 0) throw new Exception("invalid konfetti on request");
+        if (requestVm.getKonfettiCount() < party.getNewRequestMinKonfetti())
+            throw new Exception("not enough konfetti on request - is(" + requestVm.getKonfettiAdd() + ") needed(" + party.getNewRequestMinKonfetti() + ")");
 
         // check if user has minimal konfetti
         Long userBalance = accountingService.getBalanceOfAccount(AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), party.getId()));
         if (userBalance == null) userBalance = 0L;
-        if (userBalance < request.getKonfettiCount())
-            throw new Exception("not enough konfetti on userbalance - is(" + userBalance + ") needed(" + request.getKonfettiCount() + ")");
+        if (userBalance < requestVm.getKonfettiCount())
+            throw new Exception("not enough konfetti on userbalance - is(" + userBalance + ") needed(" + requestVm.getKonfettiCount() + ")");
 
         // write data better set by server
-        request.setTime(System.currentTimeMillis());
-        request.setUserId(client.getUser().getId());
-        request.setPartyId(partyId);
+        requestVm.setTime(System.currentTimeMillis());
+        requestVm.setUserId(client.getUser().getId());
+        requestVm.setPartyId(partyId);
 
         // set state based on party settings
         if (party.getReviewLevel() == REVIEWLEVEL_NONE) {
-            request.setState(STATE_OPEN);
+            requestVm.setState(STATE_OPEN);
         } else {
-            request.setState(STATE_REVIEW);
+            requestVm.setState(STATE_REVIEW);
             // TODO push info to review admin
             if (user.getPushActive()) log.warn("TODO: push info to review admin");
         }
 
         // update fields in user and persist
-        user.setImageMediaID(request.getImageMediaID());
-        user.setName(request.getUserName());
-        user.setSpokenLangs(request.getSpokenLangs());
+        user.setImageMediaID(requestVm.getImageMediaID());
+        user.setName(requestVm.getUserName());
+        user.setSpokenLangs(requestVm.getSpokenLangs());
         userService.update(user);
 
         // title --> multi language
-        MultiLang multiLang = autoTranslator.translate(langCode, request.getTitle());
+        MultiLang multiLang = autoTranslator.translate(langCode, requestVm.getTitle());
         String json = new ObjectMapper().writeValueAsString(multiLang);
         log.info("request title --autotranslate--> " + json);
         MediaItem mediaItem = new MediaItem();
@@ -525,45 +532,49 @@ public class PartyController {
         mediaItem.setUserId(client.getUser().getId());
         mediaItem = mediaService.create(mediaItem);
         log.info("multilang stored with id(" + mediaItem.getId() + ")");
-        request.setTitleMultiLangRef(mediaItem.getId());
+        requestVm.setTitleMultiLangRef(mediaItem.getId());
 
         // check media items on new request
-        if (request.getMediaItemIds().length > 0) {
-            Long[] mediaItemIds = request.getMediaItemIds();
+        if (requestVm.getMediaItemIds().length > 0) {
+            Long[] mediaItemIds = requestVm.getMediaItemIds();
             for (int i = 0; i < mediaItemIds.length; i++) {
                 Long mediaItemId = mediaItemIds[i];
                 MediaItem item = mediaService.findById(mediaItemId);
                 if (item == null) {
-                    request.setMediaItemIds(null);
+                    requestVm.setMediaItemIds(null);
                     log.error("new request has non existing media items on it - security clearing all mediaitems on request");
                     break;
                 }
                 if (!item.getUserId().equals(client.getUser().getId())) {
-                    request.setMediaItemIds(null);
+                    requestVm.setMediaItemIds(null);
                     log.error("new request has media items other users on it - security clearing all mediaitems on request");
                     break;
                 }
             }
         }
+
         // create request
-        Request persistent = requestService.create(request);
+        Request persistent = requestService.create(requestMapper.fromRequestVm(requestVm));
 
         // transfer balance to request account
         accountingService.createAccount(AccountingTools.getAccountNameFromRequest(persistent.getId()));
-        if (request.getKonfettiCount() > 0) {
-            accountingService.transferBetweenAccounts(TransactionType.TASK_CREATION, AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), partyId), AccountingTools.getAccountNameFromRequest(persistent.getId()), request.getKonfettiCount());
+        if (requestVm.getKonfettiCount() > 0) {
+            accountingService.transferBetweenAccounts(TransactionType.TASK_CREATION,
+                    AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), partyId),
+                    AccountingTools.getAccountNameFromRequest(persistent.getId()),
+                    requestVm.getKonfettiCount());
         }
 
         // store notification
-        notificationService.create(REVIEW_WAITING, null, party.getId(), request.getId());
+        notificationService.create(REVIEW_WAITING, null, party.getId(), requestVm.getId());
 
         // publish info about update on public channel
         CommandMessage msg = new CommandMessage();
         msg.setCommand(CommandMessage.COMMAND_PARTYUPADTE);
-        msg.setData("{\"party\":" + persistent.getPartyId() + ", \"request\":" + persistent.getId() + " ,\"state\":\"" + persistent.getState() + "\"}");
+        msg.setData("{\"party\":" + persistent.getParty().getId() + ", \"request\":" + persistent.getId() + " ,\"state\":\"" + persistent.getState() + "\"}");
         webSocket.convertAndSend("/out/updates", GSON.toJson(msg));
 
-        return persistent;
+        return requestMapper.toRequestVm(persistent);
     }
 
     //---------------------------------------------------
@@ -572,14 +583,21 @@ public class PartyController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{partyId}/request", method = RequestMethod.PUT)
-    public Request updateRequest(@PathVariable long partyId, @RequestBody @Valid Request request, HttpServletRequest httpRequest) throws Exception {
+    public RequestVm updateRequest(@PathVariable long partyId, @RequestBody @Valid RequestVm request, HttpServletRequest httpRequest) throws Exception {
+        log.debug("updateRequest");
         controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
-        return requestService.update(request);
+        Request updateRequestEntity = requestService.update(requestMapper.fromRequestVm(request));
+        RequestVm requestVm = requestMapper.toRequestVm(updateRequestEntity);
+        requestVm.setKonfettiAmountReward(request.getKonfettiAmountReward());
+        requestVm.setKonfettiAmountSupport(request.getKonfettiAmountSupport());
+        requestVm.setKonfettiCount(request.getKonfettiCount());
+        requestVm.setKonfettiAdd(request.getKonfettiAdd());
+        return requestVm;
     }
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{partyId}/request/{requestId}", method = RequestMethod.DELETE)
-    public Request deleteRequest(@PathVariable long partyId, @PathVariable long requestId, HttpServletRequest httpRequest) throws Exception {
+    public RequestVm deleteRequest(@PathVariable long partyId, @PathVariable long requestId, HttpServletRequest httpRequest) throws Exception {
 
         // get request that is to be deleted
         Request request = requestService.findById(requestId);
@@ -591,8 +609,8 @@ public class PartyController {
             Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
             User user = userService.findById(client.getUser().getId());
 
-            boolean userIsAuthor = (request.getUserId().equals(client.getUser().getId()));
-            boolean userIsPartyAdmin = Helper.userIsAdminOnParty(user, request.getPartyId());
+            boolean userIsAuthor = (request.getUser().getId().equals(client.getUser().getId()));
+            boolean userIsPartyAdmin = Helper.userIsAdminOnParty(user, request.getParty().getId());
             log.info("delete request(" + requestId + ") ... client is author(" + userIsAuthor + ") partyAdmin(" + userIsPartyAdmin + ")");
 
             if ((!userIsAuthor) && (!userIsPartyAdmin))
@@ -607,140 +625,147 @@ public class PartyController {
 
         // delete
         Request result = requestService.delete(request.getId());
+        RequestVm requestVm = requestMapper.toRequestVm(request);
 
         // payback of upvote konfetti when request is still open
         if (!STATE_DONE.equals(request.getState())) {
             List<KonfettiTransaction> allPayIns = konfettiTransactionService.getAllTransactionsToAccount(AccountingTools.getAccountNameFromRequest(requestId));
             for (KonfettiTransaction payIn : allPayIns) {
-                if ((payIn.getType() == TransactionType.TASK_SUPPORT) && (!AccountingTools.getAccountNameFromUserAndParty(request.getUserId(), request.getPartyId()).equals(payIn.getFromAccount()))) {
+                if ((payIn.getType() == TransactionType.TASK_SUPPORT) && (!AccountingTools.getAccountNameFromUserAndParty(request.getUser().getId(), request.getParty().getId()).equals(payIn.getFromAccount()))) {
                     // make payback
                     accountingService.transferBetweenAccounts(TransactionType.TASK_SUPPORT, AccountingTools.getAccountNameFromRequest(requestId), payIn.getFromAccount(), payIn.getAmount());
                     notificationService.create(PAYBACK, AccountingTools.getUserIdFromAccountName(payIn.getFromAccount()), AccountingTools.getPartyIdFromAccountName(payIn.getFromAccount()), payIn.getAmount());
                 }
             }
         }
-        return result;
+        return requestVm;
     }
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{partyId}/request/{requestId}", method = RequestMethod.GET)
-    public Request getRequest(@PathVariable long partyId, @PathVariable long requestId, @RequestParam(value = "upvoteAmount", defaultValue = "0") Long upvoteAmount, HttpServletRequest httpRequest) throws Exception {
+    public ResponseEntity<RequestVm> getRequest(@PathVariable long partyId, @PathVariable long requestId, @RequestParam(value = "upvoteAmount", defaultValue = "0") Long upvoteAmount, HttpServletRequest httpRequest) throws Exception {
 
         Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
         log.info("PartyController getRequest(" + requestId + ") upvoteAmount(" + upvoteAmount + ") ...");
 
-        Request request = requestService.findById(requestId);
-        if (request != null) {
-            User user = userService.findById(client.getUser().getId());
-            boolean userIsPartyAdmin = Helper.userIsAdminOnParty(user, request.getPartyId());
+        Request requestEntity = requestService.findById(requestId);
 
-            // add chats to request (when user is host or member)
-            List<Chat> chats = this.chatService.getAllByRequestId(request.getId());
-            if (chats == null) chats = new ArrayList<Chat>();
-            List<Chat> relevantChats = new ArrayList<Chat>();
-            for (Chat chat : chats) {
-                if (!chat.chatContainsMessages()) continue;
-                if (chat.getHostId().equals(client.getUser().getId())) {
-                    chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getMembers()[0], client.getUser().getId());
-                    relevantChats.add(chat);
-                } else if (Helper.contains(chat.getMembers(), client.getUser().getId())) {
-                    chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getHostId(), client.getUser().getId());
-                    relevantChats.add(chat);
-                } else if (userIsPartyAdmin) {
-                    chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getMembers()[0], client.getUser().getId());
-                    relevantChats.add(chat);
-                }
-            }
-            request.setChats(relevantChats);
-
-            // add media items to request
-            List<MediaItem> infos = null;
-            if (infos == null) infos = new ArrayList<MediaItem>();
-            Long[] mediaIDs = request.getMediaItemIds();
-            if ((mediaIDs != null) && (mediaIDs.length > 0)) {
-                for (Long mediaID : mediaIDs) {
-                    if (mediaID != null) {
-                        MediaItem item = mediaService.findById(mediaID);
-                        infos.add(item);
-                    }
-                }
-            }
-            request.setInfo(infos);
-
-            // get multi language media item
-            if (request.getTitleMultiLangRef()!=null) {
-                request.setTitleMultiLang(mediaRepository.findOne(request.getTitleMultiLangRef()));
-            }
-
-
-            // add info about support to the request from this user
-            long konfettiAmountSupport = 0L;
-            List<KonfettiTransaction> allTransactionsToRequest = konfettiTransactionService.getAllTransactionsToAccountSinceTS(AccountingTools.getAccountNameFromRequest(request.getId()), request.getTime());
-            for (KonfettiTransaction konfettiTransaction : allTransactionsToRequest) {
-                if (AccountingTools.getUserIdFromAccountName(konfettiTransaction.getFromAccount()).equals(user.getId())) {
-                    konfettiAmountSupport += konfettiTransaction.getAmount();
-                }
-            }
-            request.setKonfettiAmountSupport(konfettiAmountSupport);
-
-            // add info about rewards from the request to user
-            long konfettiAmountReward = 0L;
-            if (request.getState().equals(STATE_DONE)) {
-                String accountName = AccountingTools.getAccountNameFromRequest(request.getId());
-                List<KonfettiTransaction> allTransactionsFromRequest = konfettiTransactionService.getAllTransactionsFromAccountSinceTS(accountName, request.getTime());
-                for (KonfettiTransaction konfettiTransaction : allTransactionsFromRequest) {
-                    if (konfettiTransaction.getType() != TransactionType.TASK_REWARD) continue;
-                    if (konfettiTransaction.getFromAccount() == null) {
-                        log.warn("NULL fromAdress on transaction(" + konfettiTransaction.getId() + ") on request(" + request.getId() + ") ... why?!?");
-                        continue;
-                    }
-                    if (user.getId().equals(AccountingTools.getUserIdFromAccountName(konfettiTransaction.getToAccount()))) {
-                        konfettiAmountReward += konfettiTransaction.getAmount();
-                    }
-                }
-            }
-            request.setKonfettiAmountReward(konfettiAmountReward);
-
-            // UPVOTE (optional when request parameter set)
-            if (upvoteAmount > 0L) {
-                log.info("Upvoting request(" + requestId + ") with amount(" + upvoteAmount + ") ...");
-                // check if user has enough balance
-                String userAccountname = AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), partyId);
-                Long userBalance = accountingService.getBalanceOfAccount(userAccountname);
-                if (userBalance == null)
-                    throw new Exception("not able to get account balance of account(" + userAccountname + ")");
-                if (userBalance < upvoteAmount)
-                    throw new Exception("user(" + client.getId() + ") has not enough balance to upvote on party(" + partyId + ") - is(" + userBalance + ") needed(" + upvoteAmount + ")");
-
-                // transfer amount
-                if (!accountingService.transferBetweenAccounts(TransactionType.TASK_SUPPORT, userAccountname, AccountingTools.getAccountNameFromRequest(requestId), upvoteAmount)) {
-                    throw new Exception("was not able to transfer upvote amount(" + upvoteAmount + ") from(" + userAccountname + ") to(" + AccountingTools.getAccountNameFromRequest(requestId) + ")");
-                }
-                log.info("... OK: transfer of upvote amount(" + upvoteAmount + ") from(" + userAccountname + ") to(" + AccountingTools.getAccountNameFromRequest(requestId) + ") done.");
-            } else {
-                log.info("no Upvoting - amount(" + upvoteAmount + ")");
-            }
-
-            // add account balance to request object
-            request.setKonfettiCount(accountingService.getBalanceOfAccount(AccountingTools.getAccountNameFromRequest(requestId)));
-
-            // publish info about update on public channel
-            CommandMessage msg = new CommandMessage();
-            msg.setCommand(CommandMessage.COMMAND_PARTYUPADTE);
-            msg.setData("{\"party\":" + request.getPartyId() + ", \"request\":" + request.getId() + " ,\"state\":\"" + request.getState() + "\", \"konfetti\":" + request.getKonfettiCount() + "}");
-            webSocket.convertAndSend("/out/updates", GSON.toJson(msg));
-
-        } else {
+        if (requestEntity == null) {
             log.warn("PartyController getRequest(" + requestId + ") --> NULL");
+            ResponseEntity<Void> nullResponse = ResponseEntity.noContent().build();
+            return new ResponseEntity<>((MultiValueMap<String, String>) nullResponse, HttpStatus.OK);
         }
 
-        return request;
+        RequestVm requestReponse = requestMapper.toRequestVm(requestEntity);
+
+
+        User user = userService.findById(client.getUser().getId());
+        boolean userIsPartyAdmin = Helper.userIsAdminOnParty(user, requestReponse.getPartyId());
+
+        // add chats to request (when user is host or member)
+        List<Chat> chats = this.chatService.getAllByRequestId(requestReponse.getId());
+        if (chats == null) chats = new ArrayList<Chat>();
+        List<Chat> relevantChats = new ArrayList<Chat>();
+        for (Chat chat : chats) {
+            if (!chat.chatContainsMessages()) continue;
+            if (chat.getHostId().equals(client.getUser().getId())) {
+                chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getMembers()[0], client.getUser().getId());
+                relevantChats.add(chat);
+            } else if (Helper.contains(chat.getMembers(), client.getUser().getId())) {
+                chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getHostId(), client.getUser().getId());
+                relevantChats.add(chat);
+            } else if (userIsPartyAdmin) {
+                chat = ChatController.setChatPartnerInfoOn(userService, chat, chat.getMembers()[0], client.getUser().getId());
+                relevantChats.add(chat);
+            }
+        }
+        requestReponse.setChats(relevantChats);
+
+        // add media items to request
+        List<MediaItem> infos = null;
+        if (infos == null) infos = new ArrayList<MediaItem>();
+        Long[] mediaIDs = requestReponse.getMediaItemIds();
+        if ((mediaIDs != null) && (mediaIDs.length > 0)) {
+            for (Long mediaID : mediaIDs) {
+                if (mediaID != null) {
+                    MediaItem item = mediaService.findById(mediaID);
+                    infos.add(item);
+                }
+            }
+        }
+        requestReponse.setInfo(infos);
+
+        // get multi language media item
+        if (requestReponse.getTitleMultiLangRef() != null) {
+            requestReponse.setTitleMultiLang(mediaRepository.findOne(requestReponse.getTitleMultiLangRef()));
+        }
+
+
+        // add info about support to the request from this user
+        long konfettiAmountSupport = 0L;
+        List<KonfettiTransaction> allTransactionsToRequest = konfettiTransactionService.getAllTransactionsToAccountSinceTS(AccountingTools.getAccountNameFromRequest(requestReponse.getId()), requestReponse.getTime());
+        for (KonfettiTransaction konfettiTransaction : allTransactionsToRequest) {
+            if (AccountingTools.getUserIdFromAccountName(konfettiTransaction.getFromAccount()).equals(user.getId())) {
+                konfettiAmountSupport += konfettiTransaction.getAmount();
+            }
+        }
+        requestReponse.setKonfettiAmountSupport(konfettiAmountSupport);
+
+        // add info about rewards from the request to user
+        long konfettiAmountReward = 0L;
+        if (requestReponse.getState().equals(STATE_DONE)) {
+            String accountName = AccountingTools.getAccountNameFromRequest(requestReponse.getId());
+            List<KonfettiTransaction> allTransactionsFromRequest = konfettiTransactionService.getAllTransactionsFromAccountSinceTS(accountName, requestReponse.getTime());
+            for (KonfettiTransaction konfettiTransaction : allTransactionsFromRequest) {
+                if (konfettiTransaction.getType() != TransactionType.TASK_REWARD) continue;
+                if (konfettiTransaction.getFromAccount() == null) {
+                    log.warn("NULL fromAdress on transaction(" + konfettiTransaction.getId() + ") on request(" + requestReponse.getId() + ") ... why?!?");
+                    continue;
+                }
+                if (user.getId().equals(AccountingTools.getUserIdFromAccountName(konfettiTransaction.getToAccount()))) {
+                    konfettiAmountReward += konfettiTransaction.getAmount();
+                }
+            }
+        }
+        requestReponse.setKonfettiAmountReward(konfettiAmountReward);
+
+        // UPVOTE (optional when request parameter set)
+        if (upvoteAmount > 0L) {
+            log.info("Upvoting request(" + requestId + ") with amount(" + upvoteAmount + ") ...");
+            // check if user has enough balance
+            String userAccountname = AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), partyId);
+            Long userBalance = accountingService.getBalanceOfAccount(userAccountname);
+            if (userBalance == null)
+                throw new Exception("not able to get account balance of account(" + userAccountname + ")");
+            if (userBalance < upvoteAmount)
+                throw new Exception("user(" + client.getId() + ") has not enough balance to upvote on party(" + partyId + ") - is(" + userBalance + ") needed(" + upvoteAmount + ")");
+
+            // transfer amount
+            if (!accountingService.transferBetweenAccounts(TransactionType.TASK_SUPPORT, userAccountname, AccountingTools.getAccountNameFromRequest(requestId), upvoteAmount)) {
+                throw new Exception("was not able to transfer upvote amount(" + upvoteAmount + ") from(" + userAccountname + ") to(" + AccountingTools.getAccountNameFromRequest(requestId) + ")");
+            }
+            log.info("... OK: transfer of upvote amount(" + upvoteAmount + ") from(" + userAccountname + ") to(" + AccountingTools.getAccountNameFromRequest(requestId) + ") done.");
+        } else {
+            log.info("no Upvoting - amount(" + upvoteAmount + ")");
+        }
+
+        // add account balance to request object
+        requestReponse.setKonfettiCount(accountingService.getBalanceOfAccount(AccountingTools.getAccountNameFromRequest(requestId)));
+
+        // publish info about update on public channel
+        CommandMessage msg = new CommandMessage();
+        msg.setCommand(CommandMessage.COMMAND_PARTYUPADTE);
+        msg.setData("{\"party\":" + requestReponse.getPartyId() + ", \"request\":" + requestReponse.getId() + " ,\"state\":\"" + requestReponse.getState() + "\", \"konfetti\":" + requestReponse.getKonfettiCount() + "}");
+        webSocket.convertAndSend("/out/updates", GSON.toJson(msg));
+
+
+        return new ResponseEntity<>(requestReponse, HttpStatus.OK);
     }
 
     @SuppressWarnings("unchecked")
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/action/request/{requestId}", method = RequestMethod.GET)
-    public Request actionRequest(@PathVariable long requestId, @RequestParam(value = "action", defaultValue = "no") String action, @RequestParam(value = "json", defaultValue = "") String json, HttpServletRequest httpRequest) throws Exception {
+    public RequestVm actionRequest(@PathVariable long requestId, @RequestParam(value = "action", defaultValue = "no") String action, @RequestParam(value = "json", defaultValue = "") String json, HttpServletRequest httpRequest) throws Exception {
 
         Request request = requestService.findById(requestId);
         if (request != null) {
@@ -756,9 +781,9 @@ public class PartyController {
                 Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
                 User user = userService.findById(client.getUser().getId());
 
-                userIsAuthor = (request.getUserId().equals(client.getUser().getId()));
-                userIsPartyAdmin = Helper.userIsAdminOnParty(user, request.getPartyId());
-                userIsPartyReviewer = Helper.userIsReviewerOnParty(user, request.getPartyId());
+                userIsAuthor = (request.getUser().getId().equals(client.getUser().getId()));
+                userIsPartyAdmin = Helper.userIsAdminOnParty(user, request.getParty().getId());
+                userIsPartyReviewer = Helper.userIsReviewerOnParty(user, request.getParty().getId());
                 log.info("action request(" + requestId + ") ... client is author(" + userIsAuthor + ") partyAdmin(" + userIsPartyAdmin + ") partyReview(" + userIsPartyReviewer + ")");
 
                 if ((!userIsAuthor) && (!userIsPartyAdmin) && (!userIsPartyReviewer))
@@ -792,7 +817,7 @@ public class PartyController {
 
                 if (fromReview) {
                     // send notification to author
-                    notificationService.create(NotificationType.REVIEW_OK, request.getUserId(), request.getPartyId(), request.getId());
+                    notificationService.create(NotificationType.REVIEW_OK, request.getUser().getId(), request.getParty().getId(), request.getId());
                     // delete any waiting notification finding a reviewer
                     notificationService.deleteByTypeAndReference(REVIEW_WAITING, request.getId());
                 }
@@ -800,7 +825,7 @@ public class PartyController {
                 // publish info about update on public channel
                 CommandMessage msg = new CommandMessage();
                 msg.setCommand(CommandMessage.COMMAND_PARTYUPADTE);
-                msg.setData("{\"party\":" + request.getPartyId() + ", \"request\":" + request.getId() + " ,\"state\":\"" + request.getState() + "\"}");
+                msg.setData("{\"party\":" + request.getParty().getId() + ", \"request\":" + request.getId() + " ,\"state\":\"" + request.getState() + "\"}");
                 webSocket.convertAndSend("/out/updates", GSON.toJson(msg));
             } else
                 // set processing (by all)
@@ -828,14 +853,14 @@ public class PartyController {
                         // publish info about update on public channel
                         CommandMessage msg = new CommandMessage();
                         msg.setCommand(CommandMessage.COMMAND_PARTYUPADTE);
-                        msg.setData("{\"party\":" + request.getPartyId() + ", \"request\":" + request.getId() + " ,\"state\":\"" + request.getState() + "\"}");
+                        msg.setData("{\"party\":" + request.getParty().getId() + ", \"request\":" + request.getId() + " ,\"state\":\"" + request.getState() + "\"}");
                         webSocket.convertAndSend("/out/updates", GSON.toJson(msg));
 
                         // delete any waiting notification finding a reviewer
                         notificationService.deleteByTypeAndReference(REVIEW_WAITING, request.getId());
 
                         // send notification to author
-                        notificationService.create(REVIEW_FAIL, request.getUserId(), request.getPartyId(), request.getId());
+                        notificationService.create(REVIEW_FAIL, request.getUser().getId(), request.getParty().getId(), request.getId());
                     } else
                         // do reward
                         if (action.equals("reward")) {
@@ -883,23 +908,23 @@ public class PartyController {
                                         log.warn("skipping a NULL rewardId");
                                         continue;
                                     }
-                                    if (rewardId.equals(request.getUserId())) {
+                                    if (rewardId.equals(request.getUser().getId())) {
                                         log.warn("ignoring the author self-rewrad");
                                         continue;
                                     }
-                                    final String rewardeeAccountName = AccountingTools.getAccountNameFromUserAndParty(rewardId, request.getPartyId());
+                                    final String rewardeeAccountName = AccountingTools.getAccountNameFromUserAndParty(rewardId, request.getParty().getId());
                                     if (!accountingService.transferBetweenAccounts(TransactionType.TASK_REWARD, requestAccountName, rewardeeAccountName, rewardPerPerson)) {
                                         log.error("FAIL payout reward(" + rewardPerPerson + ") from(" + requestAccountName + ") to " + rewardeeAccountName);
                                     } else {
                                         log.info("OK payout reward(" + rewardPerPerson + ") from(" + requestAccountName + ") to " + rewardeeAccountName);
                                         // send notification to author
-                                        notificationService.create(REWARD_GOT, rewardId, request.getPartyId(), request.getId());
+                                        notificationService.create(REWARD_GOT, rewardId, request.getParty().getId(), request.getId());
                                     }
                                 }
                                 // notification to all supporters of request about finish
                                 List<KonfettiTransaction> allPayIns = konfettiTransactionService.getAllTransactionsToAccount(AccountingTools.getAccountNameFromRequest(requestId));
                                 for (KonfettiTransaction payIn : allPayIns) {
-                                    if ((payIn.getType() == TransactionType.TASK_SUPPORT) && (!AccountingTools.getAccountNameFromUserAndParty(request.getUserId(), request.getPartyId()).equals(payIn.getFromAccount()))) {
+                                    if ((payIn.getType() == TransactionType.TASK_SUPPORT) && (!AccountingTools.getAccountNameFromUserAndParty(request.getUser().getId(), request.getParty().getId()).equals(payIn.getFromAccount()))) {
                                         notificationService.create(SUPPORT_WIN, AccountingTools.getUserIdFromAccountName(payIn.getFromAccount()), AccountingTools.getPartyIdFromAccountName(payIn.getFromAccount()), request.getId());
                                     }
                                 }
@@ -907,13 +932,13 @@ public class PartyController {
 
                             // set processing & persists
                             request.setState(STATE_DONE);
-                            requestService.update(request);
+                            request = requestService.update(request);
                             log.info("request(" + requestId + ") set STATE to " + STATE_DONE);
 
                             // publish info about update on public channel
                             CommandMessage msg = new CommandMessage();
                             msg.setCommand(CommandMessage.COMMAND_PARTYUPADTE);
-                            msg.setData("{\"party\":" + request.getPartyId() + ", \"request\":" + request.getId() + " ,\"state\":\"" + request.getState() + "\"}");
+                            msg.setData("{\"party\":" + request.getParty().getId() + ", \"request\":" + request.getId() + " ,\"state\":\"" + request.getState() + "\"}");
                             webSocket.convertAndSend("/out/updates", GSON.toJson(msg));
                         } else
                             // mute chat on request
@@ -969,7 +994,7 @@ public class PartyController {
 
                                     // remove media
                                     request.setMediaItemIds(Helper.remove(request.getMediaItemIds(), mediaId));
-                                    requestService.update(request);
+                                    request = requestService.update(request);
                                     log.info("mediaItem(" + mediaId + ") removed from request(" + requestId + ")");
                                 } else
                                     // add media item to request
@@ -997,7 +1022,7 @@ public class PartyController {
                                         Long[] itemIds = request.getMediaItemIds();
                                         itemIds = Helper.append(itemIds, mediaId);
                                         request.setMediaItemIds(itemIds);
-                                        requestService.update(request);
+                                        request = requestService.update(request);
                                         log.info("mediaItem(" + mediaId + ") add to request(" + requestId + ")");
 
                                         // TODO Implement send notification to reviewer if media item still needs review
@@ -1040,12 +1065,12 @@ public class PartyController {
             log.warn("PartyController getRequest(" + requestId + ") --> NULL");
         }
 
-        return request;
+        return requestMapper.toRequestVm(request);
     }
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{partyId}/request", method = RequestMethod.GET)
-    public List<Request> getAllPartyRequests(@PathVariable long partyId) throws Exception {
+    public List<RequestVm> getAllPartyRequests(@PathVariable long partyId) throws Exception {
         return requestService.getAllPartyRequests(partyId);
     }
 

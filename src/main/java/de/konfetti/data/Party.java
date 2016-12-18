@@ -8,7 +8,6 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +70,9 @@ public class Party {
     @LazyCollection(LazyCollectionOption.FALSE)
     @ManyToMany(mappedBy = "reviewerParties")
     private List<User> reviewerUser = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "party")
+    private List<Request> requests;
 
     /*
      * SEND KONFETTI

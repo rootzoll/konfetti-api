@@ -1,9 +1,9 @@
 package de.konfetti.service;
 
+import de.konfetti.controller.vm.RequestVm;
 import de.konfetti.data.Request;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.List;
 
 public interface RequestService {
@@ -16,7 +16,7 @@ public interface RequestService {
     
     Request findById(long requestId);
 
-    List<Request> getAllPartyRequests(@NotNull long partyId);
+    List<RequestVm> getAllPartyRequests(@NotNull long partyId);
 
 	Long getNumberOfRequests();
 }

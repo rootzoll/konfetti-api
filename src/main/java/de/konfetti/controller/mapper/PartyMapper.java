@@ -8,7 +8,7 @@ import de.konfetti.data.Party;
  */
 public class PartyMapper {
 
-    public PartyResponse fromPartyToPartyResponse(Party party) {
+    public PartyResponse toPartyResponse(Party party) {
         if (party == null) {
             return null;
         }
@@ -27,7 +27,7 @@ public class PartyMapper {
         return partyResponse;
     }
 
-    public Party fromPartyResponseToParty(PartyResponse partyResponse) {
+    public Party fromPartyResponse(PartyResponse partyResponse) {
         if (partyResponse == null) {
             return null;
         }

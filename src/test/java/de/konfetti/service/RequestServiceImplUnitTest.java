@@ -39,16 +39,18 @@ public class RequestServiceImplUnitTest {
     @Test(expected = IllegalArgumentException.class)
     public void testCreateWithoutValidParty() throws Exception {
         Party testParty1 = testHelper.getTestParty1();
-        testParty1.setId((long) 10);
-        Request createdRequest = requestService.create(testHelper.getTestRequest1(testParty1));
+        User user = testHelper.getUser("test");
+        testParty1.setId(Long.MAX_VALUE);
+        Request createdRequest = requestService.create(testHelper.getTestRequest1(testParty1, user));
     }
 
     @Test(expected = ServiceException.class)
     public void testCreateWithRequestIdSet() throws Exception {
         Party testParty1 = testHelper.getTestParty1();
         testParty1.setId((long) 10);
+        User user = testHelper.getUser("test");
         when(partyRepository.findOne(testParty1.getId())).thenReturn(testParty1);
-        Request testRequest1 = testHelper.getTestRequest1(testParty1);
+        Request testRequest1 = testHelper.getTestRequest1(testParty1, user);
         testRequest1.setId((long) 1);
         Request createdRequest = requestService.create(testRequest1);
     }

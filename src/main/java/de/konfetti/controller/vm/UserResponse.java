@@ -11,6 +11,9 @@ import java.util.Set;
 @Data
 public class UserResponse {
 
+    public UserResponse() {
+    }
+
     private Long id;
 
     private String name;
@@ -27,7 +30,7 @@ public class UserResponse {
 
     private Set<Long> reviewerOnParties = new HashSet<>();
 
-    private Long lastActivityTS = 0l;
+    private Long lastActivityTS = 0L;
 
     private Boolean pushActive = false;
 

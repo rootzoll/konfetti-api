@@ -1,5 +1,7 @@
 package de.konfetti.service;
 
+import de.konfetti.controller.mapper.RequestMapper;
+import de.konfetti.controller.vm.RequestVm;
 import de.konfetti.data.*;
 import de.konfetti.service.exception.ServiceException;
 import de.konfetti.utils.AccountingTools;
@@ -16,6 +18,8 @@ import java.util.Objects;
 @Validated
 public class RequestServiceImpl extends BaseService implements RequestService {
 
+    private RequestMapper requestMapper = new RequestMapper();
+
     public RequestServiceImpl() {
     }
 
@@ -30,7 +34,7 @@ public class RequestServiceImpl extends BaseService implements RequestService {
     @Override
     public Request create(@NotNull Request request) {
 
-        getPartyOrThrowError(request.getPartyId());
+        getPartyOrThrowError(request.getParty().getId());
 
         Long requestId = request.getId();
         if (requestId != null && requestId > 0) {
@@ -47,7 +51,7 @@ public class RequestServiceImpl extends BaseService implements RequestService {
     public Request update(@NotNull Request request) {
         Objects.nonNull(request);
 
-        Party dbParty = getPartyOrThrowError(request.getPartyId());
+        Party dbParty = getPartyOrThrowError(request.getParty().getId());
 
         Request dbRequest = getRequestOrThrowError(dbParty.getId(), request.getId());
 
@@ -55,8 +59,6 @@ public class RequestServiceImpl extends BaseService implements RequestService {
         dbRequest.setTitle(request.getTitle());
         dbRequest.setImageMediaID(request.getImageMediaID());
         dbRequest.setTime(request.getTime());
-        dbRequest.setKonfettiAdd(request.getKonfettiAdd());
-        dbRequest.setKonfettiCount(request.getKonfettiCount());
 
         return requestRepository.saveAndFlush(dbRequest);
     }
@@ -77,30 +79,31 @@ public class RequestServiceImpl extends BaseService implements RequestService {
     }
 
     @Override
-    public List<Request> getAllPartyRequests(@NotNull long partyId) {
-    	
+    public List<RequestVm> getAllPartyRequests(@NotNull long partyId) {
     	List<Request> partyRequests = requestRepository.findByPartyId(partyId);
-    	List<Request> result = new ArrayList<Request>();
-    	
-    	for (Request request : partyRequests) {
+    	List<RequestVm> result = new ArrayList<>();
+
+        for (Request requestEntity : partyRequests) {
+    	    RequestVm requestVm = requestMapper.toRequestVm(requestEntity);
+
+
             // get account balance of request
-            Long requestBalance = 0l;
-            final String requestAccountName = AccountingTools.getAccountNameFromRequest(request.getId());
+            Long requestBalance = 0L;
+            final String requestAccountName = AccountingTools.getAccountNameFromRequest(requestVm.getId());
 
             Account account = accountRepository.findByName(requestAccountName);
             requestBalance = account.getBalance();
 
-            request.setKonfettiCount(requestBalance);
+            requestVm.setKonfettiCount(requestBalance);
 
             // get multi language media item
-            if (request.getTitleMultiLangRef()!=null) {
-                request.setTitleMultiLang(mediaRepository.findOne(request.getTitleMultiLangRef()));
+            if (requestVm.getTitleMultiLangRef()!=null) {
+                requestVm.setTitleMultiLang(mediaRepository.findOne(requestVm.getTitleMultiLangRef()));
             }
 
             // add to result set
-            result.add(request);
+            result.add(requestVm);
 		}
-    	
     	return result;
     }
     

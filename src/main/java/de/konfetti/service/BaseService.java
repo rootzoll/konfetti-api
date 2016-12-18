@@ -45,7 +45,7 @@ public class BaseService {
             throw new IllegalArgumentException("Request cannot be found with the given ID : " + requestId);
 
         // make sure the request belongs to the given party
-        if (!dbRequest.getPartyId().equals(partyId))
+        if (!dbRequest.getParty().getId().equals(partyId))
             throw new IllegalArgumentException("Request does not belong to the given party with ID : " + partyId);
 
         return dbRequest;

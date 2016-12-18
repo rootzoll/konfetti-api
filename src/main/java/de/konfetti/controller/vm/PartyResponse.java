@@ -1,7 +1,6 @@
 package de.konfetti.controller.vm;
 
 import de.konfetti.data.Notification;
-import de.konfetti.data.Request;
 import de.konfetti.data.enums.PartyReviewLevelEnum;
 import de.konfetti.data.enums.PartyVisibilityEnum;
 import de.konfetti.data.enums.SendKonfettiModeEnum;
@@ -57,7 +56,7 @@ public class PartyResponse {
 
     private int topPosition;
 
-    private Set<Request> requests = new HashSet<>();
+    private Set<RequestVm> requests = new HashSet<>();
 
     private Set<Notification> notifications = new HashSet<>();
 

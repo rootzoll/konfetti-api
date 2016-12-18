@@ -1,7 +1,10 @@
 package de.konfetti.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.konfetti.Application;
-import de.konfetti.data.Party;
+import de.konfetti.controller.vm.PartyResponse;
+import de.konfetti.controller.vm.RequestVm;
+import de.konfetti.controller.vm.UserResponse;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
@@ -19,10 +22,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.subethamail.wiser.Wiser;
 
+import java.io.IOException;
+
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
-import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
 
 /**
  * Created by relampago on 11.10.16.
@@ -50,12 +52,15 @@ public class BaseControllerTest {
     @Value("${local.server.port}")
     int serverPort;
 
+    protected ObjectMapper objectMapper;
+
     @Before
     public void setUp() throws Exception {
         testHelper = new TestHelper();
         emailPort = 2500;
         wiser = new Wiser(emailPort);
         wiser.start();
+        objectMapper = new ObjectMapper();
     }
 
     @After
@@ -76,7 +81,14 @@ public class BaseControllerTest {
                 .header(ControllerSecurityHelper.HEADER_ADMIN_PASSWORD, "admin");
     }
 
-    protected ValidatableResponse createUser(String email, String password) {
+    protected RequestSpecification myGivenUser(UserResponse userResponse){
+        return myGiven()
+                .header("X-CLIENT-ID", userResponse.getId())
+                .header("X-CLIENT-SECRET", userResponse.getClientSecret())
+                ;
+    }
+
+    protected ValidatableResponse insertUser(String email, String password) {
         return myGiven()
                 .param("mail", email.toLowerCase()).param("pass", password)
                 .when().post(UserController.REST_API_MAPPING)
@@ -84,16 +96,29 @@ public class BaseControllerTest {
         ;
     }
 
-    protected ValidatableResponse createAndInsertParty(String partyName) {
-        Party party = testHelper.getParty(partyName);
+    protected PartyResponse insertParty(PartyResponse party) throws IOException {
         ValidatableResponse validatableResponse = myGiven()
                 .contentType(ContentType.JSON)
                 .body(party)
                 .when().post(PartyController.REST_API_MAPPING)
-                .then().statusCode(HttpStatus.OK.value())
-                .body("name", equalToIgnoringCase(partyName));
-        return validatableResponse;
+                .then();
+        return objectMapper.readValue(validatableResponse.extract().response().prettyPrint(), PartyResponse.class);
     }
+
+    protected RequestVm insertRequest(RequestVm requestVm, UserResponse userResponse) throws IOException {
+        ValidatableResponse validatableResponse = myGivenUser(userResponse)
+                .contentType(ContentType.JSON)
+                .body(requestVm)
+                .pathParam("partyId", requestVm.getPartyId())
+                .pathParam("langCode", "en")
+                .when().post(PartyController.REST_API_MAPPING + "/{partyId}/{langCode}/request")
+                .then().statusCode(HttpStatus.OK.value());
+
+        RequestVm requestVmResponse = objectMapper.readValue(validatableResponse.extract().response().prettyPrint(), RequestVm.class);
+        return requestVmResponse;
+    }
+
+
 }
 
 

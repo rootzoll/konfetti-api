@@ -1,4 +1,4 @@
-package de.konfetti.maker;
+package de.konfetti.maker.entity;
 
 import com.natpryce.makeiteasy.Instantiator;
 import com.natpryce.makeiteasy.Property;
