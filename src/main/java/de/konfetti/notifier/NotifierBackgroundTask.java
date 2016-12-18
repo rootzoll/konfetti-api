@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import java.util.stream.Stream;
  */
 @Slf4j
 @Component
+@Transactional
 public class NotifierBackgroundTask {
 
     private static final String PUSHTYPE_IGNORE = "ignore";
