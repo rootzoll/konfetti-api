@@ -114,6 +114,12 @@ public class UserController {
 
         }
 
+        // TODO: remove when anonymouse login is allowed again -> what about email and username integrity on database
+        //       then? craete UUIDs for temporary users until they register..?
+        if (!createWithCredentials) {
+            return new ResponseEntity("\"Anonymous Login not allowed, user email to register\"", HttpStatus.BAD_REQUEST);
+        }
+
         // create new user
         User user = userService.create(email, pass, locale);
 

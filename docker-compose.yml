@@ -14,6 +14,7 @@ services:
   konfettiApi:
     image: konfetti/api
     container_name: konfettiApi
+    restart: unless-stopped
     ports:
       - "8280:8280"
 #      - "8000:8000"
@@ -33,6 +34,7 @@ services:
   konfettiApp:
     image: konfetti/app
     container_name: konfettiApp
+    restart: unless-stopped
     ports:
       - "2001:80"
     networks:
@@ -43,6 +45,7 @@ services:
   konfettiAdmin:
     image: konfetti/admin
     container_name: konfettiAdmin
+    restart: unless-stopped
     ports:
       - "8080:80"
     networks:
@@ -53,6 +56,7 @@ services:
   konfettiCouponGenerator:
     image: konfetti/couponservice
     container_name: konfettiCouponService
+    restart: unless-stopped
     ports:
       - "2342:2342"
     networks:
@@ -61,6 +65,7 @@ services:
   konfettiBootAdmin:
     image: konfetti/spring-boot-admin
     container_name: konfettiBootAdmin
+    restart: unless-stopped
     ports:
       - "8180:8180"
     networks:
@@ -71,6 +76,7 @@ services:
   database:
     image: mysql:5.7.12
     container_name: konfettiDb
+    restart: unless-stopped
     ports:
       - "3307:3306"
     networks:
