@@ -1,9 +1,6 @@
 package de.konfetti.service;
 
-import de.konfetti.data.Party;
-import de.konfetti.data.PartyRepository;
-import de.konfetti.data.User;
-import de.konfetti.data.UserRepository;
+import de.konfetti.data.*;
 import de.konfetti.utils.Helper;
 import de.konfetti.utils.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +12,7 @@ import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
@@ -46,8 +44,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setSpokenLangs(langs);
         user.setLastActivityTS(System.currentTimeMillis());
 
+        createClientAndLinkToUser(user);
+
         log.info("Create new User with eMail(" + email + ") and passwordhash(" + passMD5 + ")");
-        return userRepository.saveAndFlush(user);
+        return userRepository.save(user);
     }
 
     @Override
@@ -59,6 +59,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         String[] langs = {locale};
         user.setSpokenLangs(langs);
         user.setLastActivityTS(System.currentTimeMillis());
+
+        createClientAndLinkToUser(user);
 
         log.info("Create new Guest ");
         return userRepository.saveAndFlush(user);
@@ -142,6 +144,13 @@ public class UserServiceImpl extends BaseService implements UserService {
                     userRepository.save(user);
                     return user;
                 });
+    }
+
+    private void createClientAndLinkToUser(User user) {
+        Client client = new Client();
+        client.setSecret(UUID.randomUUID().toString());
+        user.getClients().add(client);
+        client.setUser(user);
     }
 
 }

@@ -99,16 +99,10 @@ public class UserController {
         // create new user
         User user = userService.createGuest(locale);
 
-        // create new client
-        log.info("create new client");
-        Client client = clientService.create(user);
-        user.getClients().add(client);
-
-        log.info("update user");
-        userService.update(user);
-
         log.info("mapping user response");
         UserResponse userResponse = userMapper.fromUserToUserResponse(user);
+
+        Client client = user.getClients().stream().findFirst().orElseThrow(() -> new RuntimeException("Created client for User was not persisted"));
         userResponse.setClientId(client.getId());
         userResponse.setClientSecret(client.getSecret());
 
@@ -148,16 +142,9 @@ public class UserController {
             log.warn("EXCEPTION was not able to send eMail on account creation to(" + email + ")");
         }
 
-        // create new client
-        log.info("create new client");
-        Client client = clientService.create(user);
-        user.getClients().add(client);
-
-        log.info("update user");
-        userService.update(user);
-
         log.info("mapping user response");
         UserResponse userResponse = userMapper.fromUserToUserResponse(user);
+        Client client = user.getClients().stream().findFirst().orElseThrow(() -> new RuntimeException("Created client for User was not persisted"));
         userResponse.setClientId(client.getId());
         userResponse.setClientSecret(client.getSecret());
 

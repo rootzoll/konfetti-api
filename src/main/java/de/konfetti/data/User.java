@@ -35,7 +35,7 @@ public class User {
 	// list of languages the user speaks (e.g. 'de', 'en', 'ar')
     private String[] spokenLangs = {};
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     private List<Client> clients = new ArrayList<>();
 
     // IDs of parties the user has an konfetti balance on
