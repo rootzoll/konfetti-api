@@ -78,10 +78,34 @@ public class UserControllerTest extends BaseControllerTest {
                 .body("email", equalToIgnoringCase(testEmail))
                 .body("password", isEmptyOrNullString())
                 .body("clientId", greaterThan(0))
+                .body("clientSecret", notNullValue())
+                .body("activeOnParties", notNullValue())
+                .body("adminOnParties", notNullValue())
+                .body("reviewerOnParties", notNullValue())
         ;
 
         // make sure client object is persisted and linked with user object
         assertThat(userRepository.findByEMail("testcreateuser@test.de").getClients().size(), greaterThan(0));
+        assertThat(clientRepository.findAll().get(0).getUser(), notNullValue());
+    }
+
+    @Test
+    public void registerGuest() throws Exception {
+        ValidatableResponse validatableResponse = myGiven()
+                .when().post(UserController.REST_API_MAPPING + "/registerGuest")
+                .then().statusCode(HttpStatus.OK.value());
+
+        validatableResponse
+                .body("id", notNullValue())
+                .body("clientId", greaterThan(0))
+                .body("clientSecret", notNullValue())
+                .body("activeOnParties", notNullValue())
+                .body("adminOnParties", notNullValue())
+                .body("reviewerOnParties", notNullValue())
+        ;
+
+        // make sure client object is persisted and linked with user object
+        assertThat(userRepository.findAll().get(0).getClients().size(), greaterThan(0));
         assertThat(clientRepository.findAll().get(0).getUser(), notNullValue());
     }
 

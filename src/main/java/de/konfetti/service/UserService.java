@@ -10,6 +10,8 @@ public interface UserService {
 
     User create(String email, String password, String locale);
 
+    User createGuest(String locale);
+
 	User update(User user);
     
     User findById(long userId);

@@ -1,0 +1,1 @@
+DROP INDEX user_e_mail_uindex ON user;
