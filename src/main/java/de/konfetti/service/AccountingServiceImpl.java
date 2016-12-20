@@ -1,7 +1,6 @@
 package de.konfetti.service;
 
 import de.konfetti.data.*;
-import de.konfetti.service.exception.ServiceException;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +38,6 @@ public class AccountingServiceImpl extends BaseService implements AccountingServ
 		return (accountRepository.saveAndFlush(account) != null);
 	}
 
-	@Override
-	public synchronized boolean deleteAccount(String accountName) throws Exception {
-		Account account = accountRepository.findByName(accountName);
-		if (account == null)
-			throw new ServiceException("deleteAccount(" + accountName + ") --> account does not exist");
-		accountRepository.delete(account.getId());
-		accountRepository.flush();
-		return true;
-	}
 	@Override
 	public synchronized boolean transferBetweenAccounts(TransactionType transactionType, String fromAccountName, String toAccountName, long amount) throws Exception {
 
@@ -209,9 +199,9 @@ public class AccountingServiceImpl extends BaseService implements AccountingServ
 	}
 
 	private class CumulatedTransations {
-		long earned = 0l;
-		long inserted = 0l;
-		long spend = 0l;
+		long earned = 0L;
+		long inserted = 0L;
+		long spend = 0L;
 	}
 
 }

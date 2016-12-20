@@ -111,22 +111,22 @@ public class ControllerSecurityHelper {
 		return true;
 	}
 		
-	public Client getClientFromRequestWhileCheckAuth(HttpServletRequest req, ClientService clientService) throws Exception {
+	public Client getClientFromRequestWhileCheckAuth(HttpServletRequest req, ClientService clientService) {
 		
 		if (!doneInit) doInit();
 		
 		// get user credentials from HTTP header
-		String clientId = req.getHeader("X-CLIENT-ID"); 
+		String clientId = req.getHeader("X-CLIENT-ID");
 		String clientSecret = req.getHeader("X-CLIENT-SECRET"); 
 		
 		// check if input data is valid
-		if ((clientId==null) || (clientSecret==null)) throw new Exception("ControllerSecurityHelper: Missing X-CLIENT-* fields on client request from IP("+req.getRemoteAddr()+")");
-		if ((clientId.indexOf(" ")>=0) || (clientSecret.indexOf(" ")>=0)) throw new Exception("ControllerSecurityHelper: Missing X-CLIENT-* fields contain ' ' ("+clientId+"/"+clientSecret+") from IP("+req.getRemoteAddr()+")");
+		if ((clientId==null) || (clientSecret==null)) throw new IllegalArgumentException("ControllerSecurityHelper: Missing X-CLIENT-* fields on client request from IP("+req.getRemoteAddr()+")");
+		if ((clientId.indexOf(" ")>=0) || (clientSecret.indexOf(" ")>=0)) throw new IllegalArgumentException("ControllerSecurityHelper: Missing X-CLIENT-* fields contain ' ' ("+clientId+"/"+clientSecret+") from IP("+req.getRemoteAddr()+")");
 		Long clientIdLong =  null;
 		try {
 			clientIdLong = Long.parseLong(clientId);
-		} catch (Exception e) {
-			throw new Exception("ControllerSecurityHelper: X-CLIENT-ID id no Number ("+clientId+"/"+clientSecret+") from IP("+req.getRemoteAddr()+")");
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("ControllerSecurityHelper: X-CLIENT-ID id no Number ("+clientId+"/"+clientSecret+") from IP("+req.getRemoteAddr()+")");
 		}
 
 		log.trace("clientId(" + clientId + ") clientSecret(" + clientSecret + ")");
@@ -135,15 +135,21 @@ public class ControllerSecurityHelper {
 		Client client = clientService.findById(clientIdLong);
 		if (client==null) {
 			log.trace("CLIENT NOT FOUND");
-			Thread.sleep(300); // security delay against brute force
-			throw new Exception("ControllerSecurityHelper: No client found with id ("+clientId+") from IP("+req.getRemoteAddr()+")");
+			try {
+				Thread.sleep(300); // security delay against brute force
+			} finally {
+				throw new IllegalArgumentException("ControllerSecurityHelper: No client found with id ("+clientId+") from IP("+req.getRemoteAddr()+")");
+			}
 		}
 		
 		// check if client has correct secret
 		if (!clientSecret.equals(client.getSecret())) {
 			log.trace("WRONG SECRET");
-			Thread.sleep(300); // security delay against brute force
-			throw new Exception("ControllerSecurityHelper: Client("+clientId+") wrong secretGiven("+clientSecret+") should be secretIs("+client.getSecret()+") from IP("+req.getRemoteAddr()+")");
+			try {
+				Thread.sleep(300); // security delay against brute force
+			} finally {
+				throw new IllegalArgumentException("ControllerSecurityHelper: Client(" + clientId + ") wrong secretGiven(" + clientSecret + ") should be secretIs(" + client.getSecret() + ") from IP(" + req.getRemoteAddr() + ")");
+			}
 		}
 
 		return client;

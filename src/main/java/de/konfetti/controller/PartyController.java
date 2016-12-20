@@ -293,7 +293,7 @@ public class PartyController {
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public List<PartyResponse> getAllPartiesAdmin(HttpServletRequest request) throws Exception {
-    	// check admin auth
+        // check admin auth
         controllerSecurityHelper.checkAdminLevelSecurity(request);
         log.info("ADMIN: Get all PARTIES ...");
 
@@ -313,7 +313,7 @@ public class PartyController {
     public List<PartyResponse> getAllParties(
             @RequestParam(value = "lat", defaultValue = "0.0") String latStr,
             @RequestParam(value = "lon", defaultValue = "0.0") String lonStr,
-            HttpServletRequest request) throws Exception {
+            HttpServletRequest request) {
 
         log.info("getAllParties lat(" + latStr + ") lon(" + lonStr + ")");
 
@@ -374,78 +374,72 @@ public class PartyController {
 
         List<PartyResponse> partyResponses = new ArrayList<>();
         // try to personalize when client/user info is in header
-        try {
 
-            Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(request, clientService);
+        Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(request, clientService);
 
-            if (client != null) {
-
-                // force add parties the user is member of (if not already in list)
-                User user = userService.findById(client.getUser().getId());
-                if (user != null) {
-                    if (user.getActiveParties().size() > 0) {
-                        // TODO: implement
-                        log.warn("PartyController getAllParties(): TODO: mustHaveParty to add to partylist");
-                    }
-                }
-
-                // update activity on user
-                if (!user.wasUserActiveInLastMinutes(1)) {
-                    log.info("Updating ActivityTS of user(" + user.getId() + ")");
-                    user.setLastActivityTS(System.currentTimeMillis());
-                    userService.update(user);
-                }
-
-
-                // for all parties
-                for (final Party party : resultParties) {
-                    PartyResponse partyResponse = partyMapper.toPartyResponse(party);
-                    final String accountName = AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), partyResponse.getId());
-
-                    // add accounting info
-                    Long userBalance = accountingService.getBalanceOfAccount(accountName);
-
-                    // if user is new on party (has no account yet)
-                    if (userBalance == null) {
-                        userBalance = 0L;
-                        log.info("New User(" + client.getUser().getId() + ") active on Party(" + partyResponse.getId() + ")");
-                        // create account
-                        if (!accountingService.createAccount(accountName)) {
-                            log.warn("Was not able to create balance account(" + accountName + ")");
-                        }
-
-                        // make user member of party
-                        if (!user.getActiveParties().contains(party)) {
-                            user.getActiveParties().add(party);
-                            userService.update(user);
-                        }
-
-                        // welcome user
-                        if (partyResponse.getWelcomeBalance() > 0) {
-                            // transfer welcome konfetti
-                            log.info("Transfer Welcome-Konfetti(" + partyResponse.getWelcomeBalance() + ") on Party(" + partyResponse.getId() + ") to User(" + client.getUser().getId() + ") with accountName(" + accountName + ")");
-                            userBalance = accountingService.addBalanceToAccount(TransactionType.USER_WELCOME, accountName, partyResponse.getWelcomeBalance());
-                        }
-                        // show welcome notification
-                        log.info("NOTIFICATION Welcome Paty (" + partyResponse.getId() + ")");
-                        notificationService.create(NotificationType.PARTY_WELCOME, user, party, 0L);
-
-                        log.debug("userBalance(" + userBalance + ")");
-                    } else {
-                        log.debug("user known on party");
-                    }
-                    partyResponse.setKonfettiCount(userBalance);
-
-                    // disable statistics in this level
-                    partyResponse.setKonfettiTotal(-1L);
-                    partyResponse.setTopPosition(-1);
-                    partyResponses.add(partyResponse);
+        if (client != null) {
+            // force add parties the user is member of (if not already in list)
+            User user = userService.findById(client.getUser().getId());
+            if (user != null) {
+                if (user.getActiveParties().size() > 0) {
+                    // TODO: implement
+                    log.warn("PartyController getAllParties(): TODO: mustHaveParty to add to partylist");
                 }
             }
-        } catch (Exception e) {
-            // exception can be ignored - because its just optional
-            log.info("Was not able to get optional client info on request for party list: " + e.getMessage());
+
+            // update activity on user
+            if (!user.wasUserActiveInLastMinutes(1)) {
+                log.info("Updating ActivityTS of user(" + user.getId() + ")");
+                user.setLastActivityTS(System.currentTimeMillis());
+                userService.update(user);
+            }
+
+
+            // for all parties
+            for (final Party party : resultParties) {
+                PartyResponse partyResponse = partyMapper.toPartyResponse(party);
+                final String accountName = AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), partyResponse.getId());
+
+                // add accounting info
+                Account userAccountForParty = accountingService.findAccountByName(accountName);
+
+                // if user is new on party (has no account yet)
+                if (userAccountForParty == null) {
+                    log.info("New User(" + client.getUser().getId() + ") active on Party(" + partyResponse.getId() + ")");
+
+                    // create account
+                    if (!accountingService.createAccount(accountName)) {
+                        log.warn("Was not able to create balance account(" + accountName + ")");
+                    }
+
+                    // make user member of party
+                    if (!user.getActiveParties().contains(party)) {
+                        user.getActiveParties().add(party);
+                        userService.update(user);
+                    }
+
+                    // welcome user
+                    if (partyResponse.getWelcomeBalance() > 0) {
+                        // transfer welcome konfetti
+                        log.info("Transfer Welcome-Konfetti(" + partyResponse.getWelcomeBalance() + ") on Party(" + partyResponse.getId() + ") to User(" + client.getUser().getId() + ") with accountName(" + accountName + ")");
+                        Long userBalance = accountingService.addBalanceToAccount(TransactionType.USER_WELCOME, accountName, partyResponse.getWelcomeBalance());
+                        log.debug("userBalance(" + userBalance + ")");
+                    }
+                    // show welcome notification
+                    log.info("NOTIFICATION Welcome Paty (" + partyResponse.getId() + ")");
+                    notificationService.create(NotificationType.PARTY_WELCOME, user, party, 0L);
+                } else {
+                    log.debug("user known on party");
+                    partyResponse.setKonfettiCount(userAccountForParty.getBalance());
+                }
+
+                // disable statistics in this level
+                partyResponse.setKonfettiTotal(-1L);
+                partyResponse.setTopPosition(-1);
+                partyResponses.add(partyResponse);
+            }
         }
+
         log.info("RESULT number of parties is " + resultParties.size());
         return partyResponses;
     }

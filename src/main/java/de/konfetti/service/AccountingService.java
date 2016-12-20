@@ -19,8 +19,6 @@ public interface AccountingService {
 
 	boolean createAccount(String accountName);
 
-	boolean deleteAccount(String accountName) throws Exception;
-
 	Account findAccountByName(String name);
 
 	boolean transferBetweenAccounts(TransactionType transactionType, String fromAccountName, String toAccountName, long amount) throws Exception;

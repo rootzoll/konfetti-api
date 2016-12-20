@@ -20,16 +20,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    // self written name (nick or real)
     private String name;
 
-    // email
     private String eMail;
 
-    // password
     private String password;
 
-	// image of user
 	private Long imageMediaID;
 
 	// list of languages the user speaks (e.g. 'de', 'en', 'ar')
@@ -63,7 +59,7 @@ public class User {
     private List<Party> reviewerParties = new ArrayList<>();
 
     // time stamp when the user last was online (not more precise 1 minute)
-    private Long lastActivityTS = 0l;
+    private Long lastActivityTS = 0L;
 
     private Boolean pushActive = false;
     
@@ -75,7 +71,7 @@ public class User {
     @Column(name = "reset_key", length = 20)
     private String resetKey;
 
-    @Column(name = "reset_date", nullable = true)
+    @Column(name = "reset_date")
     private ZonedDateTime resetDate = null;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
@@ -86,9 +82,7 @@ public class User {
     
 	public boolean wasUserActiveInLastMinutes(int minutes) {
 		long minutesSinceLastActivity = Math.round((System.currentTimeMillis() - this.lastActivityTS) / (60d*1000d));
-		boolean wasUserActiveInLastMinutes = ((minutesSinceLastActivity==0) || (minutes>=minutesSinceLastActivity));
-		//System.out.println("wasUserActiveInLastMinutes("+minutes+") : User("+this.id+") lastActivity old ("+minutesSinceLastActivity+")min <= "+minutes+" --> "+wasUserActiveInLastMinutes);
-		return wasUserActiveInLastMinutes;
+		return  ((minutesSinceLastActivity==0) || (minutes>=minutesSinceLastActivity));
 	}
     
 }
