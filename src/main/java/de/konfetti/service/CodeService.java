@@ -17,5 +17,5 @@ public interface CodeService {
 
     Code findByCode(String code);
 
-    RedeemResponse processCodeCoupon(User user, Code code);
+    RedeemResponse processCodeCoupon(User user, Code code, String locale);
 }

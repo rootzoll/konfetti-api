@@ -646,8 +646,6 @@ public class UserController {
     @GetMapping(value = "/redeem/{code}", produces = "application/json")
     public RedeemResponse redeemCode(@PathVariable String code, @RequestParam(value = "locale", defaultValue = "en") String locale, HttpServletRequest httpRequest) throws Exception {
         if (StringUtils.isEmpty(code)) throw new Exception("code is not valid");
-        // TODO implement reedem code feedback in locale
-        if (!locale.equals("en")) log.warn("TODO: implement reedem code feedback in locale '" + locale + "'");
 
         // get user from HTTP request
         Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
@@ -655,7 +653,7 @@ public class UserController {
         User user = userService.findById(client.getUser().getId());
         if (user == null) throw new Exception("missing user with id(" + client.getUser().getId() + ")");
 
-        // try to redeemcode
+        // try to redeem code
         Code coupon = this.codeService.redeemByCode(code);
 
         // just if backend is running on in test mode allow cheat codes
@@ -666,7 +664,7 @@ public class UserController {
 
         RedeemResponse result = new RedeemResponse();
         if (coupon != null) {
-            result = this.codeService.processCodeCoupon(user, coupon);
+            result = this.codeService.processCodeCoupon(user, coupon, locale);
         } else {
             // CODE NOT KNOWN
             // TODO --> multi lang by lang set in user

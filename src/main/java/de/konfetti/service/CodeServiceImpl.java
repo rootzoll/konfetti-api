@@ -74,11 +74,14 @@ public class CodeServiceImpl extends BaseService implements CodeService {
     }
 
     @Override
-    public RedeemResponse processCodeCoupon(User user, Code coupon) {
+    public RedeemResponse processCodeCoupon(User user, Code coupon, String locale) {
+    	
         RedeemResponse result = new RedeemResponse();
         Party foundParty = partyService.findById(coupon.getPartyID());
+        
         // redeem konfetti
         if (ACTION_TYPE_KONFETTI == coupon.getActionType()) {
+        	 	
             // add konfetti to party
             result.setActions(addKonfettiOnParty(user, coupon.getPartyID(), coupon.getAmount(), result.getActions()));
 
@@ -88,47 +91,98 @@ public class CodeServiceImpl extends BaseService implements CodeService {
             gpsInfo.json = "{\"lat\":" + foundParty.getLat() + ", \"lon\":" + foundParty.getLon() + "}";
             result.getActions().add(gpsInfo);
 
-            // TODO --> multi lang by lang set in user
-            result.setFeedbackHtml("You got now " + coupon.getAmount() + " konfetti to create a task with or upvote other ideas.");
+            // locale language result text
+            if ("de".equals(locale)) {
+            	result.setFeedbackHtml("Du hast " + coupon.getAmount() + " Konfetti erhalten und kannst damit nun eigene Ideen einstellen oder bestehende unterstützen.");
+            } else 
+            if ("ar".equals(locale)) {
+            	result.setFeedbackHtml("هل حصلت على قصاصات من الورق.");
+            } else {
+            	result.setFeedbackHtml("You gained " + coupon.getAmount() + " konfetti to create a task with or upvote other ideas.");
+            }
+            
         } else if (ACTION_TYPE_REVIEWER == coupon.getActionType()) {
+        	
             // promote user to reviewer
             result.setActions(makeUserReviewerOnParty(user, foundParty, result.getActions()));
-            // TODO --> multi lang by lang set in user
-            result.setFeedbackHtml("You are now REVIEWER on the following party.");
+            
+            // locale language result text
+            if ("de".equals(locale)) {
+                result.setFeedbackHtml("Du bist nun GUTACHTER für die folgende Party.");
+            } else 
+            if ("ar".equals(locale)) {
+            	result.setFeedbackHtml("أنت الآن مراجع.");
+            } else {
+            	result.setFeedbackHtml("You are now REVIEWER on the following party.");
+            }
+            
         } else if (ACTION_TYPE_ADMIN == coupon.getActionType()) {
             // promote user to admin
             List<ClientAction> actions = makeUserAdminOnParty(user, foundParty, result.getActions());
             result.setActions(actions);
-            // TODO --> multi lang by lang set in user
-            result.setFeedbackHtml("You are now ADMIN on the following party.");
+                        
+            // locale language result text
+            if ("de".equals(locale)) {
+                result.setFeedbackHtml("Du bist nun ADMINISTRATOR für die folgende Party.");
+            } else 
+            if ("ar".equals(locale)) {
+            	result.setFeedbackHtml("أنت الآن مسؤول.");
+            } else {
+            	result.setFeedbackHtml("You are now ADMIN on the following party.");
+            }
+            
+            
         }  else if (ACTION_TYPE_USER == coupon.getActionType()) {
             // promote user to admin
             List<ClientAction> actions = makeUserNormaloOnParty(user, foundParty, result.getActions());
             result.setActions(actions);
-            // TODO --> multi lang by lang set in user
-            result.setFeedbackHtml("You are now USER on the following party.");
+            
+            // locale language result text
+            if ("de".equals(locale)) {
+                result.setFeedbackHtml("Du bist nun MITGLIED auf der folgenden Party.");
+            } else 
+            if ("ar".equals(locale)) {
+            	result.setFeedbackHtml("أنت الآن عضو.");
+            } else {
+            	result.setFeedbackHtml("You are now MEMBER on the following party.");
+            }           
+            
         }
         return result;
     }
 
     private List<ClientAction> addKonfettiOnParty(User user, Long partyId, Long konfettiAmount, List<ClientAction> actions)  {
-        Party party = partyService.findById(partyId);
+       
+    	Party party = partyService.findById(partyId);
         Objects.nonNull(party);
         final String userAccountName = AccountingTools.getAccountNameFromUserAndParty(user.getId(), partyId);
 
         // add user to party if not already part of
         if (!user.getActiveParties().contains(party)) {
+        	
+        	// open konfetti account for this party
             this.accountingService.createAccount(userAccountName);
+            
+            // add user to party
             user.getActiveParties().add(party);
             this.userService.update(user);
+            
+    		// check if user should get granted welcome konfetti additional to coupon
+        	if (party.getWelcomeBalance()>0) {
+        		this.accountingService.addBalanceToAccount(TransactionType.USER_WELCOME, userAccountName, party.getWelcomeBalance());
+        	}
+            
         }
 
+        // add konfetti to account
         Long konfettiBefore = this.accountingService.getBalanceOfAccount(userAccountName);
         Long konfettiAfter = this.accountingService.addBalanceToAccount(TransactionType.COUPON, userAccountName, konfettiAmount);
 
+        // security check - just for the paranoid
         if (konfettiBefore.equals(konfettiAfter)) {
             log.warn("addKonfettiOnParty, same amount as before! konfettiAmount: " + konfettiAmount + " , konfettiBefore : " + konfettiBefore + " , konfettiAfter : " + konfettiAfter);
         }
+        
         log.info("user(" + user.getId() + ") on party(" + partyId + ") +" + konfettiAmount + " konfetti");
         actions = addFocusPartyAction(actions, partyId);
         return actions;
