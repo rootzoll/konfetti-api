@@ -666,9 +666,18 @@ public class UserController {
         if (coupon != null) {
             result = this.codeService.processCodeCoupon(user, coupon, locale);
         } else {
+        	
             // CODE NOT KNOWN
-            // TODO --> multi lang by lang set in user
-            result.setFeedbackHtml("Sorry. The code '" + code + "' is not known or invalid.");
+            // locale language result text
+            if ("de".equals(locale)) {
+                result.setFeedbackHtml("Ungültig. Der Code '" + code + "' wurde bereits verwendet oder ist generell ungültig.");
+            } else 
+            if ("ar".equals(locale)) {
+            	result.setFeedbackHtml("رمز غير معروف أو استخدمت بالفعل.");
+            } else {
+            	result.setFeedbackHtml("Sorry. The code '" + code + "' is not known or was already used.");
+            }
+
         }
         return result;
     }
