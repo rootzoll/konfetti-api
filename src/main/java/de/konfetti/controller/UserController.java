@@ -8,6 +8,7 @@ import de.konfetti.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import javax.validation.Valid;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static de.konfetti.data.enums.SendKonfettiModeEnum.SENDKONFETTIMODE_DISABLED;
@@ -38,6 +40,9 @@ public class UserController {
     private final AccountingService accountingService;
     private final PartyService partyService;
     private final CodeService codeService;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @Value("${security.passwordsalt}")
     private String passwordSalt;
@@ -666,18 +671,9 @@ public class UserController {
         if (coupon != null) {
             result = this.codeService.processCodeCoupon(user, coupon, locale);
         } else {
-        	
-            // CODE NOT KNOWN
-            // locale language result text
-            if ("de".equals(locale)) {
-                result.setFeedbackHtml("Ungültig. Der Code '" + code + "' wurde bereits verwendet oder ist generell ungültig.");
-            } else 
-            if ("ar".equals(locale)) {
-            	result.setFeedbackHtml("رمز غير معروف أو استخدمت بالفعل.");
-            } else {
-            	result.setFeedbackHtml("Sorry. The code '" + code + "' is not known or was already used.");
-            }
-
+            // Code not known or invalid
+            String i18nMessage = messageSource.getMessage("redeem.code.invalid", new String[]{code}, Locale.forLanguageTag(locale));
+            result.setFeedbackHtml(i18nMessage);
         }
         return result;
     }

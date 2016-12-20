@@ -8,7 +8,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by relampago on 05.03.16.
@@ -46,18 +47,6 @@ public class AccountingServiceImplTest extends BaseTest {
         // find created account
         Account persistedAccount = accountingService.findAccountByName(TEST_ACCOUNT_NAME);
         assertEquals("account Persisted", TEST_ACCOUNT_NAME, persistedAccount.getName());
-    }
-
-    @Test
-    public void testDeleteAccount() throws Exception {
-        accountingService.createAccount(TEST_ACCOUNT_NAME);
-
-        boolean deleted = accountingService.deleteAccount(TEST_ACCOUNT_NAME);
-        assertTrue("account deleted successfully", deleted);
-
-        // verify the account does not exist anymore
-        Account account = accountingService.findAccountByName(TEST_ACCOUNT_NAME);
-        assertNull("account not in database anymore", account);
     }
 
     @Ignore

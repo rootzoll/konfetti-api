@@ -8,10 +8,12 @@ import de.konfetti.utils.AccountingTools;
 import de.konfetti.utils.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import static de.konfetti.data.enums.CodeActionTypeEnum.*;
@@ -28,6 +30,9 @@ public class CodeServiceImpl extends BaseService implements CodeService {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @Autowired
     public CodeServiceImpl(CodeRepository codeRepository) {
@@ -78,10 +83,11 @@ public class CodeServiceImpl extends BaseService implements CodeService {
     	
         RedeemResponse result = new RedeemResponse();
         Party foundParty = partyService.findById(coupon.getPartyID());
-        
+        String redeemMessageCode = null;
+        Long[] redeemMessageVars = null;
+
         // redeem konfetti
         if (ACTION_TYPE_KONFETTI == coupon.getActionType()) {
-        	 	
             // add konfetti to party
             result.setActions(addKonfettiOnParty(user, coupon.getPartyID(), coupon.getAmount(), result.getActions()));
 
@@ -91,63 +97,24 @@ public class CodeServiceImpl extends BaseService implements CodeService {
             gpsInfo.json = "{\"lat\":" + foundParty.getLat() + ", \"lon\":" + foundParty.getLon() + "}";
             result.getActions().add(gpsInfo);
 
-            // locale language result text
-            if ("de".equals(locale)) {
-            	result.setFeedbackHtml("Du hast " + coupon.getAmount() + " Konfetti erhalten und kannst damit nun eigene Ideen einstellen oder bestehende unterstützen.");
-            } else 
-            if ("ar".equals(locale)) {
-            	result.setFeedbackHtml("هل حصلت على قصاصات من الورق.");
-            } else {
-            	result.setFeedbackHtml("You gained " + coupon.getAmount() + " konfetti to create a task with or upvote other ideas.");
-            }
-            
+            redeemMessageCode = "redeem.code.konfetti";
+            redeemMessageVars = new Long[]{coupon.getAmount()};
         } else if (ACTION_TYPE_REVIEWER == coupon.getActionType()) {
-        	
             // promote user to reviewer
             result.setActions(makeUserReviewerOnParty(user, foundParty, result.getActions()));
-            
-            // locale language result text
-            if ("de".equals(locale)) {
-                result.setFeedbackHtml("Du bist nun GUTACHTER für die folgende Party.");
-            } else 
-            if ("ar".equals(locale)) {
-            	result.setFeedbackHtml("أنت الآن مراجع.");
-            } else {
-            	result.setFeedbackHtml("You are now REVIEWER on the following party.");
-            }
-            
+            redeemMessageCode = "redeem.code.reviewer";
         } else if (ACTION_TYPE_ADMIN == coupon.getActionType()) {
             // promote user to admin
             List<ClientAction> actions = makeUserAdminOnParty(user, foundParty, result.getActions());
             result.setActions(actions);
-                        
-            // locale language result text
-            if ("de".equals(locale)) {
-                result.setFeedbackHtml("Du bist nun ADMINISTRATOR für die folgende Party.");
-            } else 
-            if ("ar".equals(locale)) {
-            	result.setFeedbackHtml("أنت الآن مسؤول.");
-            } else {
-            	result.setFeedbackHtml("You are now ADMIN on the following party.");
-            }
-            
-            
+            redeemMessageCode = "redeem.code.admin";
         }  else if (ACTION_TYPE_USER == coupon.getActionType()) {
             // promote user to admin
             List<ClientAction> actions = makeUserNormaloOnParty(user, foundParty, result.getActions());
             result.setActions(actions);
-            
-            // locale language result text
-            if ("de".equals(locale)) {
-                result.setFeedbackHtml("Du bist nun MITGLIED auf der folgenden Party.");
-            } else 
-            if ("ar".equals(locale)) {
-            	result.setFeedbackHtml("أنت الآن عضو.");
-            } else {
-            	result.setFeedbackHtml("You are now MEMBER on the following party.");
-            }           
-            
+            redeemMessageCode = "redeem.code.user";
         }
+        result.setFeedbackHtml(messageSource.getMessage(redeemMessageCode, redeemMessageVars, Locale.forLanguageTag(locale)));
         return result;
     }
 
@@ -159,11 +126,7 @@ public class CodeServiceImpl extends BaseService implements CodeService {
 
         // add user to party if not already part of
         if (!user.getActiveParties().contains(party)) {
-        	
-        	// open konfetti account for this party
             this.accountingService.createAccount(userAccountName);
-            
-            // add user to party
             user.getActiveParties().add(party);
             this.userService.update(user);
             
@@ -171,7 +134,6 @@ public class CodeServiceImpl extends BaseService implements CodeService {
         	if (party.getWelcomeBalance()>0) {
         		this.accountingService.addBalanceToAccount(TransactionType.USER_WELCOME, userAccountName, party.getWelcomeBalance());
         	}
-            
         }
 
         // add konfetti to account
