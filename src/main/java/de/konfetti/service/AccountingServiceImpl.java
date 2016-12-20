@@ -33,6 +33,10 @@ public class AccountingServiceImpl extends BaseService implements AccountingServ
 
 	@Override
 	public boolean createAccount(String accountName) {
+		if (accountRepository.findByName(accountName)!= null) {
+			throw new IllegalArgumentException("Account with accountName : '" + accountName + "' exists already");
+		}
+
 		Account account = new Account();
 		account.setName(accountName);
 		return (accountRepository.saveAndFlush(account) != null);
