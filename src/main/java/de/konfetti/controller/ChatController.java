@@ -6,6 +6,7 @@ import de.konfetti.controller.mapper.ChatMapper;
 import de.konfetti.controller.vm.ChatDto;
 import de.konfetti.data.*;
 import de.konfetti.service.*;
+import de.konfetti.utils.NotificationManager;
 import de.konfetti.utils.PushManager;
 import de.konfetti.websocket.CommandMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,9 @@ public class ChatController {
 
     @Autowired
     private SimpMessagingTemplate webSocket;
+    
+    @Autowired 
+    private NotificationManager notificationManager;
 
     @Autowired
     public ChatController(final UserService userService, final ClientService clientService, final ChatService chatService, final MessageService messageService, final RequestService requestService) {
@@ -262,40 +266,7 @@ public class ChatController {
     	msg.setData("{\"party\":"+chat.getPartyId()+", \"users\":"+jsonArray+"}");
     	webSocket.convertAndSend("/out/updates", GSON.toJson(msg));  
     	
-    	// send push notification if possible
-    	if (PushManager.getInstance().isAvaliable()) {
-			log.info("PushMessage Alert");
-			if (receivers!=null) {
-    			for (Long userID : receivers) {
-					log.info("PUSHTO(" + userID + ")");
-					User receiver = userService.findById(userID);
-    				if (receiver!=null) {
-    					if (receiver.getPushActive()) {
-							log.info(" - WIN - DOING PUSH ...");
-
-							// TODO multi lang - see user
-    	    				PushManager.getInstance().sendNotification(
-    	    						PushManager.PLATFORM_ANDROID, 
-    	    						receiver.getPushID(), 
-    	    						"new chat message for you", 
-    	    						null, //locale, 
-    	    						null, //messageLocale, 
-    	    						-1l);
-							log.info(" - PUSH DONE :D");
-
-						} else {
-							log.info(" - FAIL - NO PUSH");
-						}
-    				} else {
-						log.warn("PUSH RECEIVER id(" + userID + ") NOT FOUND");
-					}
-				}
-    		} else {
-				log.info("No Receivers on chat ?!? - no push");
-			}
-     	} else {
-			log.info("PushMessage not configured");
-		}
+    	this.notificationManager.sendNotification_TaskCHAT();
     	
         return message;
     }

@@ -52,15 +52,10 @@ public class NotifierBackgroundTask {
     private EMailManager eMailManager;
 
     @Autowired
-    private JavaMailSender javaMailSender;
-
-    @Autowired
     private NotificationService notificationService;
 
     @Autowired
     private UserService userService;
-
-    private Random randomGenerator;
 
     //CACHE 1 "Pushed Users" - make sure just one/push/user all 15min max
     private Cache spamBlockerPerUserCache;
@@ -72,7 +67,6 @@ public class NotifierBackgroundTask {
         log.info("CONTRUCTOR BACKGROUNDTASK");
         this.processedNotificationsCache = this.cacheManager().getCache("processedNotifications");
         this.spamBlockerPerUserCache = this.cacheManager().getCache("spamBlockerPerUser");
-        this.randomGenerator = new Random();
     }
 
 
@@ -98,7 +92,10 @@ public class NotifierBackgroundTask {
         // start notifier background task loop and catch all problems
         try {
             // do the actual work
-            runNotifierBackgroundTaskThread();
+            // runNotifierBackgroundTaskThread();
+        	
+        	log.info("NotifierBackgroundTask DEPRECATED: TODO: get rid of it completly and also remove Notification persistence");
+        	
         } catch (Exception e) {
             log.error("EXCEPTION on NotifierBackgroundTask loop: ", e);
             e.printStackTrace();
@@ -200,6 +197,7 @@ public class NotifierBackgroundTask {
 
         // REVIEW WAITING ==> select one reviewer/admin by random
         if (NotificationType.REVIEW_WAITING == notification.getType()) {
+        	
             // get all reviewer and admins for party
             Stream<User> reviewer = userService.getAllUsersReviewerOnParty(party.getId());
 
@@ -331,8 +329,7 @@ public class NotifierBackgroundTask {
      */
     private boolean sendPushMail(Notification notification) {
         User user = userService.findById(notification.getUser().getId());
-        // TODO multi lang --- see user setting
-        if (eMailManager.sendMail(user.getEMail(), "notifier.party.events", "Open Konfetti App so see more :D", null, null)) {
+        if (eMailManager.sendMail(user.getEMail(), "[Konfetti] Party Event", "Open Konfetti App so see more :D", null)) {
             log.info("OK - PUSH SEND BY EMAIL (" + user.getEMail() + ")");
             return true;
         } else {
@@ -354,9 +351,8 @@ public class NotifierBackgroundTask {
                 PushManager.PLATFORM_ANDROID,
                 user.getPushID(),
                 "new events in your neighborhood",
-                null, // locale
-                null, // localeMessage
-                notification.getId());
+                "en", // locale
+                "{}");
         log.info("OK - PUSH SEND BY PUSH (" + user.getPushID() + ")");
         return true;
     }

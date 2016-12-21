@@ -17,6 +17,7 @@ import de.konfetti.service.*;
 import de.konfetti.utils.AccountingTools;
 import de.konfetti.utils.AutoTranslator;
 import de.konfetti.utils.Helper;
+import de.konfetti.utils.NotificationManager;
 import de.konfetti.websocket.CommandMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,9 @@ public class PartyController {
 
     @Autowired
     private MediaRepository mediaRepository;
+    
+    @Autowired
+    private NotificationManager notificationManager;
 
     @Autowired
     private RequestMapper requestMapper;
@@ -480,8 +484,6 @@ public class PartyController {
             requestVm.setState(STATE_OPEN);
         } else {
             requestVm.setState(STATE_REVIEW);
-            // TODO push info to review admin
-            if (user.getPushActive()) log.warn("TODO: push info to review admin");
         }
 
         // update fields in user and persist
@@ -534,8 +536,7 @@ public class PartyController {
                     requestVm.getKonfettiCount());
         }
 
-        // store notification
-        notificationService.create(REVIEW_WAITING, null, party, requestVm.getId());
+        this.notificationManager.sendNotification_ReviewWAITING(persistent);
 
         // publish info about update on public channel
         CommandMessage msg = new CommandMessage();

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -72,19 +71,11 @@ public class EMailManager {
      * @param urlAttachment HTTP URL string to attachment file - if NULL = no attachment
      * @return
      */
-    public boolean sendMail(String toAddress, String subjectKey, String bodyText, String urlAttachment, String[] spokenLangs) {
+    public boolean sendMail(String toAddress, String subjectText, String bodyText, String urlAttachment) {
         fromEmailAddress = fromEmailAddress.trim();
         replyToAddress = replyToAddress.trim();
         if (replyToAddress == null) replyToAddress = fromEmailAddress;
-
-        Locale locale;
-        if (spokenLangs == null || spokenLangs.length == 0) {
-            locale = getDefaultLocale();
-        } else {
-            locale = Locale.forLanguageTag(spokenLangs[0]);
-        }
-        String subjectText = MessageSourceResourceBundle.getBundle("messages", locale).getString(subjectKey);
-
+ 
         if ((toAddress == null) || (toAddress.length() <= 3)) {
             log.warn("failed sending email because toAdrress(" + toAddress + ") is unvalid");
             return false;
@@ -94,7 +85,6 @@ public class EMailManager {
             log.warn("eMail not configured in application.properties - skipping sending to " + toAddress);
             return false;
         }
-
 
         toAddress = toAddress.trim();
 
@@ -123,12 +113,6 @@ public class EMailManager {
             e.printStackTrace();
         }
         return false;
-    }
-
-    private Locale getDefaultLocale() {
-        Locale locale;
-        locale = Locale.getDefault();
-        return locale;
     }
 
     public String getFromEmailAddress() {

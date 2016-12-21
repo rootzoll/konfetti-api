@@ -43,7 +43,7 @@ public class PushManager {
 		return this.pushAuth.trim().length() != 0;
 	}
 
-	public boolean sendNotification(int platformUSEFINALS, String userPushID, String messageEnglish, String locale, String messageLocale, Long notificationID) {
+	public boolean sendNotification(int platformUSEFINALS, String userPushID, String textShort, String locale, String meta) {
 
 		if (!isAvaliable()) {
 			log.warn("PushManager not configured - not possible");
@@ -52,9 +52,8 @@ public class PushManager {
 
 		try {
 			// PREPARE JSON DATA
-			String additionalLanguage = "";
-			  if ((locale!=null) && (messageLocale!=null)) additionalLanguage = ", \""+locale+"\": \""+messageLocale+"\"";
-			  String json = "{\"app_id\": \""+this.pushId +"\",\"include_player_ids\":[\""+userPushID+"\"],\"data\": {\"notification\": \""+notificationID+"\"},\"contents\": {\"en\": \""+messageEnglish+"\""+additionalLanguage+"}}";
+
+			String json = "{\"app_id\": \""+this.pushId +"\",\"include_player_ids\":[\""+userPushID+"\"],\"data\": "+meta+",\"contents\": {\""+locale+"\": \""+textShort+"\"}}";
 
 
 			// HTTP REQUEST --> ONESIGNAL REST API

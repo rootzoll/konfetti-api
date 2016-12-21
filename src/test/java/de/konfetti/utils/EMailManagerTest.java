@@ -46,35 +46,15 @@ public class EMailManagerTest extends BaseTest {
     }
 
     @Test
-    public void sendMailWithDefault() throws Exception {
+    public void sendMail() throws Exception {
         String bodyText = "username: " + email + "\npass: " + password + "\n\nkeep email or write password down";
 
-        subjectKeyAccountCreated = "rest.user.created.subject";
-        boolean success = eMailManager.sendMail(toEmail, subjectKeyAccountCreated, bodyText, null, null);
+        boolean success = eMailManager.sendMail(toEmail, "test", bodyText, null);
         Assert.assertTrue("Email send successfully", success);
-        // assert
-        ResourceBundle messages = MessageSourceResourceBundle.getBundle("messages");
-
         assertReceivedMessage(wiser)
                 .from(eMailManager.getFromEmailAddress())
                 .to(toEmail)
-                .withSubject(messages.getString("rest.user.created.subject"));
-//                .withContent(bodyText);
+                .withSubject("test");
     }
 
-    @Test
-    public void sendMailWithGerman() throws Exception {
-        String bodyText = "username: " + email + "\npass: " + password + "\n\nkeep email or write password down";
-
-        boolean success = eMailManager.sendMail(toEmail, "rest.user.created.subject", bodyText, null, new String[]{"de"});
-        Assert.assertTrue("Email send successfully", success);
-        // assert
-        ResourceBundle messages = MessageSourceResourceBundle.getBundle("messages", Locale.GERMAN);
-
-        assertReceivedMessage(wiser)
-                .from(eMailManager.getFromEmailAddress())
-                .to(toEmail)
-                .withSubject(messages.getString("rest.user.created.subject"));
-//                .withContent(bodyText);
-    }
 }

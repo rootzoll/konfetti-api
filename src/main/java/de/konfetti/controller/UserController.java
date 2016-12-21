@@ -61,6 +61,9 @@ public class UserController {
 
     @Autowired
     private EMailManager mailService;
+    
+    @Autowired
+    private NotificationManager notificationManager;
 
     private UserMapper userMapper;
 
@@ -139,7 +142,7 @@ public class UserController {
 
         // TODO --> email multi lang by lang set in user
         try {
-            if (!mailService.sendMail(email, "rest.user.created.subject", "username: " + email + "\npass: " + pass + "\n\nkeep email or write password down", null, user.getSpokenLangs())) {
+            if (!mailService.sendMail(email, "[Konfetti] Your Password", "username: " + email + "\npass: " + pass + "\n\nkeep email or write password down", null)) {
                 log.warn("was not able to send eMail on account creation to(" + email + ")");
             }
         } catch (Exception e) {
@@ -316,23 +319,10 @@ public class UserController {
                 user.setPassword(Helper.hashPassword(this.passwordSalt, pass));
                 if (firstTimeMailSet) {
                     // TODO multi lang eMail text by lang in user object - use same text as on account created with email
-                    mailService.sendMail(userInput.getEMail(), "rest.user.created.subject", "username: " + user.getEMail() + "\npass: " + pass + "\n\nkeep email or write password down", null, user.getSpokenLangs());
+                    mailService.sendMail(userInput.getEMail(), "[Konfetti] Your Password", "username: " + user.getEMail() + "\npass: " + pass + "\n\nkeep email or write password down", null);
                 }
             }
 
-            // send initial welcome push message
-            if ((user.getPushID() == null) && (userInput.getPushID() != null)) {
-                if (PushManager.getInstance().isAvaliable()) {
-                    PushManager.getInstance().sendNotification(
-                            PushManager.mapUserPlatform(userInput.getPushSystem()),
-                            userInput.getPushID(),
-                            "Welcome. If something happens in your neighborhood, Konfetti will send you Push-Updates.",
-                            null,
-                            null,
-                            0l
-                    );
-                }
-            }
             // transfer selective values from input to existing user
             user.setEMail(userInput.getEMail());
             user.setImageMediaID(userInput.getImageMediaID());
@@ -416,7 +406,7 @@ public class UserController {
 
         log.info("URL to generate Coupons: " + urlStr);
 
-        if ((mailEnabled) && (!mailService.sendMail(email.trim(), "rest.user.coupons.subject", "Print out the PDF attached and spread the love :)", urlStr, user.getSpokenLangs()))) {
+        if ((mailEnabled) && (!mailService.sendMail(email.trim(), "[Konfetti] Coupons", "Print out the PDF attached and spread the love :)", urlStr))) {
             throw new Exception("Was not able to send eMail with Coupons to " + user.getEMail());
         }
         return true;
@@ -583,7 +573,7 @@ public class UserController {
             }
 
             // send coupon by eMail
-            if ((mailEnabled) && (mailService.sendMail(address, "rest.user.coupons.received", "Open app and redeem coupon code: '" + code.getCode(), null, user.getSpokenLangs()))) {
+            if ((mailEnabled) && (this.notificationManager.sendNotification_SendCOUPON())) {
                 log.info("- email with coupon send to: " + address);
             } else {
                 accountingService.addBalanceToAccount(TransactionType.PAYBACK, accountName, amount);
@@ -608,33 +598,8 @@ public class UserController {
                 throw new Exception("Was not able to transfere amount(" + amount + ") from(" + accountName + ") to(" + toAccountName + ")");
             }
 
-            // send notification receiver (email as fallback)
-            boolean sendNotification = false;
-            if ((toUser.getPushID() != null) && (PushManager.getInstance().isAvaliable())) {
-                // push notification
-                if (PushManager.getInstance().sendNotification(
-                        PushManager.mapUserPlatform(toUser.getPushSystem()),
-                        toUser.getPushID(),
-                        "You received " + amount + " Konfetti on Party '" + party.getName() + "'",
-                        null,
-                        null,
-                        0l
-                )) {
-                    log.info("- push notification send to");
-                    sendNotification = true;
-                } else {
-                    log.warn("was not able to send push notification to uuserId(" + user.getId() + ")");
-                }
-            }
-
-            if (!sendNotification) {
-                // eMail
-                if ((mailEnabled) && (mailService.sendMail(address, "rest.user.coupons.received.party", "Open app and check party '" + party.getName() + "' :)", null, user.getSpokenLangs()))) {
-                    log.info("- eMail with Info notification send to: " + address);
-                } else {
-                    log.error("Was not able to send eMail with Notification about received konfetti to " + user.getEMail() + " - check address and server email config");
-                }
-            }
+            this.notificationManager.sendNotification_SendTRANSFER();
+            
         }
         log.info("OK SENDING KONFETTI");
         return result;
