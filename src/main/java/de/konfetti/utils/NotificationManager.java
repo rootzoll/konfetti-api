@@ -1,6 +1,7 @@
 package de.konfetti.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
 
 import java.util.List;
+import java.util.Locale;
 
 /*
  * Use to manage nofification sending to users. 
@@ -34,6 +36,9 @@ public class NotificationManager {
     @Autowired
     private EMailManager eMailManager;
 
+    @Autowired
+    private MessageSource messageSource;
+    
     @SuppressWarnings("unused")
 	@Autowired
     private UserService userService;
@@ -65,29 +70,16 @@ public class NotificationManager {
     		// logic check
     		if (reviewer.size()==0) log.warn("sendNotification_ReviewWAITING: party("+request.getParty().getId()+") has no admin user");
     		
-    		
     		// send notification to all reviewers
     		for (User user : reviewer) {
-    			
-    			String textShort = null;
-    			String textLong = null;
-    			String metaJSON = "{\"type\": \"REVIEW_WAITING\",\"partyID\": "+request.getParty().getId()+",\"taskID\": "+request.getId()+"}";
     			
     			// set text by locale of user
     			String locale = decideWichLanguageForUser(user);
     			
-    			if (LOCALE_GERMAN.equals(locale)) {
-        			textShort = "Aufgabe wartet auf Prüfung";
-        			textLong = "Eine Aufgabe auf der Konfetti Party '"+request.getParty().getName()+"' wartet auf Prüfung.";
-    			} else
-    			if (LOCALE_ARABIC.equals(locale)) {
-        			textShort = "مهمة فحص انتظار";
-        			textLong = "مهمة فحص انتظار";
-        		} else {
-        			textShort = "Task for Review";
-        			textLong = "A task for the Konfetti Party '"+request.getParty().getName()+"' is waiting for your review.";
-        		}			
-    			
+    			String textShort = messageSource.getMessage("push.reviewer.short", new String[]{}, Locale.forLanguageTag(locale));
+    			String textLong = messageSource.getMessage("push.reviewer.long", new String[]{request.getParty().getName()}, Locale.forLanguageTag(locale));
+    			String metaJSON = "{\"type\": \"REVIEW_WAITING\",\"partyID\": "+request.getParty().getId()+",\"taskID\": "+request.getId()+"}";
+    			    			
     			final String pushType = getTypeOfPushForUser(user);
     			if (PUSHTYPE_EMAIL.equals(pushType)) {
     				
@@ -99,7 +91,6 @@ public class NotificationManager {
     				// PUSH NOTIFICATION
     				sendPushPush(user, textShort, textLong, metaJSON, locale);
     			}
-    			
     			
 			}
     		
@@ -229,6 +220,7 @@ public class NotificationManager {
 		 */
 		
 	}
+		
     
     /*
      * PRIVATE METHODS
@@ -262,7 +254,7 @@ public class NotificationManager {
      * @param user
      * @return
      */
-    private String decideWichLanguageForUser(User user) {
+    public static String decideWichLanguageForUser(User user) {
     	
     	String result = null;
     	
