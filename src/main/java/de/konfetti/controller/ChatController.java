@@ -7,7 +7,6 @@ import de.konfetti.controller.vm.ChatDto;
 import de.konfetti.data.*;
 import de.konfetti.service.*;
 import de.konfetti.utils.NotificationManager;
-import de.konfetti.utils.PushManager;
 import de.konfetti.websocket.CommandMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +46,9 @@ public class ChatController {
     
     @Autowired 
     private NotificationManager notificationManager;
+
+    @Autowired
+	private ChatMapper chatMapper;
 
     @Autowired
     public ChatController(final UserService userService, final ClientService clientService, final ChatService chatService, final MessageService messageService, final RequestService requestService) {
@@ -115,7 +117,6 @@ public class ChatController {
 			if (memberUser==null) throw new Exception("member("+memberId+") on new chat does NOT EXIST");
 		}
     	// create new chat
-		ChatMapper chatMapper = new ChatMapper();
     	Chat chat = chatService.create(chatMapper.fromChatDto(template));
 
     	ChatDto chatDto = chatMapper.toChatDto(chat);
@@ -168,7 +169,6 @@ public class ChatController {
         	}
 
 			// C) add transient chat partner info
-			ChatMapper chatMapper = new ChatMapper();
 			chatDto =  chatMapper.toChatDto(chat);
 			chatDto.setMessages(messages);
 

@@ -2,10 +2,7 @@ package de.konfetti.data;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.HashMap;
 
 @Data
@@ -15,9 +12,10 @@ public class Chat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    // the request this chat belongs to (if possible keep optional)
-    private Long requestId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "request_id", nullable = false)
+    private Request request;
     
     // the party this chat belongs to - request --> party (if possible keep optional)
     private Long partyId;
