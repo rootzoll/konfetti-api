@@ -10,6 +10,7 @@ import de.konfetti.data.User;
 import de.konfetti.data.UserRepository;
 import de.konfetti.service.ClientService;
 import de.konfetti.service.PartyService;
+import de.konfetti.utils.EMailManager;
 import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import org.junit.After;
@@ -137,7 +138,7 @@ public class UserControllerTest extends BaseControllerTest {
         assertReceivedMessage(wiser)
                 .from(emailFrom)
                 .to(user.getEMail())
-                .withSubject(messageSource.getMessage("email.reset.title", null, Locale.ENGLISH));
+                .withSubject(EMailManager.EMAIL_SUBJECT_TAG+" "+messageSource.getMessage("email.reset.title", null, Locale.ENGLISH));
     }
 
     @Test
