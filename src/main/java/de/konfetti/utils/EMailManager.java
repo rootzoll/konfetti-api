@@ -35,6 +35,8 @@ import org.thymeleaf.spring4.SpringTemplateEngine;
 @Configuration
 public class EMailManager {
 
+	public static final String EMAIL_SUBJECT_TAG = "[Konfetti]";
+	
     @Autowired
     private JavaMailSender javaMailSender;
 
@@ -95,7 +97,7 @@ public class EMailManager {
             helper.setTo(toAddress);
             helper.setReplyTo(replyToAddress);
             helper.setFrom(fromEmailAddress);
-            helper.setSubject(subjectText);
+            helper.setSubject(EMAIL_SUBJECT_TAG + " " + subjectText);
             helper.setText(bodyText);
             if (urlAttachment != null)
                 helper.addAttachment("KonfettiCoupons.pdf", new URLDataSource(new URL(urlAttachment)));
@@ -135,7 +137,7 @@ public class EMailManager {
             message.setTo(to);
             message.setReplyTo(replyToAddress);
             message.setFrom(fromEmailAddress);
-            message.setSubject(subject);
+            message.setSubject(EMAIL_SUBJECT_TAG+" "+subject);
             message.setText(content, isHtml);
             javaMailSender.send(mimeMessage);
             log.debug("Sent e-mail to User '{}'", to);
@@ -147,9 +149,7 @@ public class EMailManager {
     @Async
     public void sendPasswordResetMail(User user) {
         log.debug("Sending password reset e-mail to '{}'", user.getEMail());
-        // TODO: when user has locale, use users locale
-//        Locale locale = Locale.forLanguageTag(user.getLangKey());
-        Locale locale = Locale.ENGLISH;
+        Locale locale = Locale.forLanguageTag(user.decideWichLanguageForUser());
         Context context = new Context(locale);
         if (user.getName() == null) {
             user.setName("Konfetti User");

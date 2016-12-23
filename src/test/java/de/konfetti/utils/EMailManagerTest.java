@@ -2,15 +2,8 @@ package de.konfetti.utils;
 
 import de.konfetti.service.BaseTest;
 import org.junit.*;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.MessageSourceResourceBundle;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.subethamail.wiser.Wiser;
-
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 import static de.konfetti.utils.WiserAssertions.assertReceivedMessage;
 
@@ -30,8 +23,9 @@ public class EMailManagerTest extends BaseTest {
     private String password = "myPassword";
 
     private String toEmail = "testEmail@test.de";
-    private String subjectKeyAccountCreated;
-
+    
+    @SuppressWarnings("unused")
+	private String subjectKeyAccountCreated;
 
     @Before
     public void setUp() throws Exception {

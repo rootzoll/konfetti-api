@@ -142,7 +142,9 @@ public class UserController {
 
         // TODO --> email multi lang by lang set in user
         try {
-            if (!mailService.sendMail(email, "[Konfetti] Your Password", "username: " + email + "\npass: " + pass + "\n\nkeep email or write password down", null)) {
+        	String subject = messageSource.getMessage("email.account.headline", new String[]{}, Locale.forLanguageTag(locale));
+        	String body = messageSource.getMessage("email.account.body", new String[]{user.getEMail(), user.getPassword()}, Locale.forLanguageTag(locale));
+            if (!mailService.sendMail(email, body ,subject , null)) {
                 log.warn("was not able to send eMail on account creation to(" + email + ")");
             }
         } catch (Exception e) {
@@ -318,8 +320,10 @@ public class UserController {
                 String pass = RandomUtil.generadeCodeNumber() + "";
                 user.setPassword(Helper.hashPassword(this.passwordSalt, pass));
                 if (firstTimeMailSet) {
-                    // TODO multi lang eMail text by lang in user object - use same text as on account created with email
-                    mailService.sendMail(userInput.getEMail(), "[Konfetti] Your Password", "username: " + user.getEMail() + "\npass: " + pass + "\n\nkeep email or write password down", null);
+                	String locale =  user.decideWichLanguageForUser();
+                	String subject = messageSource.getMessage("email.account.headline", new String[]{}, Locale.forLanguageTag(locale));
+                    String body = messageSource.getMessage("email.account.body", new String[]{user.getEMail(), pass}, Locale.forLanguageTag(locale));
+                	mailService.sendMail(userInput.getEMail(), subject, body, null);
                 }
             }
 
@@ -406,7 +410,10 @@ public class UserController {
 
         log.info("URL to generate Coupons: " + urlStr);
 
-        if ((mailEnabled) && (!mailService.sendMail(email.trim(), "[Konfetti] Coupons", "Print out the PDF attached and spread the love :)", urlStr))) {
+        String subject = messageSource.getMessage("email.coupons.headline", new String[]{}, Locale.forLanguageTag(locale));
+        String body = messageSource.getMessage("email.coupons.body", new String[]{}, Locale.forLanguageTag(locale));
+        
+        if ((mailEnabled) && (!mailService.sendMail(email.trim(), subject, body, urlStr))) {
             throw new Exception("Was not able to send eMail with Coupons to " + user.getEMail());
         }
         return true;
@@ -573,7 +580,7 @@ public class UserController {
             }
 
             // send coupon by eMail
-            if ((mailEnabled) && (this.notificationManager.sendNotification_SendCOUPON())) {
+            if ((mailEnabled) && (this.notificationManager.sendNotification_SendCOUPON(address, user, code))) {
                 log.info("- email with coupon send to: " + address);
             } else {
                 accountingService.addBalanceToAccount(TransactionType.PAYBACK, accountName, amount);

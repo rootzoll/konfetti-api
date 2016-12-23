@@ -16,19 +16,18 @@ import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.context.annotation.Bean;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 /*
+ * DEPRECATED: IS NOT IN USE ANYMORE - KEEP CODE JUST IN CASE
+ * 
  * A task that is scheduled to check in short periods 
  * if there is any notification to be delivered by email or push. 
  * 
@@ -86,7 +85,6 @@ public class NotifierBackgroundTask {
      *  the background task gets scheduled often.
      *
      *  Spring boost takes care not to start the task when still running.
-     */
     @Scheduled(fixedRate = 5000)
     public void periodicStartUpTimer() {
         // start notifier background task loop and catch all problems
@@ -101,13 +99,15 @@ public class NotifierBackgroundTask {
             e.printStackTrace();
         }
     }
+    */
 
     /**
      * What the background task actually does when running (one loop)
      *
      * @throws InterruptedException
      */
-    private void runNotifierBackgroundTaskThread() throws InterruptedException {
+    @SuppressWarnings("unused")
+	private void runNotifierBackgroundTaskThread() throws InterruptedException {
         // Going thru all pending notifications and see which to level up to email or push
         // TODO: get just pending notifications form database (at the moment all that are not deleted)
         List<Notification> pendingNotifications = notificationService.getAllPossiblePushNotifications();
@@ -329,7 +329,7 @@ public class NotifierBackgroundTask {
      */
     private boolean sendPushMail(Notification notification) {
         User user = userService.findById(notification.getUser().getId());
-        if (eMailManager.sendMail(user.getEMail(), "[Konfetti] Party Event", "Open Konfetti App so see more :D", null)) {
+        if (eMailManager.sendMail(user.getEMail(), "Party Event", "Open Konfetti App so see more :D", null)) {
             log.info("OK - PUSH SEND BY EMAIL (" + user.getEMail() + ")");
             return true;
         } else {
