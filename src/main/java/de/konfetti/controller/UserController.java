@@ -142,7 +142,7 @@ public class UserController {
 
         // TODO --> email multi lang by lang set in user
         try {
-        	String subject = "[Konfetti] "+messageSource.getMessage("email.account.headline", new String[]{}, Locale.forLanguageTag(locale));
+        	String subject = messageSource.getMessage("email.account.headline", new String[]{}, Locale.forLanguageTag(locale));
         	String body = messageSource.getMessage("email.account.body", new String[]{user.getEMail(), user.getPassword()}, Locale.forLanguageTag(locale));
             if (!mailService.sendMail(email, body ,subject , null)) {
                 log.warn("was not able to send eMail on account creation to(" + email + ")");
@@ -320,8 +320,8 @@ public class UserController {
                 String pass = RandomUtil.generadeCodeNumber() + "";
                 user.setPassword(Helper.hashPassword(this.passwordSalt, pass));
                 if (firstTimeMailSet) {
-                	String locale = NotificationManager.decideWichLanguageForUser(user);
-                	String subject = "[Konfetti]"+messageSource.getMessage("email.account.headline", new String[]{}, Locale.forLanguageTag(locale));
+                	String locale =  user.decideWichLanguageForUser();
+                	String subject = messageSource.getMessage("email.account.headline", new String[]{}, Locale.forLanguageTag(locale));
                     String body = messageSource.getMessage("email.account.body", new String[]{user.getEMail(), pass}, Locale.forLanguageTag(locale));
                 	mailService.sendMail(userInput.getEMail(), subject, body, null);
                 }
@@ -410,7 +410,7 @@ public class UserController {
 
         log.info("URL to generate Coupons: " + urlStr);
 
-        String subject = "[Konfetti]"+messageSource.getMessage("email.coupons.headline", new String[]{}, Locale.forLanguageTag(locale));
+        String subject = messageSource.getMessage("email.coupons.headline", new String[]{}, Locale.forLanguageTag(locale));
         String body = messageSource.getMessage("email.coupons.body", new String[]{}, Locale.forLanguageTag(locale));
         
         if ((mailEnabled) && (!mailService.sendMail(email.trim(), subject, body, urlStr))) {
@@ -580,7 +580,7 @@ public class UserController {
             }
 
             // send coupon by eMail
-            if ((mailEnabled) && (this.notificationManager.sendNotification_SendCOUPON())) {
+            if ((mailEnabled) && (this.notificationManager.sendNotification_SendCOUPON(address, user, code))) {
                 log.info("- email with coupon send to: " + address);
             } else {
                 accountingService.addBalanceToAccount(TransactionType.PAYBACK, accountName, amount);

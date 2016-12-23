@@ -12,6 +12,9 @@ import java.util.List;
 @Data
 public class User {
 
+    private static final String LOCALE_ENGLISH 	= "en";
+    private static final String LOCALE_GERMAN 	= "de";
+	
 	public static final String PUSHSYSTEM_IOS = "ios";
 	public static final String PUSHSYSTEM_ANDROID = "android";
 	public static final String PUSHSYSTEM_CHROME = "chrome";
@@ -84,6 +87,36 @@ public class User {
 		long minutesSinceLastActivity = Math.round((System.currentTimeMillis() - this.lastActivityTS) / (60d*1000d));
 		return  ((minutesSinceLastActivity==0) || (minutes>=minutesSinceLastActivity));
 	}
+	
+    /**
+     * user can speak multiple languages ... choose one
+     * (quick and dirty)
+     * @param user
+     * @return
+     */
+    public String decideWichLanguageForUser() {
+    	
+    	String result = null;
+    	
+    	String[] langs = this.getSpokenLangs();
+    	for (String lang : langs) {
+    		
+    		// pick first language available
+			if (result==null) result = lang;
+			
+			// pick german over english
+			if ((LOCALE_GERMAN.equals(lang)) && (LOCALE_ENGLISH.equals(result))) result=lang;
+			
+			// pick english over any other if not german
+			if ((LOCALE_ENGLISH.equals(lang)) && (!LOCALE_GERMAN.equals(result))) result=lang;
+			
+		}
+    	
+   		// english as backup
+		if (result==null) result = LOCALE_ENGLISH;
+    	return result;
+    	
+    }
     
 }
 

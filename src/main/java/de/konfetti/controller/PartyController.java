@@ -431,7 +431,7 @@ public class PartyController {
                     }
                     // show welcome notification
                     log.info("NOTIFICATION Welcome Paty (" + partyResponse.getId() + ")");
-                    notificationService.create(NotificationType.PARTY_WELCOME, user, party, 0L);
+                    notificationManager.sendNotification_PartyWelcome(user, party);
                 } else {
                     log.debug("user known on party");
                     partyResponse.setKonfettiCount(userAccountForParty.getBalance());
@@ -589,10 +589,7 @@ public class PartyController {
             // B) check for trusted application with administrator privilege
             controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
         }
-        // delete any waiting notification finding a reviewer
-        if (STATE_REVIEW.equals(request.getState()))
-            notificationService.deleteByTypeAndReference(REVIEW_WAITING, request.getId());
-
+        
         // delete
         Request result = requestService.delete(request.getId());
         RequestVm requestVm = requestMapper.toRequestVm(request);
@@ -608,7 +605,7 @@ public class PartyController {
                     User user = userService.findById(userIdFromAccountName);
                     Long partyIdFromAccountName = AccountingTools.getPartyIdFromAccountName(payIn.getFromAccount());
                     Party party = partyService.findById(partyIdFromAccountName);
-                    notificationService.create(PAYBACK, user, party, payIn.getAmount());
+                    this.notificationManager.sendNotification_VotePAYBACK(user, party, payIn.getAmount());
                 }
             }
         }
@@ -795,9 +792,7 @@ public class PartyController {
 
                 if (fromReview) {
                     // send notification to author
-                    notificationService.create(NotificationType.REVIEW_OK, request.getUser(), request.getParty(), request.getId());
-                    // delete any waiting notification finding a reviewer
-                    notificationService.deleteByTypeAndReference(REVIEW_WAITING, request.getId());
+                	notificationManager.sendNotification_ReviewOK(request);
                 }
 
                 // publish info about update on public channel
@@ -833,12 +828,8 @@ public class PartyController {
                         msg.setCommand(CommandMessage.COMMAND_PARTYUPADTE);
                         msg.setData("{\"party\":" + request.getParty().getId() + ", \"request\":" + request.getId() + " ,\"state\":\"" + request.getState() + "\"}");
                         webSocket.convertAndSend("/out/updates", GSON.toJson(msg));
-
-                        // delete any waiting notification finding a reviewer
-                        notificationService.deleteByTypeAndReference(REVIEW_WAITING, request.getId());
-
-                        // send notification to author
-                        notificationService.create(REVIEW_FAIL, request.getUser(), request.getParty(), request.getId());
+                        notificationManager.sendNotification_ReviewFAIL(request);
+                        
                     } else
                         // do reward
                         if (action.equals("reward")) {
@@ -897,7 +888,7 @@ public class PartyController {
                                         log.info("OK payout reward(" + rewardPerPerson + ") from(" + requestAccountName + ") to " + rewardeeAccountName);
                                         // send notification to author
                                         User userReward = userService.findById(userRewardId);
-                                        notificationService.create(REWARD_GOT, userReward, request.getParty(), request.getId());
+                                        notificationManager.sendNotification_TaskREWARD(userReward, request);
                                     }
                                 }
                                 // notification to all supporters of request about finish
@@ -908,7 +899,7 @@ public class PartyController {
                                         User user = userService.findById(userIdFromAccountName);
                                         Long partyIdFromAccountName = AccountingTools.getPartyIdFromAccountName(payIn.getFromAccount());
                                         Party party = partyService.findById(partyIdFromAccountName);
-                                        notificationService.create(SUPPORT_WIN, user, party, request.getId());
+                                        notificationManager.sendNotification_VoteDONE(user, request);
                                     }
                                 }
                             }

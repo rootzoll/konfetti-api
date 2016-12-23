@@ -5,11 +5,20 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
+import de.konfetti.data.Code;
+import de.konfetti.data.NotificationType;
+import de.konfetti.data.Party;
 import de.konfetti.data.Request;
 import de.konfetti.data.User;
+import de.konfetti.service.NotificationService;
 import de.konfetti.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 
+import static de.konfetti.data.NotificationType.PAYBACK;
+import static de.konfetti.data.NotificationType.REVIEW_FAIL;
+import static de.konfetti.data.NotificationType.REVIEW_WAITING;
+import static de.konfetti.data.NotificationType.REWARD_GOT;
+import static de.konfetti.data.NotificationType.SUPPORT_WIN;
 import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
 
 import java.util.List;
@@ -28,21 +37,20 @@ public class NotificationManager {
     private static final String PUSHTYPE_NOTPOSSIBLE = "not-possible";
     private static final String PUSHTYPE_EMAIL = "email";
     private static final String PUSHTYPE_PUSH = "push";
-
-    private static final String LOCALE_ENGLISH 	= "en";
-    private static final String LOCALE_GERMAN 	= "de";
-    private static final String LOCALE_ARABIC 	= "ar";
     
     @Autowired
     private EMailManager eMailManager;
 
     @Autowired
     private MessageSource messageSource;
+   
+    @Autowired
+    private NotificationService notificationService;
     
     @SuppressWarnings("unused")
 	@Autowired
     private UserService userService;
-    
+   
     public NotificationManager() {
         log.info("NotificationManager Constructor");
     }
@@ -74,7 +82,7 @@ public class NotificationManager {
     		for (User user : reviewer) {
     			
     			// set text by locale of user
-    			String locale = decideWichLanguageForUser(user);
+    			String locale = user.decideWichLanguageForUser();
     			
     			String textShort = messageSource.getMessage("push.reviewer.short", new String[]{}, Locale.forLanguageTag(locale));
     			String textLong = messageSource.getMessage("push.reviewer.long", new String[]{request.getParty().getName()}, Locale.forLanguageTag(locale));
@@ -101,19 +109,38 @@ public class NotificationManager {
     	    	
     }
     
-    // TODO: implement and add to correct spots in code
-    public void sendNotification_ReviewOK() {
-    	log.warn("sendNotification_ReviewOK: TODO");
+    // TODO: push/email
+    public void sendNotification_ReviewOK(Request request) {
+    	
+    	log.warn("sendNotification_ReviewOK: TODO push/email");
+    	
+        // delete any waiting notification finding a reviewer
+        notificationService.deleteByTypeAndReference(REVIEW_WAITING, request.getId());
+    	
+    	// store notification to be displayed on party
+        notificationService.create(NotificationType.REVIEW_OK, request.getUser(), request.getParty(), request.getId());
+
     }
     
-    // TODO: implement and add to correct spots in code
-    public void sendNotification_ReviewFAIL() {
-    	log.warn("sendNotification_ReviewFAIL: TODO");
+    // TODO: push/email
+    public void sendNotification_ReviewFAIL(Request request) {
+    	
+    	log.warn("sendNotification_ReviewFAIL: TODO push/email");
+    
+    	// delete any waiting notification finding a reviewer
+        notificationService.deleteByTypeAndReference(REVIEW_WAITING, request.getId());
+
+    	// store notification to be displayed on party
+        notificationService.create(REVIEW_FAIL, request.getUser(), request.getParty(), request.getId());
+ 
     }
     
     // TODO: implement and add to correct spots in code
     public void sendNotification_TaskCHAT() {
+    	
     	log.warn("sendNotification_TaskCHAT: TODO");
+    	
+    	// why no notification persistence? deleted on last commit? or will it get calculated on party list deliver? 
     	
     	/*
     	 // send push notification if possible
@@ -154,36 +181,59 @@ public class NotificationManager {
     	
     }
         
-    // TODO: implement and add to correct spots in code
-    public void sendNotification_TaskREWARD() {
-    	log.warn("sendNotification_TaskREWARD: TODO");
+    // TODO: push/email
+    public void sendNotification_TaskREWARD(User user, Request request) {
+    	
+    	log.warn("sendNotification_TaskREWARD: TODO push/email");
+            
+    	// store notification to be displayed on party
+    	notificationService.create(REWARD_GOT, user, request.getParty(), request.getId());
+  
     }
 
-    // TODO: implement and add to correct spots in code
-    public void sendNotification_VotePAYBACK() {
-    	log.warn("sendNotification_VotePAYBACK: TODO");
-    }
-    
-    // TODO: implement and add to correct spots in code
-    public void sendNotification_VoteDONE() {
-    	log.warn("sendNotification_VoteDONE: TODO");
-    }
-    
-    // TODO: implement and add to correct spots in code
-    public boolean sendNotification_SendCOUPON() {
-    	log.warn("sendNotification_SendCOUPON: TODO");
+    // TODO: push/email
+    public void sendNotification_VotePAYBACK(User user, Party party, Long amount) {
     	
-    	/*
-    	 
-    	   // send coupon by eMail
-           mailService.sendMail(address, "rest.user.coupons.received", "Open app and redeem coupon code: '" + code.getCode(), null, user.getSpokenLangs()))
-    	 
-    	 */
+    	log.warn("sendNotification_VotePAYBACK: TODO push/email");
+    	
+    	// store notification to be displayed on party
+    	notificationService.create(PAYBACK, user, party, amount);
+    	
+    }
+    
+    // TODO: push/email
+    public void sendNotification_VoteDONE(User user, Request request) {
+    	
+    	log.warn("sendNotification_VoteDONE: TODO push/email");
+
+    	// store notification to be displayed on party
+    	notificationService.create(SUPPORT_WIN, user, request.getParty(), request.getId());
+
+    }
+    
+    // TODO: implement and add to correct spots in code
+    public boolean sendNotification_SendCOUPON(String receiverMail, User user, Code code) {
+    	
+    	log.warn("sendNotification_SendCOUPON: TODO");
+ 
+    	Locale locale = Locale.forLanguageTag(user.decideWichLanguageForUser());
+		String subject = messageSource.getMessage("email.coupon.send.head", new String[]{code.getAmount()+""}, locale);
+		String body = messageSource.getMessage("email.coupon.send.body", new String[]{code.getCode()}, locale);
+    	// TODO: add in email how to install app & enter code (or browser)
+		
+    	// send coupon by eMail
+    	eMailManager.sendMail(receiverMail, subject, body, null);
     	
     	return false;
     	
     }
     
+    public void sendNotification_PartyWelcome(User user, Party party) {
+    	// store notification to be displayed on party
+        notificationService.create(NotificationType.PARTY_WELCOME, user, party, 0L);
+    }
+    
+    // TODO
 	public void sendNotification_SendTRANSFER() {
 		
 	   	log.warn("sendNotification_SendTRANSFER: TODO");
@@ -247,37 +297,7 @@ public class NotificationManager {
         
         return PUSHTYPE_NOTPOSSIBLE;
     }
-    
-    /**
-     * user can speak multiple languages ... choose one
-     * (quick and dirty)
-     * @param user
-     * @return
-     */
-    public static String decideWichLanguageForUser(User user) {
-    	
-    	String result = null;
-    	
-    	String[] langs = user.getSpokenLangs();
-    	for (String lang : langs) {
-    		
-    		// pick first language available
-			if (result==null) result = lang;
-			
-			// pick german over english
-			if ((LOCALE_GERMAN.equals(lang)) && (LOCALE_ENGLISH.equals(result))) result=lang;
-			
-			// pick english over any other if not german
-			if ((LOCALE_ENGLISH.equals(lang)) && (!LOCALE_GERMAN.equals(result))) result=lang;
-			
-		}
-    	
-   		// english as backup
-		if (result==null) result = LOCALE_ENGLISH;
-    	return result;
-    	
-    }
-   
+       
     /**
      * sending push by email
      *
@@ -286,12 +306,9 @@ public class NotificationManager {
      */
     private boolean sendPushMail(User user, String subject, String body, String locale ) {
  
-    	// TODO make 18n extra text
-    	subject = "[Konfetti] "+subject;
-    	body = body + "\n\nThis email was sent as a notification from the KonfettiApp. It can be that this notification is already outdated, please report your feedback with email notifications to bugs@konfettiapp.de";
-        // TODO: add a direct jump link to browser version with meta data as URL parameter
+    	body = body + "\n\n"+messageSource.getMessage("email.general.footer", new String[]{}, Locale.forLanguageTag(locale));
+    	// TODO: add a direct jump link to browser version with meta data as URL parameter
     	
-        // TODO multi lang --- see user setting
         if (eMailManager.sendMail(user.getEMail(), subject, body, null)) {
             log.info("OK - PUSH SEND BY EMAIL (" + user.getEMail() + ")");
             return true;
