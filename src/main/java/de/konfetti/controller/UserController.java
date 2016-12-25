@@ -605,7 +605,7 @@ public class UserController {
                 throw new Exception("Was not able to transfere amount(" + amount + ") from(" + accountName + ") to(" + toAccountName + ")");
             }
 
-            this.notificationManager.sendNotification_SendTRANSFER();
+            this.notificationManager.sendNotification_SendTRANSFER(user, party, amount);
             
         }
         log.info("OK SENDING KONFETTI");

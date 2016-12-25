@@ -262,7 +262,7 @@ public class PartyController {
                 partyResponse.setKonfettiTotal(-1L); // TODO: implement statistic later
                 partyResponse.setTopPosition(-1); // TODO: implement statistic later
 
-                // see if there is any new chat message for user TODO: find a more performat way
+                // see if there is any new chat message for user TODO: find a more performant way
                 log.debug("see if there is any new chat message");
                 List<Chat> allPartyChatsUserIsPartOf = chatService.getAllByUserAndParty(client.getUser().getId(), partyId);
                 Party party = partyService.findById(partyId);
@@ -605,7 +605,7 @@ public class PartyController {
                     User user = userService.findById(userIdFromAccountName);
                     Long partyIdFromAccountName = AccountingTools.getPartyIdFromAccountName(payIn.getFromAccount());
                     Party party = partyService.findById(partyIdFromAccountName);
-                    this.notificationManager.sendNotification_VotePAYBACK(user, party, payIn.getAmount());
+                    this.notificationManager.sendNotification_VotePAYBACK(user, result, payIn.getAmount());
                 }
             }
         }
@@ -888,7 +888,7 @@ public class PartyController {
                                         log.info("OK payout reward(" + rewardPerPerson + ") from(" + requestAccountName + ") to " + rewardeeAccountName);
                                         // send notification to author
                                         User userReward = userService.findById(userRewardId);
-                                        notificationManager.sendNotification_TaskREWARD(userReward, request);
+                                        notificationManager.sendNotification_TaskREWARD(userReward, request, rewardPerPerson);
                                     }
                                 }
                                 // notification to all supporters of request about finish

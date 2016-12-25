@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import de.konfetti.controller.mapper.ChatMapper;
 import de.konfetti.controller.vm.ChatDto;
 import de.konfetti.data.*;
+import de.konfetti.data.enums.MediaItemTypeEnum;
 import de.konfetti.service.*;
 import de.konfetti.utils.NotificationManager;
 import de.konfetti.utils.PushManager;
@@ -38,6 +39,7 @@ public class ChatController {
     private final ChatService chatService;
     private final MessageService messageService;
     private final RequestService requestService;
+    private final MediaService mediaService;
 
 	@Autowired
 	private ControllerSecurityHelper controllerSecurityHelper;
@@ -49,12 +51,13 @@ public class ChatController {
     private NotificationManager notificationManager;
 
     @Autowired
-    public ChatController(final UserService userService, final ClientService clientService, final ChatService chatService, final MessageService messageService, final RequestService requestService) {
+    public ChatController(final UserService userService, final ClientService clientService, final ChatService chatService, final MessageService messageService, final RequestService requestService, final MediaService mediaService) {
         this.userService = userService;
         this.clientService = clientService;
         this.chatService = chatService;
         this.messageService = messageService;
         this.requestService = requestService;
+        this.mediaService = mediaService;
     }
 
     //---------------------------------------------------
@@ -204,11 +207,13 @@ public class ChatController {
     	Chat chat = chatService.findById(chatId);
     	if (chat==null) throw new Exception("chat("+chatId+") not found");
     	
+    	Client client = null;
+    	
     	// check if user is allowed to create
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
     		
     		// A) check that user is host or member of chat
-    		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+    		client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     		boolean userIsHost = (chat.getHostId().equals(client.getUser().getId()));
     		boolean userIsMember = false;
     		for (Long memeberId : chat.getMembers()) {
@@ -266,7 +271,15 @@ public class ChatController {
     	msg.setData("{\"party\":"+chat.getPartyId()+", \"users\":"+jsonArray+"}");
     	webSocket.convertAndSend("/out/updates", GSON.toJson(msg));  
     	
-    	this.notificationManager.sendNotification_TaskCHAT();
+    	// load all users that will receive chat message
+    	List<User> receivingUsers = new ArrayList<User>();
+    	for (Long userId : receivers) {
+			User u = userService.findById(userId);
+			if (u!=null) receivingUsers.add(u);
+		}
+    	    	
+    	// send notification
+    	this.notificationManager.sendNotification_TaskCHAT(chat, message, this.mediaService.findById(template.getItemId()), receivingUsers, client, requestService.findById(chat.getRequestId()));
     	
         return message;
     }
