@@ -80,6 +80,12 @@ public class NotificationManager {
     		// logic check
     		if (reviewer.size()==0) log.warn("sendNotification_ReviewWAITING: party("+request.getParty().getId()+") has no admin user");
     		
+    		// if more than 3 reviewers - TODO: find the last three active reviews
+    		if (reviewer.size()>3) {
+    			log.warn("TODO: reviewer list is bigger than 3 - sort by last active and just use the lastest 3 active");
+    			reviewer = reviewer.subList(0, 2);
+    		}
+    		
     		// send notification to all reviewers
     		for (User user : reviewer) {
     			
