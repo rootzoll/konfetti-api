@@ -34,6 +34,7 @@ public class RequestMapper {
         requestVm.setTime(request.getTime());
         requestVm.setMediaItemIds(request.getMediaItemIds());
         requestVm.setImageMediaID(request.getImageMediaID());
+        requestVm.setSpokenLangs(request.getSpokenLangs());
         return requestVm;
     }
 
@@ -50,6 +51,7 @@ public class RequestMapper {
         request.setTime(requestVm.getTime());
         request.setMediaItemIds(requestVm.getMediaItemIds());
         request.setImageMediaID(requestVm.getImageMediaID());
+        request.setSpokenLangs(requestVm.getSpokenLangs());
         return request;
     }
 
