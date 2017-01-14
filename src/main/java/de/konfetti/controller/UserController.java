@@ -309,6 +309,8 @@ public class UserController {
                 ) {
             return new ResponseEntity("Another user exists with this name : '" + userInput.getName() + "'", HttpStatus.BAD_REQUEST);
         }
+        
+       	log.info("check if user is allowed to read");
 
         // check if user is allowed to read
         if (httpRequest.getHeader("X-CLIENT-ID") != null) {
@@ -349,9 +351,6 @@ public class UserController {
         }
         // update user in persistence
         userService.update(user);
-
-        // keep password hash just on server side
-        user.setPassword("");
 
         return new ResponseEntity(userMapper.fromUserToUserResponse(user), HttpStatus.OK);
     }
