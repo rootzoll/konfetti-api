@@ -289,9 +289,14 @@ public class UserController {
     @CrossOrigin(origins = "*")
     @PutMapping(value = "/{userId}", produces = "application/json")
     public ResponseEntity<UserResponse> updateUser(@RequestBody @Valid final User userInput, HttpServletRequest httpRequest) throws Exception {
-        User user = userService.findById(userInput.getId());
+        
+    	log.info("Update User("+userInput.getId()+") ...");
+    	
+    	User user = userService.findById(userInput.getId());
         if (user == null) throw new Exception("NOT FOUND user(" + userInput.getId() + ")");
 
+       	log.info("check if other user exists with name / email");
+        
         // check if other user exists with name / email
         User byMail = userService.findByMailIgnoreCase(userInput.getEMail());
         if (byMail != null && byMail.getId() != userInput.getId()) {

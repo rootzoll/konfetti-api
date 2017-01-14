@@ -132,7 +132,12 @@ public class ControllerSecurityHelper {
 		log.trace("clientId(" + clientId + ") clientSecret(" + clientSecret + ")");
 		
 		// check if client exists
-		Client client = clientService.findById(clientIdLong);
+		Client client = null;
+		try {
+			client = clientService.findById(clientIdLong);
+		} catch (Exception e) {
+			log.error("EXCEPTION in finding client with id("+clientIdLong+")", e);
+		}
 		if (client==null) {
 			log.trace("CLIENT NOT FOUND");
 			try {
