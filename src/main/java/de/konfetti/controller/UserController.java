@@ -360,6 +360,8 @@ public class UserController {
                 // set new name
             	user.setName(newName);
             }
+            
+            log.info("PushData active("+userInput.getPushActive()+") system("+userInput.getPushSystem()+") id("+userInput.getPushID()+")");
            
             // transfer selective values from input to existing user
             user.setImageMediaID(userInput.getImageMediaID());

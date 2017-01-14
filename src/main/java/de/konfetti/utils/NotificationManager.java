@@ -5,6 +5,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.Gson;
+
 import de.konfetti.data.Chat;
 import de.konfetti.data.Client;
 import de.konfetti.data.Code;
@@ -283,6 +285,14 @@ public class NotificationManager {
 		
 		boolean wasSend = false;
 		
+		try {
+			log.info("*** DEBUG ******* sendPushAuto");
+			log.info("PushManager.getInstance().isAvaliable() --> "+PushManager.getInstance().isAvaliable());
+			log.info("sendPushAuto User Data --> "+new Gson().toJson(user));
+		} catch (Exception e) {
+			log.info("FAILED to log data");
+		}
+		
         // check for push notification works for user
         if ((user.getPushActive()) && (PushManager.getInstance().isAvaliable())) {
         	wasSend = sendPushPush(user,textShort,textLong,metaJSON,locale);
@@ -293,7 +303,7 @@ public class NotificationManager {
         	wasSend = sendPushMail(user,textShort,textLong,locale);
         }
         
-        if (!wasSend) log.warn("sendPushAuto: Notification was not send to user ("+user.getId()+") textShort("+textShort+")");
+        if (!wasSend) log.warn("sendPushAuto: Notification was NOT send to user ("+user.getId()+") textShort("+textShort+")");
 			
 		return wasSend;
 		
