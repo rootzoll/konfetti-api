@@ -742,10 +742,12 @@ public class PartyController {
     @RequestMapping(value = "/action/request/{requestId}", method = RequestMethod.GET)
     public RequestVm actionRequest(@PathVariable long requestId, @RequestParam(value = "action", defaultValue = "no") String action, @RequestParam(value = "json", defaultValue = "") String json, HttpServletRequest httpRequest) throws Exception {
 
+    	log.info("Action on Request("+requestId+") action("+action+") ...");
+    	
         Request request = requestService.findById(requestId);
         if (request != null) {
             if (action.equals("no")) throw new Exception("missing parameter action");
-
+            
             // check if user is allowed to work on request
             boolean userIsAuthor = false;
             boolean userIsPartyAdmin = false;
@@ -792,7 +794,10 @@ public class PartyController {
 
                 if (fromReview) {
                     // send notification to author
+                	log.info("set to open - from review");
                 	notificationManager.sendNotification_ReviewOK(request);
+                } else {
+                	log.info("set to open - not from review");
                 }
 
                 // publish info about update on public channel

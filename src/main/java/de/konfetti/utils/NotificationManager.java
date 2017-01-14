@@ -112,6 +112,8 @@ public class NotificationManager {
     
     public void sendNotification_ReviewOK(Request request) {
     	
+    	log.info("sendNotification_ReviewOK to user ("+request.getUser()+")");
+    	
         // delete any waiting notification finding a reviewer
         notificationService.deleteByTypeAndReference(REVIEW_WAITING, request.getId());
     	
@@ -289,8 +291,9 @@ public class NotificationManager {
         // check for eMail email works for user
         if ((!wasSend) && (user.getEMail() != null) && (user.getEMail().trim().length() >= 4)) {
         	wasSend = sendPushMail(user,textShort,textLong,locale);
-            
         }
+        
+        if (!wasSend) log.warn("sendPushAuto: Notification was not send to user ("+user.getId()+") textShort("+textShort+")");
 			
 		return wasSend;
 		
