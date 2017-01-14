@@ -91,6 +91,9 @@ public class UserController {
     @CrossOrigin(origins = "*")
     @GetMapping(produces = "application/json")
     public List<UserResponse> getAllUsers(HttpServletRequest httpRequest) throws Exception {
+    	
+    	log.info("*** GET All Users ***");
+    	
         controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
         List<UserResponse> listOfUserResponses = userService.getAllUsers()
                 .stream().map(user -> userMapper.fromUserToUserResponse(user))
@@ -102,7 +105,8 @@ public class UserController {
     @PostMapping(value = "registerGuest", produces = "application/json")
     public ResponseEntity<UserResponse> registerGuest(
             @RequestParam(value = "locale", defaultValue = "en") String locale) throws Exception {
-        log.debug("registerGuest");
+    	
+    	log.info("*** POST Create User (Guest) ***");
 
         // create new user
         User user = userService.createGuest(locale);
@@ -125,6 +129,8 @@ public class UserController {
             @RequestParam(value = "pass", defaultValue = "") String pass,
             @RequestParam(value = "locale", defaultValue = "en") String locale) throws Exception {
 
+    	log.info("*** POST Create User (Full) ***");
+    	
         if ((email != null) && (email.length() > 1)) {
             // check if credentials are available
             if ((pass == null) || (pass.trim().length() == 0)) {
@@ -166,6 +172,8 @@ public class UserController {
     @GetMapping(value = "/{userId}", produces = "application/json")
     public UserResponse getUser(@PathVariable Long userId, HttpServletRequest httpRequest) throws Exception {
 
+    	log.info("*** GET User ("+userId+") ***");
+    	
         User user = userService.findById(userId);
         if (user == null) {
             log.warn("NOT FOUND user(" + userId + ")");
@@ -209,6 +217,8 @@ public class UserController {
     public UserResponse login(@RequestParam(value = "mail", defaultValue = "") String email,
                               @RequestParam(value = "pass", defaultValue = "") String pass) throws Exception {
 
+    	log.info("*** GET Login User ("+email+") ***");
+    	
         pass = pass != null ? pass.trim() : pass;
 
         // check user and input data
@@ -256,6 +266,9 @@ public class UserController {
     @PostMapping(value = "/reset_password/init",
             produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<?> requestPasswordReset(@RequestBody String mail, HttpServletRequest request) {
+    	
+    	log.info("*** POST Reset Password Init ("+mail+") ***");
+    	
         return userService.requestPasswordReset(mail)
                 .map(user -> {
                     mailService.sendPasswordResetMail(user);
@@ -273,6 +286,9 @@ public class UserController {
     @CrossOrigin(origins = "*")
     @PostMapping(value = "/reset_password/finish", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> finishPasswordReset(@RequestBody KeyAndPasswordVM keyAndPassword) {
+    	
+    	log.info("*** POST Reset Password Finish ("+keyAndPassword.getKey()+") ***");
+    	
         return userService.completePasswordReset(keyAndPassword.getNewPassword(), keyAndPassword.getKey())
                 .map(user -> new ResponseEntity<String>(HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
@@ -282,6 +298,9 @@ public class UserController {
     @CrossOrigin(origins = "*")
     @GetMapping(value = "/check_free", produces = "application/json")
     public Boolean checkUserNameStillFree(@RequestParam(value = "username", defaultValue = "") String name) {
+    	
+    	log.info("*** GET Check Username Is Free ("+name+") ***");
+    	
         if ((name == null) || (name.length() == 0)) return false;
         return (userService.findByName(name) == null);
     }
@@ -290,7 +309,7 @@ public class UserController {
     @PutMapping(value = "/{userId}", produces = "application/json")
     public ResponseEntity<UserResponse> updateUser(@RequestBody @Valid final User userInput, HttpServletRequest httpRequest) throws Exception {
         
-    	log.info("Update User("+userInput.getId()+") ...");
+    	log.info("*** PUT Update User ("+userInput.getId()+") ***");
     	
     	User user = userService.findById(userInput.getId());
         if (user == null) throw new Exception("NOT FOUND user(" + userInput.getId() + ")");
@@ -371,6 +390,8 @@ public class UserController {
                                  @RequestParam(value = "email", defaultValue = "") String email,
                                  @RequestParam(value = "locale", defaultValue = "en") String locale,
                                  HttpServletRequest httpRequest) throws Exception {
+    	
+    	log.info("*** GET Generate Konfetti Coupons for Party ("+partyId+") ***");
 
         checkEmailConfiguration();
 
@@ -431,6 +452,7 @@ public class UserController {
     }
 
     private void checkEmailConfiguration() throws Exception {
+    	    	
         if (StringUtils.isEmpty(mailHost) && mailEnabled) {
             throw new Exception("eMail is not configured in properties file - cannot generate/send coupons");
         }
@@ -443,6 +465,8 @@ public class UserController {
                                            @RequestParam(value = "amount", defaultValue = "0") Integer amount,
                                            HttpServletRequest httpRequest) throws Exception {
 
+    	log.info("*** GET Generate Admin Coupons for Party ("+partyId+") ***");
+    	
         // validate inputs
         if (count <= 0) throw new Exception("must be more than 0 coupons");
         if (amount <= 0) throw new Exception("must be more than 0 per coupon");
@@ -471,6 +495,8 @@ public class UserController {
                                            @RequestParam(value = "count", defaultValue = "1") Integer count,
                                            @RequestParam(value = "type", defaultValue = "admin") String type,
                                            HttpServletRequest httpRequest) throws Exception {
+    	
+    	log.info("*** GET Generate Admin Codes for Party ("+partyId+") ***");
 
         // validate inputs
         if (count <= 0) throw new Exception("must be more than 0");
@@ -504,7 +530,7 @@ public class UserController {
                                              @RequestParam(value = "locale", defaultValue = "en") String locale,
                                              HttpServletRequest httpRequest) throws Exception {
 
-        log.info("*** SEND KONFETTI *** partyId(" + partyId + ") amount(" + amount + ") to(" + address + ")");
+        log.info("*** GET Send Konfetti partyId(" + partyId + ") amount(" + amount + ") to(" + address + ") ***");
 
         // get eMail config
         checkEmailConfiguration();
@@ -626,6 +652,9 @@ public class UserController {
     @CrossOrigin(origins = "*")
     @GetMapping(value = "/zip2gps/{country}/{code}", produces = "application/json")
     public ResponseZip2Gps zip2Gps(@PathVariable String country, @PathVariable String code) throws Exception {
+    	
+        log.info("*** GET ZIP 2 GPS country("+country+") code("+code+") ***");
+    	
         GpsConverter gpsConverter = new GpsConverter();
         return gpsConverter.fromZipCode(country, code);
     }
@@ -633,7 +662,10 @@ public class UserController {
     @CrossOrigin(origins = "*")
     @GetMapping(value = "/redeem/{code}", produces = "application/json")
     public RedeemResponse redeemCode(@PathVariable String code, @RequestParam(value = "locale", defaultValue = "en") String locale, HttpServletRequest httpRequest) throws Exception {
-        if (StringUtils.isEmpty(code)) throw new Exception("code is not valid");
+        
+        log.info("*** GET Redeem Code ("+code+") ***");
+    	
+    	if (StringUtils.isEmpty(code)) throw new Exception("code is not valid");
 
         // get user from HTTP request
         Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);

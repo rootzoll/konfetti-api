@@ -25,7 +25,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +32,6 @@ import javax.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.konfetti.data.NotificationType.*;
 import static de.konfetti.data.enums.MediaItemReviewEnum.REVIEWED_PUBLIC;
 import static de.konfetti.data.enums.MediaItemTypeEnum.TYPE_MULTILANG;
 import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
@@ -124,6 +122,8 @@ public class PartyController {
     @RequestMapping(value = "/dashboard", method = RequestMethod.GET)
     public DashBoardInfo getDashBaordInfo(HttpServletRequest request) throws Exception {
 
+    	log.info("*** GET Dashboard ***");
+    	
         controllerSecurityHelper.checkAdminLevelSecurity(request);
         DashBoardInfo info = new DashBoardInfo();
 
@@ -138,7 +138,10 @@ public class PartyController {
     @CrossOrigin(origins = "*")
     @RequestMapping(method = RequestMethod.POST)
     public PartyResponse createParty(@RequestBody @Valid final PartyResponse partyResponse, HttpServletRequest request) throws Exception {
-        controllerSecurityHelper.checkAdminLevelSecurity(request);
+        
+    	log.info("*** POST Party ***");
+    	
+    	controllerSecurityHelper.checkAdminLevelSecurity(request);
         log.info("ADMIN: Creating PARTY(" + partyResponse.getId() + ")");
         Party createdParty = partyService.create(partyMapper.fromPartyResponse(partyResponse));
         return partyMapper.toPartyResponse(createdParty);
@@ -151,7 +154,10 @@ public class PartyController {
     @CrossOrigin(origins = "*")
     @RequestMapping(method = RequestMethod.PUT)
     public PartyResponse updateParty(@RequestBody @Valid final PartyResponse partyResponse, HttpServletRequest request) throws Exception {
-        controllerSecurityHelper.checkAdminLevelSecurity(request);
+        
+    	log.info("*** PUT Update Party ***");
+    	
+    	controllerSecurityHelper.checkAdminLevelSecurity(request);
         log.info("ADMIN: Updating PARTY(" + partyResponse.getId() + ")");
         Party party = partyMapper.fromPartyResponse(partyResponse);
         Party updatedParty = partyService.update(party);
@@ -161,8 +167,11 @@ public class PartyController {
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{partyId}", method = RequestMethod.DELETE)
     public boolean deleteParty(@PathVariable long partyId, HttpServletRequest request) throws Exception {
+    	
+    	log.info("*** DELETE Party ***");
+    	
         controllerSecurityHelper.checkAdminLevelSecurity(request);
-
+     
     	/* real delete needs to delete also all connected data
         partyService.delete(partyId);
         */
@@ -182,6 +191,8 @@ public class PartyController {
     @RequestMapping(value = "/{partyId}", method = RequestMethod.GET)
     public PartyResponse getParty(@PathVariable long partyId, @RequestParam(value = "lastTS", defaultValue = "0") long lastTs, HttpServletRequest request) throws Exception {
 
+    	log.info("*** GET Party ("+partyId+") ***");
+    	
         PartyResponse partyResponse = partyMapper.toPartyResponse(partyService.findById(partyId));
         if (partyResponse == null)
             throw new Exception("was not able to load party with id(" + partyId + ") - NOT FOUND");
@@ -297,6 +308,9 @@ public class PartyController {
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public List<PartyResponse> getAllPartiesAdmin(HttpServletRequest request) throws Exception {
+    	
+    	log.info("*** GET All Parties (Admin) ***");
+    	
         // check admin auth
         controllerSecurityHelper.checkAdminLevelSecurity(request);
         log.info("ADMIN: Get all PARTIES ...");
@@ -319,8 +333,8 @@ public class PartyController {
             @RequestParam(value = "lon", defaultValue = "0.0") String lonStr,
             HttpServletRequest request) {
 
-        log.info("getAllParties lat(" + latStr + ") lon(" + lonStr + ")");
-
+    	log.info("*** GET All Parties lat(" + latStr + ") lon(" + lonStr + ") ***");
+    
         // TODO: improve later by filter on GPS per search index
 
         List<Party> foundParties = partyService.findByVisibility(VISIBILITY_PUBLIC);
@@ -453,6 +467,8 @@ public class PartyController {
     @RequestMapping(value = "/{partyId}/{langCode}/request", method = RequestMethod.POST)
     public RequestVm createRequest(@PathVariable long partyId, @PathVariable String langCode, @RequestBody @Valid final RequestVm requestVm, HttpServletRequest httpRequest) throws Exception {
 
+    	log.info("*** POST Create Request ***");
+    	
         // load party for background info
         Party party = partyService.findById(partyId);
         if (party == null) throw new Exception("party with id(" + partyId + ") not found");
@@ -554,7 +570,10 @@ public class PartyController {
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{partyId}/request", method = RequestMethod.PUT)
     public RequestVm updateRequest(@PathVariable long partyId, @RequestBody @Valid RequestVm request, HttpServletRequest httpRequest) throws Exception {
-        log.debug("updateRequest");
+        
+    	log.info("*** PUT Update Request ***");
+    	
+    	log.debug("updateRequest");
         controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
         Request updateRequestEntity = requestService.update(requestMapper.fromRequestVm(request));
         RequestVm requestVm = requestMapper.toRequestVm(updateRequestEntity);
@@ -569,6 +588,8 @@ public class PartyController {
     @RequestMapping(value = "/{partyId}/request/{requestId}", method = RequestMethod.DELETE)
     public RequestVm deleteRequest(@PathVariable long partyId, @PathVariable long requestId, HttpServletRequest httpRequest) throws Exception {
 
+    	log.info("*** DELETE Request ***");
+    	
         // get request that is to be deleted
         Request request = requestService.findById(requestId);
         if (request == null) throw new Exception("no request with id(" + requestId + ") found");
@@ -616,6 +637,8 @@ public class PartyController {
     @RequestMapping(value = "/{partyId}/request/{requestId}", method = RequestMethod.GET)
     public ResponseEntity<RequestVm> getRequest(@PathVariable long partyId, @PathVariable long requestId, @RequestParam(value = "upvoteAmount", defaultValue = "0") Long upvoteAmount, HttpServletRequest httpRequest) throws Exception {
 
+    	log.info("*** GET Request ***");
+    	
         Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
         log.info("PartyController getRequest(" + requestId + ") upvoteAmount(" + upvoteAmount + ") ...");
 
@@ -623,12 +646,10 @@ public class PartyController {
 
         if (requestEntity == null) {
             log.warn("PartyController getRequest(" + requestId + ") --> NULL");
-            ResponseEntity<Void> nullResponse = ResponseEntity.noContent().build();
-            return new ResponseEntity<>((MultiValueMap<String, String>) nullResponse, HttpStatus.OK);
+            throw new Exception("was not able to load request with id(" + requestId + ") - NOT FOUND");
         }
 
         RequestVm requestReponse = requestMapper.toRequestVm(requestEntity);
-
 
         User user = userService.findById(client.getUser().getId());
         boolean userIsPartyAdmin = Helper.userIsAdminOnParty(user, requestReponse.getPartyId());
@@ -742,7 +763,7 @@ public class PartyController {
     @RequestMapping(value = "/action/request/{requestId}", method = RequestMethod.GET)
     public RequestVm actionRequest(@PathVariable long requestId, @RequestParam(value = "action", defaultValue = "no") String action, @RequestParam(value = "json", defaultValue = "") String json, HttpServletRequest httpRequest) throws Exception {
 
-    	log.info("Action on Request("+requestId+") action("+action+") ...");
+    	log.info("*** GET Action on Request("+requestId+") action("+action+") ***");
     	
         Request request = requestService.findById(requestId);
         if (request != null) {
@@ -794,13 +815,15 @@ public class PartyController {
 
                 if (fromReview) {
                     // send notification to author
-                	log.info("set to open - from review");
+                	log.info("set to open - from review (before)");
                 	notificationManager.sendNotification_ReviewOK(request);
+                	log.info("set to open - from review (after)");
                 } else {
                 	log.info("set to open - not from review");
                 }
 
                 // publish info about update on public channel
+            	log.info("publish info about update on public channel");
                 CommandMessage msg = new CommandMessage();
                 msg.setCommand(CommandMessage.COMMAND_PARTYUPADTE);
                 msg.setData("{\"party\":" + request.getParty().getId() + ", \"request\":" + request.getId() + " ,\"state\":\"" + request.getState() + "\"}");
@@ -1050,12 +1073,18 @@ public class PartyController {
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/{partyId}/request", method = RequestMethod.GET)
     public List<RequestVm> getAllPartyRequests(@PathVariable long partyId) throws Exception {
+    	
+    	log.info("*** GET All Requests on Party ***");
+    	
         return requestService.getAllPartyRequests(partyId);
     }
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/testData", method = RequestMethod.GET)
     public List<Party> testData() throws Exception {
+    	
+    	log.info("*** GET Test Data ***");
+    	
         List<Party> foundParties = partyService.findByName("Helferverein Nord e.V.");
         if (CollectionUtils.isEmpty(foundParties)) {
             log.debug("Creating Test Parties : Creating test parties..");

@@ -112,7 +112,7 @@ public class NotificationManager {
     
     public void sendNotification_ReviewOK(Request request) {
     	
-    	log.info("sendNotification_ReviewOK to user ("+request.getUser()+")");
+    	log.info("sendNotification_ReviewOK to user");
     	
         // delete any waiting notification finding a reviewer
         notificationService.deleteByTypeAndReference(REVIEW_WAITING, request.getId());

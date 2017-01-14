@@ -5,10 +5,8 @@ import com.google.gson.GsonBuilder;
 import de.konfetti.controller.mapper.ChatMapper;
 import de.konfetti.controller.vm.ChatDto;
 import de.konfetti.data.*;
-import de.konfetti.data.enums.MediaItemTypeEnum;
 import de.konfetti.service.*;
 import de.konfetti.utils.NotificationManager;
-import de.konfetti.utils.PushManager;
 import de.konfetti.websocket.CommandMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +82,8 @@ public class ChatController {
     @RequestMapping(method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<ChatDto> createChat(@RequestBody @Valid final ChatDto template, HttpServletRequest httpRequest) throws Exception {
 
+        log.info("*** POST Create Chat ***");
+		
     	// check if user is allowed to create
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
 
@@ -137,6 +137,8 @@ public class ChatController {
     @RequestMapping(value="/{chatId}", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<ChatDto> getChat(@PathVariable Long chatId, @RequestParam(value="lastTS",defaultValue="0") Long lastTS, HttpServletRequest httpRequest) throws Exception {
 
+        log.info("*** GET Chat ("+chatId+") ***");
+    	
     	// try to load message and chat
     	Chat chat = chatService.findById(chatId);
     	if (chat==null) throw new Exception("chat("+chatId+") not found");
@@ -200,6 +202,8 @@ public class ChatController {
     @CrossOrigin(origins = "*")
     @RequestMapping(value="/{chatId}/message", method = RequestMethod.POST, produces = "application/json")
     public Message addMessage(@PathVariable Long chatId, @RequestBody @Valid final Message template, HttpServletRequest httpRequest) throws Exception {
+    	
+        log.info("*** POST Message on Chat ("+chatId+") ***");
     	
     	Set<Long> receivers = null;
     	long messageTS = System.currentTimeMillis();
@@ -288,6 +292,8 @@ public class ChatController {
     @RequestMapping(value="/{chatId}/message/{messageId}", method = RequestMethod.GET, produces = "application/json")
     public Message actionMessage(@PathVariable Long chatId, @PathVariable Long messageId, HttpServletRequest httpRequest) throws Exception {
         
+        log.info("*** GET Message ("+messageId+") on Chat ("+chatId+") ***");
+    	
     	// try to load message and chat
     	Chat chat = chatService.findById(chatId);
     	if (chat==null) throw new Exception("chat("+chatId+") not found");
