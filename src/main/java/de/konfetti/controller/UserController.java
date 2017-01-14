@@ -295,21 +295,6 @@ public class UserController {
     	User user = userService.findById(userInput.getId());
         if (user == null) throw new Exception("NOT FOUND user(" + userInput.getId() + ")");
 
-       	log.info("check if other user exists with name / email");
-        
-        // check if other user exists with name / email
-        User byMail = userService.findByMailIgnoreCase(userInput.getEMail());
-        if (byMail != null && byMail.getId() != userInput.getId()) {
-            return new ResponseEntity("Another user exists with this email : '" + userInput.getEMail() + "'", HttpStatus.BAD_REQUEST);
-        }
-        User byName = userService.findByName(userInput.getName());
-        if (byName != null
-                && byName.getId() != userInput.getId()
-                && userInput.getName().length() > 0
-                ) {
-            return new ResponseEntity("Another user exists with this name : '" + userInput.getName() + "'", HttpStatus.BAD_REQUEST);
-        }
-        
        	log.info("check if user is allowed to read");
 
         // check if user is allowed to read
@@ -322,27 +307,49 @@ public class UserController {
 
             // B) check if email got changed
             boolean firstTimeMailSet = (user.getEMail() == null) || (user.getEMail().trim().length() == 0);
-            if ((userInput.getEMail() != null) && (!userInput.getEMail().equals(user.getEMail()))) {
-                user.setEMail(userInput.getEMail());
+            if ((userInput.getEMail() != null) && (userInput.getEMail().trim().length()>3) && (!userInput.getEMail().equals(user.getEMail()))) {
+                
+            	// check that new eMail is not used by other user
+            	String newMail = userInput.getEMail().trim();
+                User byMail = userService.findByMailIgnoreCase(newMail);
+                if (byMail != null && byMail.getId() != userInput.getId()) {
+                    return new ResponseEntity("Another user exists with this email : '" + newMail + "'", HttpStatus.BAD_REQUEST);
+                }
+            	
+            	// set new email and send email with automated password
+            	user.setEMail(newMail);
                 String pass = RandomUtil.generadeCodeNumber() + "";
                 user.setPassword(Helper.hashPassword(this.passwordSalt, pass));
                 if (firstTimeMailSet) {
                 	String locale =  user.decideWichLanguageForUser();
                 	String subject = messageSource.getMessage("email.account.headline", new String[]{}, Locale.forLanguageTag(locale));
                     String body = messageSource.getMessage("email.account.body", new String[]{user.getEMail(), pass}, Locale.forLanguageTag(locale));
-                	mailService.sendMail(userInput.getEMail(), subject, body, null);
+                	mailService.sendMail(newMail, subject, body, null);
                 }
             }
-
+            
+            // C) Check if name got changed
+            if ((userInput.getName()!=null) && (userInput.getName().trim().length()>0) && (!userInput.equals(user.getName()))) {
+            	
+            	// check that new name is not used by other user
+            	String newName = userInput.getName().trim();
+                User byName = userService.findByName(newName);
+                if (byName != null && byName.getId() != userInput.getId() && userInput.getName().length() > 0 ) {
+                    return new ResponseEntity("Another user exists with this name : '" + userInput.getName() + "'", HttpStatus.BAD_REQUEST);
+                }
+         
+                // set new name
+            	user.setName(newName);
+            }
+           
             // transfer selective values from input to existing user
-            user.setEMail(userInput.getEMail());
             user.setImageMediaID(userInput.getImageMediaID());
-            user.setName(userInput.getName());
             user.setPushActive(userInput.getPushActive());
             user.setPushSystem(userInput.getPushSystem());
             user.setPushID(userInput.getPushID());
             user.setSpokenLangs(userInput.getSpokenLangs());
             user.setLastActivityTS(System.currentTimeMillis());
+            
         } else {
             // B) check for trusted application with administrator privilege
             controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
