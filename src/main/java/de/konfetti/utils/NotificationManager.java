@@ -285,13 +285,7 @@ public class NotificationManager {
 		
 		boolean wasSend = false;
 		
-		try {
-			log.info("*** DEBUG ******* sendPushAuto");
-			log.info("PushManager.getInstance().isAvaliable() --> "+PushManager.getInstance().isAvaliable());
-			log.info("sendPushAuto User Data --> "+new Gson().toJson(user));
-		} catch (Exception e) {
-			log.info("FAILED to log data");
-		}
+		if (PushManager.getInstance().isAvaliable()) log.warn("Pushnotification Provider is NOT available. Check Server Config..");
 		
         // check for push notification works for user
         if ((user.getPushActive()) && (PushManager.getInstance().isAvaliable())) {

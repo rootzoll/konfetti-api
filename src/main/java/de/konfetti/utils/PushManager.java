@@ -37,10 +37,12 @@ public class PushManager {
 	}
 		
 	public boolean isAvaliable() {
-		if (this.pushId ==null) return false;
+		log.info("PushManager: isAvaliable pushId("+this.pushId+") pushAuth("+this.pushAuth+")"); 
+		if (this.pushId==null) return false;
 		if (this.pushId.trim().length()==0) return false;
-		if (this.pushAuth ==null) return false;
-		return this.pushAuth.trim().length() != 0;
+		if (this.pushAuth==null) return false;
+		if (this.pushAuth.trim().length()==0) return false;
+		return true;
 	}
 
 	public boolean sendNotification(int platformUSEFINALS, String userPushID, String textShort, String locale, String meta) {
