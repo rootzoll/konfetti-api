@@ -3,6 +3,7 @@ package de.konfetti.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
 
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -11,6 +12,7 @@ import java.net.URL;
 /*
  * Use to send push notifications to apps.
  */
+@Service
 @Configuration
 @Slf4j
 public class PushManager {

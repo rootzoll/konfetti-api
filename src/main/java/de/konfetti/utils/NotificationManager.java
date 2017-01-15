@@ -285,7 +285,7 @@ public class NotificationManager {
 		
 		boolean wasSend = false;
 		
-		if (PushManager.getInstance().isAvaliable()) log.warn("Pushnotification Provider is NOT available. Check Server Config..");
+		if (PushManager.getInstance().isAvaliable()) log.warn("Pushnotification Provider is NOT available. Check Server Config.");
 		
         // check for push notification works for user
         if ((user.getPushActive()) && (PushManager.getInstance().isAvaliable())) {
