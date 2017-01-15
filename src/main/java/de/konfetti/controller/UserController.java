@@ -294,15 +294,24 @@ public class UserController {
                 .orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
-    // use to quickly check if a user name is already in use - no auth needed
+    // use to quickly check if a username or email is already in use - no auth needed
+    // just one parameter at a time - not both together
     @CrossOrigin(origins = "*")
     @GetMapping(value = "/check_free", produces = "application/json")
-    public Boolean checkUserNameStillFree(@RequestParam(value = "username", defaultValue = "") String name) {
+    public Boolean checkUserNameStillFree(@RequestParam(value = "username", defaultValue = "") String name, @RequestParam(value = "email", defaultValue = "") String email) {
     	
-    	log.info("*** GET Check Username Is Free ("+name+") ***");
+    	log.info("*** GET Check Username / eMail Is Free ("+name+") ***");
     	
-        if ((name == null) || (name.length() == 0)) return false;
+    	// check if name is free
+        if ((name != null) && (name.length() > 0))
         return (userService.findByName(name) == null);
+        
+        // check if email is free
+        if ((email != null) && (email.length() > 0))
+        return (userService.findByMailIgnoreCase(email) == null);     
+        
+        // just in case default to
+        return false;
     }
 
     @CrossOrigin(origins = "*")
