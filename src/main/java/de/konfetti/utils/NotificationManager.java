@@ -1,17 +1,16 @@
 package de.konfetti.utils;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Service;
-
 import de.konfetti.data.Request;
 import de.konfetti.data.User;
 import de.konfetti.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-
-import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
 
 /*
  * Use to manage nofification sending to users. 
@@ -37,6 +36,9 @@ public class NotificationManager {
     @SuppressWarnings("unused")
 	@Autowired
     private UserService userService;
+
+    @Autowired
+    private PushManager pushManager;
     
     public NotificationManager() {
         log.info("NotificationManager Constructor");
@@ -243,7 +245,7 @@ public class NotificationManager {
     private String getTypeOfPushForUser(User user) {
     	
         // check for push notification
-        if ((user.getPushActive()) && (PushManager.getInstance().isAvaliable())) {
+        if ((user.getPushActive()) && (pushManager.isAvaliable())) {
         	return PUSHTYPE_PUSH;
         }
 
@@ -317,7 +319,7 @@ public class NotificationManager {
      */
     private boolean sendPushPush(User user, String textShort, String textLong, String meta, String locale) {
         
-       if (PushManager.getInstance().sendNotification(
+       if (pushManager.sendNotification(
                 PushManager.PLATFORM_ANDROID,
                 user.getPushID(),
                 textShort,

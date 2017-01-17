@@ -3,6 +3,7 @@ package de.konfetti.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
 
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -11,6 +12,7 @@ import java.net.URL;
 /*
  * Use to send push notifications to apps.
  */
+@Service
 @Configuration
 @Slf4j
 public class PushManager {
@@ -18,19 +20,12 @@ public class PushManager {
 	public static final int PLATFORM_ANDROID = 1;
 	public static final int PLATFORM_IOS = 1; 
 	
-	private static PushManager singleton = null;
-
 	@Value("${konfetti.pushID}")
 	private String pushId;
 
 	@Value("${konfetti.pushAuth}")
 	private String pushAuth;
 	
-	public static PushManager getInstance() {
-		if (singleton==null) singleton = new PushManager();
-		return singleton;
-	}
-
 	public static int mapUserPlatform(String pushSystem) {
 		// TODO map user.pushSystem values to this class finals
 		return PLATFORM_ANDROID;
@@ -87,9 +82,6 @@ public class PushManager {
 			e.printStackTrace();
 			return false;
 		}
-
-
 	}
-	
-	
+
 }
