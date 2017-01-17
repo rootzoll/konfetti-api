@@ -284,7 +284,7 @@ public class ChatController {
 		}
 
     	// send notification
-    	this.notificationManager.sendNotification_TaskCHAT(chat, message, this.mediaService.findById(template.getItemId()), receivingUsers, client, requestService.findById(chat.getRequestId()));
+    	this.notificationManager.sendNotification_TaskCHAT(chat, message, this.mediaService.findById(template.getItemId()), receivingUsers, client, requestService.findById(chat.getRequest().getId()));
     	
         return message;
     }
