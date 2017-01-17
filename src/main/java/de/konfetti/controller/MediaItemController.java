@@ -54,6 +54,8 @@ public class MediaItemController {
     @RequestMapping(method = RequestMethod.POST, produces = "application/json")
     public MediaItem createMedia(@RequestBody @Valid final MediaItem template, HttpServletRequest httpRequest) throws Exception {
     	
+        log.info("*** POST Create Media ***");
+    	
     	// check if user is allowed to create
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
     		// A) check that chat is just hosted by user
@@ -98,6 +100,8 @@ public class MediaItemController {
     @RequestMapping(value="/{mediaId}", method = RequestMethod.GET, produces = "application/json")
     public MediaItem getMedia(@PathVariable Long mediaId, HttpServletRequest httpRequest) throws Exception {
         
+        log.info("*** GET Media ***");
+    	
     	// try to item
     	MediaItem item = mediaService.findById(mediaId);
     	if (item==null) throw new Exception("media("+mediaId+") not found");
@@ -109,6 +113,8 @@ public class MediaItemController {
     @RequestMapping(value="/{mediaId}/image", method = RequestMethod.GET, produces = "image/*")
     public ResponseEntity<InputStreamResource> getMediaAsImage(@PathVariable Long mediaId, HttpServletRequest httpRequest) throws Exception {
         
+        log.info("*** GET Media As Image ***");
+    	
     	// try to item
     	MediaItem item = mediaService.findById(mediaId);
     	if (item==null) throw new Exception("media("+mediaId+") not found");

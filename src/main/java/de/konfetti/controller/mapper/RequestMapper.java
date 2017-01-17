@@ -33,13 +33,14 @@ public class RequestMapper {
         requestVm.setTitleMultiLangRef(request.getTitleMultiLangRef());
         requestVm.setTime(request.getTime());
         requestVm.setMediaItemIds(request.getMediaItemIds());
+        requestVm.setImageMediaID(request.getImageMediaID());
+        requestVm.setSpokenLangs(request.getSpokenLangs());
         return requestVm;
     }
 
     public Request fromRequestVm(RequestVm requestVm) {
         User user = userService.findById(requestVm.getUserId());
         Party party = partyService.findById(requestVm.getPartyId());
-
         Request request = new Request();
         request.setId(requestVm.getId());
         request.setUser(user);
@@ -49,6 +50,8 @@ public class RequestMapper {
         request.setTitleMultiLangRef(requestVm.getTitleMultiLangRef());
         request.setTime(requestVm.getTime());
         request.setMediaItemIds(requestVm.getMediaItemIds());
+        request.setImageMediaID(requestVm.getImageMediaID());
+        request.setSpokenLangs(requestVm.getSpokenLangs());
         return request;
     }
 

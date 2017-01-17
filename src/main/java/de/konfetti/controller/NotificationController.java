@@ -33,7 +33,8 @@ public class NotificationController {
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/notification/{notiId}", method = RequestMethod.DELETE)
     public Notification deleteNotification(@PathVariable long notiId, HttpServletRequest httpRequest) throws Exception {
-        log.info("NotificationController deleteNotification : " + notiId);
+        
+        log.info("*** DELETE Notification ("+notiId+") ***");
 
         // get notification
         Notification noti = notificationService.findById(notiId);

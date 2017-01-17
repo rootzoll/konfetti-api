@@ -113,6 +113,7 @@ public class ControllerSecurityHelper {
 		
 	public Client getClientFromRequestWhileCheckAuth(HttpServletRequest req, ClientService clientService) {
 		
+		log.info("Check Client Security ...");
 		if (!doneInit) doInit();
 		
 		// get user credentials from HTTP header
@@ -129,10 +130,15 @@ public class ControllerSecurityHelper {
 			throw new IllegalArgumentException("ControllerSecurityHelper: X-CLIENT-ID id no Number ("+clientId+"/"+clientSecret+") from IP("+req.getRemoteAddr()+")");
 		}
 
-		log.trace("clientId(" + clientId + ") clientSecret(" + clientSecret + ")");
+		log.info("clientId(" + clientId + ") clientSecret(" + clientSecret + ")");
 		
 		// check if client exists
-		Client client = clientService.findById(clientIdLong);
+		Client client = null;
+		try {
+			client = clientService.findById(clientIdLong);
+		} catch (Exception e) {
+			log.error("EXCEPTION in finding client with id("+clientIdLong+")", e);
+		}
 		if (client==null) {
 			log.trace("CLIENT NOT FOUND");
 			try {
@@ -152,6 +158,7 @@ public class ControllerSecurityHelper {
 			}
 		}
 
+		log.info("Check Client Security ... OK");
 		return client;
 	}
 }

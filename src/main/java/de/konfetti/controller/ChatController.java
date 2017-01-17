@@ -37,6 +37,7 @@ public class ChatController {
     private final ChatService chatService;
     private final MessageService messageService;
     private final RequestService requestService;
+    private final MediaService mediaService;
 
 	@Autowired
 	private ControllerSecurityHelper controllerSecurityHelper;
@@ -51,12 +52,13 @@ public class ChatController {
 	private ChatMapper chatMapper;
 
     @Autowired
-    public ChatController(final UserService userService, final ClientService clientService, final ChatService chatService, final MessageService messageService, final RequestService requestService) {
+    public ChatController(final UserService userService, final ClientService clientService, final ChatService chatService, final MessageService messageService, final RequestService requestService, final MediaService mediaService) {
         this.userService = userService;
         this.clientService = clientService;
         this.chatService = chatService;
         this.messageService = messageService;
         this.requestService = requestService;
+        this.mediaService = mediaService;
     }
 
     //---------------------------------------------------
@@ -82,6 +84,8 @@ public class ChatController {
 	@CrossOrigin(origins = "*")
     @RequestMapping(method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<ChatDto> createChat(@RequestBody @Valid final ChatDto template, HttpServletRequest httpRequest) throws Exception {
+
+        log.info("*** POST Create Chat ***");
 
     	// check if user is allowed to create
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
@@ -134,6 +138,8 @@ public class ChatController {
     @CrossOrigin(origins = "*")
     @RequestMapping(value="/{chatId}", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<ChatDto> getChat(@PathVariable Long chatId, @RequestParam(value="lastTS",defaultValue="0") Long lastTS, HttpServletRequest httpRequest) throws Exception {
+
+        log.info("*** GET Chat ("+chatId+") ***");
 
     	// try to load message and chat
     	Chat chat = chatService.findById(chatId);
@@ -198,17 +204,21 @@ public class ChatController {
     @RequestMapping(value="/{chatId}/message", method = RequestMethod.POST, produces = "application/json")
     public Message addMessage(@PathVariable Long chatId, @RequestBody @Valid final Message template, HttpServletRequest httpRequest) throws Exception {
     	
+        log.info("*** POST Message on Chat ("+chatId+") ***");
+
     	Set<Long> receivers = null;
     	long messageTS = System.currentTimeMillis();
     	
     	Chat chat = chatService.findById(chatId);
     	if (chat==null) throw new Exception("chat("+chatId+") not found");
     	
+    	Client client = null;
+
     	// check if user is allowed to create
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
     		
     		// A) check that user is host or member of chat
-    		Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
+    		client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);
     		boolean userIsHost = (chat.getHostId().equals(client.getUser().getId()));
     		boolean userIsMember = false;
     		for (Long memeberId : chat.getMembers()) {
@@ -266,7 +276,15 @@ public class ChatController {
     	msg.setData("{\"party\":"+chat.getPartyId()+", \"users\":"+jsonArray+"}");
     	webSocket.convertAndSend("/out/updates", GSON.toJson(msg));  
     	
-    	this.notificationManager.sendNotification_TaskCHAT();
+    	// load all users that will receive chat message
+    	List<User> receivingUsers = new ArrayList<User>();
+    	for (Long userId : receivers) {
+			User u = userService.findById(userId);
+			if (u!=null) receivingUsers.add(u);
+		}
+
+    	// send notification
+    	this.notificationManager.sendNotification_TaskCHAT(chat, message, this.mediaService.findById(template.getItemId()), receivingUsers, client, requestService.findById(chat.getRequestId()));
     	
         return message;
     }
@@ -275,6 +293,8 @@ public class ChatController {
     @RequestMapping(value="/{chatId}/message/{messageId}", method = RequestMethod.GET, produces = "application/json")
     public Message actionMessage(@PathVariable Long chatId, @PathVariable Long messageId, HttpServletRequest httpRequest) throws Exception {
         
+        log.info("*** GET Message ("+messageId+") on Chat ("+chatId+") ***");
+
     	// try to load message and chat
     	Chat chat = chatService.findById(chatId);
     	if (chat==null) throw new Exception("chat("+chatId+") not found");

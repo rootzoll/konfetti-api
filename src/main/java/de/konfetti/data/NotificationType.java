@@ -14,5 +14,6 @@ public enum NotificationType {
 	REWARD_GOT,				// received a reward
 	SUPPORT_WIN, 			// when a task you supported got done
 	LOGOUT_REMINDER,		// remind user to logout on browser
-	REVIEW_WAITING;			// task is waiting for reviewer
+	REVIEW_WAITING,			// task is waiting for reviewer
+	TRANSFER_RECEIVED;		// user received a konfetti transfer
 }

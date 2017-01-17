@@ -23,7 +23,7 @@ public class Notification {
     // type (see CONST above)
 	private NotificationType type;
 
-	// reference - depending on type
+	// reference - depending on type (database nightmare)
     private Long ref;
     
     // time stamp of creation

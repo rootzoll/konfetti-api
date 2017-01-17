@@ -5,11 +5,19 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.Gson;
+
+import de.konfetti.data.Chat;
+import de.konfetti.data.Client;
 import de.konfetti.data.Code;
+import de.konfetti.data.MediaItem;
+import de.konfetti.data.Message;
+import de.konfetti.data.Notification;
 import de.konfetti.data.NotificationType;
 import de.konfetti.data.Party;
 import de.konfetti.data.Request;
 import de.konfetti.data.User;
+import de.konfetti.data.enums.MediaItemTypeEnum;
 import de.konfetti.service.NotificationService;
 import de.konfetti.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +41,6 @@ import java.util.Locale;
 @Service
 @Configuration
 public class NotificationManager {
-
-    private static final String PUSHTYPE_NOTPOSSIBLE = "not-possible";
-    private static final String PUSHTYPE_EMAIL = "email";
-    private static final String PUSHTYPE_PUSH = "push";
     
     @Autowired
     private EMailManager eMailManager;
@@ -78,8 +82,16 @@ public class NotificationManager {
     		// logic check
     		if (reviewer.size()==0) log.warn("sendNotification_ReviewWAITING: party("+request.getParty().getId()+") has no admin user");
     		
+    		// if more than 3 reviewers - TODO: find the last three active reviews
+    		if (reviewer.size()>3) {
+    			log.warn("TODO: reviewer list is bigger than 3 - sort by last active and just use the lastest 3 active");
+    			reviewer = reviewer.subList(0, 2);
+    		}
+    		
     		// send notification to all reviewers
     		for (User user : reviewer) {
+    			
+    			// TODO: decide to persist a party notification and link id in metaJSON
     			
     			// set text by locale of user
     			String locale = user.decideWichLanguageForUser();
@@ -88,17 +100,8 @@ public class NotificationManager {
     			String textLong = messageSource.getMessage("push.reviewer.long", new String[]{request.getParty().getName()}, Locale.forLanguageTag(locale));
     			String metaJSON = "{\"type\": \"REVIEW_WAITING\",\"partyID\": "+request.getParty().getId()+",\"taskID\": "+request.getId()+"}";
     			    			
-    			final String pushType = getTypeOfPushForUser(user);
-    			if (PUSHTYPE_EMAIL.equals(pushType)) {
-    				
-    				// EMAIL
-    				sendPushMail(user, textShort, textLong, locale);
-    				
-    			} else {
-    				
-    				// PUSH NOTIFICATION
-    				sendPushPush(user, textShort, textLong, metaJSON, locale);
-    			}
+				// push notification
+				sendPushAuto(user, textShort, textLong, metaJSON, locale);
     			
 			}
     		
@@ -109,195 +112,198 @@ public class NotificationManager {
     	    	
     }
     
-    // TODO: push/email
     public void sendNotification_ReviewOK(Request request) {
     	
-    	log.warn("sendNotification_ReviewOK: TODO push/email");
+    	log.info("sendNotification_ReviewOK to user");
     	
         // delete any waiting notification finding a reviewer
         notificationService.deleteByTypeAndReference(REVIEW_WAITING, request.getId());
     	
     	// store notification to be displayed on party
-        notificationService.create(NotificationType.REVIEW_OK, request.getUser(), request.getParty(), request.getId());
+        Notification notification = notificationService.create(NotificationType.REVIEW_OK, request.getUser(), request.getParty(), request.getId());
 
+		// set text by locale of user
+		String locale = request.getUser().decideWichLanguageForUser();
+		
+		String textShort = messageSource.getMessage("push.review.ok.short", new String[]{}, Locale.forLanguageTag(locale));
+		String textLong = messageSource.getMessage("push.review.ok.long", new String[]{request.getTitle()}, Locale.forLanguageTag(locale));
+		String metaJSON = "{\"type\": \"REVIEW_OK\",\"partyID\": "+request.getParty().getId()+",\"requestID\": "+request.getId()+",\"notificationID\": "+notification.getId()+"}";
+		
+		// PUSH NOTIFICATION
+		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale);
+        
     }
     
-    // TODO: push/email
+    // TODO: add comment why rejected that was given in app by reviewer
     public void sendNotification_ReviewFAIL(Request request) {
-    	
-    	log.warn("sendNotification_ReviewFAIL: TODO push/email");
     
     	// delete any waiting notification finding a reviewer
         notificationService.deleteByTypeAndReference(REVIEW_WAITING, request.getId());
 
     	// store notification to be displayed on party
-        notificationService.create(REVIEW_FAIL, request.getUser(), request.getParty(), request.getId());
+        Notification notification = notificationService.create(REVIEW_FAIL, request.getUser(), request.getParty(), request.getId());
  
+		// set text by locale of user
+		String locale = request.getUser().decideWichLanguageForUser();
+		
+		String textShort = messageSource.getMessage("push.review.fail.short", new String[]{}, Locale.forLanguageTag(locale));
+		String textLong = messageSource.getMessage("push.review.fail.long", new String[]{request.getTitle()}, Locale.forLanguageTag(locale));
+		String metaJSON = "{\"type\": \"REVIEW_FAIL\",\"partyID\": "+request.getParty().getId()+",\"requestID\": "+request.getId()+",\"notificationID\": "+notification.getId()+"}";
+		
+		// PUSH NOTIFICATION
+		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale);
+        
     }
     
-    // TODO: implement and add to correct spots in code
-    public void sendNotification_TaskCHAT() {
+    public void sendNotification_TaskCHAT(Chat chat, Message message, MediaItem item, List<User> receivingUsers, Client fromClient, Request request) {
     	
-    	log.warn("sendNotification_TaskCHAT: TODO");
+    	// get a chat message text preview
+    	String messageTextPreview = "(media)";
+    	if ((item!=null) && (item.getType()==MediaItemTypeEnum.TYPE_TEXT)) messageTextPreview=item.getData();
     	
-    	// why no notification persistence? deleted on last commit? or will it get calculated on party list deliver? 
-    	
-    	/*
-    	 // send push notification if possible
-    	if (PushManager.getInstance().isAvaliable()) {
-			log.info("PushMessage Alert");
-			if (receivers!=null) {
-    			for (Long userID : receivers) {
-					log.info("PUSHTO(" + userID + ")");
-					User receiver = userService.findById(userID);
-    				if (receiver!=null) {
-    					if (receiver.getPushActive()) {
-							log.info(" - WIN - DOING PUSH ...");
+    	// get name from user sending 
+    	String fromUserName = "ADMIN";
+    	if (fromClient!=null) fromUserName = fromClient.getUser().getName();
+    	   	
+    	// NOTE: notification persistence because at the moment the PartyController will check all chats for new messages
+    	if (receivingUsers.size()==0) log.warn("sendNotification_TaskCHAT: no receivers of chat message");
 
-							// TODO multi lang - see user
-    	    				PushManager.getInstance().sendNotification(
-    	    						PushManager.PLATFORM_ANDROID, 
-    	    						receiver.getPushID(), 
-    	    						"new chat message for you", 
-    	    						null, //locale, 
-    	    						null, //messageLocale,);
-							log.info(" - PUSH DONE :D");
+    	for (User user : receivingUsers) {
 
-						} else {
-							log.info(" - FAIL - NO PUSH");
-						}
-    				} else {
-						log.warn("PUSH RECEIVER id(" + userID + ") NOT FOUND");
-					}
-				}
-    		} else {
-				log.info("No Receivers on chat ?!? - no push");
-			}
-     	} else {
-			log.info("PushMessage not configured");
+    		String localeStr = user.decideWichLanguageForUser();
+        	Locale locale = Locale.forLanguageTag(localeStr);
+    		String subject = messageSource.getMessage("chat.message.new.head", new String[]{request.getTitle(), message.getTime()+""}, locale); // TODO: dateformat with locale
+    		String body = messageSource.getMessage("chat.message.new.body", new String[]{fromUserName, messageTextPreview}, locale);
+    		String metaJSON = "{\"type\": \"CHAT_NEW\",\"partyID\": "+chat.getPartyId()+",\"chatID\": "+chat.getId()+",\"messageID\": "+message.getId()+"}";		
+    		
+    		// PUSH NOTIFICATION
+    		sendPushAuto(user, subject, body, metaJSON, localeStr);
+    		
 		}
-    	 
-    	 */
     	
     }
         
-    // TODO: push/email
-    public void sendNotification_TaskREWARD(User user, Request request) {
-    	
-    	log.warn("sendNotification_TaskREWARD: TODO push/email");
-            
+    public void sendNotification_TaskREWARD(User user, Request request, Long amount) {
+    	            
     	// store notification to be displayed on party
-    	notificationService.create(REWARD_GOT, user, request.getParty(), request.getId());
+    	Notification notification = notificationService.create(REWARD_GOT, user, request.getParty(), request.getId());
+    	
+		// set text by locale of user
+		String locale = request.getUser().decideWichLanguageForUser();
+		
+		String textShort = messageSource.getMessage("push.task.reward.short", new String[]{}, Locale.forLanguageTag(locale));
+		String textLong = messageSource.getMessage("push.task.reward.long", new String[]{amount+"", request.getTitle()}, Locale.forLanguageTag(locale));
+		String metaJSON = "{\"type\": \"REWARD_GOT\",\"partyID\": "+request.getParty().getId()+",\"requestID\": "+request.getId()+",\"notificationID\": "+notification.getId()+"}";
+		
+		// PUSH NOTIFICATION
+		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale);
   
     }
 
-    // TODO: push/email
-    public void sendNotification_VotePAYBACK(User user, Party party, Long amount) {
-    	
-    	log.warn("sendNotification_VotePAYBACK: TODO push/email");
-    	
+    public void sendNotification_VotePAYBACK(User user, Request request, Long amount) {
+    
     	// store notification to be displayed on party
-    	notificationService.create(PAYBACK, user, party, amount);
+    	Notification notification = notificationService.create(PAYBACK, user, request.getParty(), amount);
+    	
+		// set text by locale of user
+		String locale = request.getUser().decideWichLanguageForUser();
+		
+		String textShort = messageSource.getMessage("push.vote.payback.short", new String[]{}, Locale.forLanguageTag(locale));
+		String textLong = messageSource.getMessage("push.vote.payback.long", new String[]{request.getTitle()}, Locale.forLanguageTag(locale));
+		String metaJSON = "{\"type\": \"PAYBACK\",\"partyID\": "+request.getParty().getId()+",\"requestID\": "+request.getId()+",\"notificationID\": "+notification.getId()+"}";
+		
+		// PUSH NOTIFICATION
+		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale);
     	
     }
     
     // TODO: push/email
     public void sendNotification_VoteDONE(User user, Request request) {
     	
-    	log.warn("sendNotification_VoteDONE: TODO push/email");
-
     	// store notification to be displayed on party
-    	notificationService.create(SUPPORT_WIN, user, request.getParty(), request.getId());
+    	Notification notification = notificationService.create(SUPPORT_WIN, user, request.getParty(), request.getId());
+    	
+		// set text by locale of user
+		String locale = request.getUser().decideWichLanguageForUser();
+		
+		String textShort = messageSource.getMessage("push.vote.done.short", new String[]{}, Locale.forLanguageTag(locale));
+		String textLong = messageSource.getMessage("push.vote.done.long", new String[]{request.getTitle()}, Locale.forLanguageTag(locale));
+		String metaJSON = "{\"type\": \"SUPPORT_WIN\",\"partyID\": "+request.getParty().getId()+",\"requestID\": "+request.getId()+",\"notificationID\": "+notification.getId()+"}";
+		
+		// PUSH NOTIFICATION
+		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale);
 
     }
     
-    // TODO: implement and add to correct spots in code
     public boolean sendNotification_SendCOUPON(String receiverMail, User user, Code code) {
-    	
-    	log.warn("sendNotification_SendCOUPON: TODO");
- 
+    	 
     	Locale locale = Locale.forLanguageTag(user.decideWichLanguageForUser());
 		String subject = messageSource.getMessage("email.coupon.send.head", new String[]{code.getAmount()+""}, locale);
 		String body = messageSource.getMessage("email.coupon.send.body", new String[]{code.getCode()}, locale);
     	// TODO: add in email how to install app & enter code (or browser)
 		
     	// send coupon by eMail
-    	eMailManager.sendMail(receiverMail, subject, body, null);
-    	
-    	return false;
-    	
-    }
+    	return eMailManager.sendMail(receiverMail, subject, body, null);
     
-    public void sendNotification_PartyWelcome(User user, Party party) {
-    	// store notification to be displayed on party
-        notificationService.create(NotificationType.PARTY_WELCOME, user, party, 0L);
     }
-    
-    // TODO
-	public void sendNotification_SendTRANSFER() {
+        
+	public void sendNotification_SendTRANSFER(User user, Party party, Integer amount) {
 		
-	   	log.warn("sendNotification_SendTRANSFER: TODO");
-
-		/*
-	            // send notification receiver (email as fallback)
-            boolean sendNotification = false;
-            if ((toUser.getPushID() != null) && (PushManager.getInstance().isAvaliable())) {
-                // push notification
-                if (PushManager.getInstance().sendNotification(
-                        PushManager.mapUserPlatform(toUser.getPushSystem()),
-                        toUser.getPushID(),
-                        "You received " + amount + " Konfetti on Party '" + party.getName() + "'",
-                        null,
-                        null,
-                        0l
-                )) {
-                    log.info("- push notification send to");
-                    sendNotification = true;
-                } else {
-                    log.warn("was not able to send push notification to uuserId(" + user.getId() + ")");
-                }
-            }
-
-            if (!sendNotification) {
-                // eMail
-                if ((mailEnabled) && (mailService.sendMail(address, "rest.user.coupons.received.party", "Open app and check party '" + party.getName() + "' :)", null, user.getSpokenLangs()))) {
-                    log.info("- eMail with Info notification send to: " + address);
-                } else {
-                    log.error("Was not able to send eMail with Notification about received konfetti to " + user.getEMail() + " - check address and server email config");
-                }
-            }
-	
-		 */
+		// set text by locale of user
+		String locale = user.decideWichLanguageForUser();
+		
+		// create notification object for user
+        Notification notification = notificationService.create(NotificationType.TRANSFER_RECEIVED, user, party, new Long(amount));
+		
+		String textShort = messageSource.getMessage("email.konfetti.transfer.head", new String[]{amount+""}, Locale.forLanguageTag(locale));
+		String textLong = messageSource.getMessage("email.konfetti.transfer.body", new String[]{amount+"", party.getName()}, Locale.forLanguageTag(locale));
+		String metaJSON = "{\"type\": \"TRANSFER_RECEIVED\",\"partyID\": "+party.getId()+",\"amount\": "+amount+",\"notificationID\": "+notification.getId()+"}";
+		
+		// PUSH NOTIFICATION
+		sendPushAuto(user, textShort, textLong, metaJSON, locale);
 		
 	}
+	
+    public void sendNotification_PartyWelcome(User user, Party party) {
+    	
+    	// no push - just store notification to be displayed on party
+        notificationService.create(NotificationType.PARTY_WELCOME, user, party, 0L);
+        
+    }
 		
     
     /*
      * PRIVATE METHODS
      */
             
+		     
     /**
-     * decide how to send push notification to user
-     *
-     * @param notification
-     * @return
+     * tries to send push or email - what ever works best if available
+     * @param user
      */
-    private String getTypeOfPushForUser(User user) {
-    	
-        // check for push notification
+	private boolean sendPushAuto(User user, String textShort, String textLong, String metaJSON, String locale) {
+		
+		boolean wasSend = false;
+		
+		if (PushManager.getInstance().isAvaliable()) log.warn("Pushnotification Provider is NOT available. Check Server Config.");
+		
+        // check for push notification works for user
         if ((user.getPushActive()) && (PushManager.getInstance().isAvaliable())) {
-        	return PUSHTYPE_PUSH;
+        	wasSend = sendPushPush(user,textShort,textLong,metaJSON,locale);
         }
 
-        // check for eMail
-        if ((user.getEMail() != null) && (user.getEMail().trim().length() >= 4)) {
-        	return PUSHTYPE_EMAIL;
-            
+        // check for eMail email works for user
+        if ((!wasSend) && (user.getEMail() != null) && (user.getEMail().trim().length() >= 4)) {
+        	wasSend = sendPushMail(user,textShort,textLong,locale);
         }
         
-        return PUSHTYPE_NOTPOSSIBLE;
-    }
-       
+        if (!wasSend) log.warn("sendPushAuto: Notification was NOT send to user ("+user.getId()+") textShort("+textShort+")");
+			
+		return wasSend;
+		
+	}
+    
+    
     /**
      * sending push by email
      *
@@ -317,6 +323,7 @@ public class NotificationManager {
             return false;
         }
     }
+    
 
     /**
      * sending push by push
@@ -326,17 +333,28 @@ public class NotificationManager {
      */
     private boolean sendPushPush(User user, String textShort, String textLong, String meta, String locale) {
         
-       if (PushManager.getInstance().sendNotification(
+    	if (!PushManager.getInstance().isAvaliable()) {
+            log.warn("PushManager.getInstance().isAvaliable() --> FALSE");
+    		return false;
+    	}
+    	
+        if (PushManager.getInstance().sendNotification(
                 PushManager.PLATFORM_ANDROID,
                 user.getPushID(),
                 textShort,
                 locale,
                 meta)) {
+        	
            log.info("OK - PUSH SEND BY PUSH (" + user.getPushID() + ")");
-       } else {
+           return true;
+           
+        } else {
+        	
            log.warn("FAIL - PUSH SEND BY PUSH (" + user.getPushID() + ")");
-       }
-        return true;
+           return false;
+           
+        }
+       
     }
 
     

@@ -91,6 +91,9 @@ public class UserController {
     @CrossOrigin(origins = "*")
     @GetMapping(produces = "application/json")
     public List<UserResponse> getAllUsers(HttpServletRequest httpRequest) throws Exception {
+    	
+    	log.info("*** GET All Users ***");
+    	
         controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
         List<UserResponse> listOfUserResponses = userService.getAllUsers()
                 .stream().map(user -> userMapper.fromUserToUserResponse(user))
@@ -102,7 +105,8 @@ public class UserController {
     @PostMapping(value = "registerGuest", produces = "application/json")
     public ResponseEntity<UserResponse> registerGuest(
             @RequestParam(value = "locale", defaultValue = "en") String locale) throws Exception {
-        log.debug("registerGuest");
+    	
+    	log.info("*** POST Create User (Guest) ***");
 
         // create new user
         User user = userService.createGuest(locale);
@@ -125,6 +129,8 @@ public class UserController {
             @RequestParam(value = "pass", defaultValue = "") String pass,
             @RequestParam(value = "locale", defaultValue = "en") String locale) throws Exception {
 
+    	log.info("*** POST Create User (Full) ***");
+    	
         if ((email != null) && (email.length() > 1)) {
             // check if credentials are available
             if ((pass == null) || (pass.trim().length() == 0)) {
@@ -166,6 +172,8 @@ public class UserController {
     @GetMapping(value = "/{userId}", produces = "application/json")
     public UserResponse getUser(@PathVariable Long userId, HttpServletRequest httpRequest) throws Exception {
 
+    	log.info("*** GET User ("+userId+") ***");
+    	
         User user = userService.findById(userId);
         if (user == null) {
             log.warn("NOT FOUND user(" + userId + ")");
@@ -209,6 +217,8 @@ public class UserController {
     public UserResponse login(@RequestParam(value = "mail", defaultValue = "") String email,
                               @RequestParam(value = "pass", defaultValue = "") String pass) throws Exception {
 
+    	log.info("*** GET Login User ("+email+") ***");
+    	
         pass = pass != null ? pass.trim() : pass;
 
         // check user and input data
@@ -256,6 +266,9 @@ public class UserController {
     @PostMapping(value = "/reset_password/init",
             produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<?> requestPasswordReset(@RequestBody String mail, HttpServletRequest request) {
+    	
+    	log.info("*** POST Reset Password Init ("+mail+") ***");
+    	
         return userService.requestPasswordReset(mail)
                 .map(user -> {
                     mailService.sendPasswordResetMail(user);
@@ -273,37 +286,44 @@ public class UserController {
     @CrossOrigin(origins = "*")
     @PostMapping(value = "/reset_password/finish", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> finishPasswordReset(@RequestBody KeyAndPasswordVM keyAndPassword) {
+    	
+    	log.info("*** POST Reset Password Finish ("+keyAndPassword.getKey()+") ***");
+    	
         return userService.completePasswordReset(keyAndPassword.getNewPassword(), keyAndPassword.getKey())
                 .map(user -> new ResponseEntity<String>(HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
-    // use to quickly check if a user name is already in use - no auth needed
+    // use to quickly check if a username or email is already in use - no auth needed
+    // just one parameter at a time - not both together
     @CrossOrigin(origins = "*")
     @GetMapping(value = "/check_free", produces = "application/json")
-    public Boolean checkUserNameStillFree(@RequestParam(value = "username", defaultValue = "") String name) {
-        if ((name == null) || (name.length() == 0)) return false;
+    public Boolean checkUserNameStillFree(@RequestParam(value = "username", defaultValue = "") String name, @RequestParam(value = "email", defaultValue = "") String email) {
+    	
+    	log.info("*** GET Check Username / eMail Is Free ("+name+") ***");
+    	
+    	// check if name is free
+        if ((name != null) && (name.length() > 0))
         return (userService.findByName(name) == null);
+        
+        // check if email is free
+        if ((email != null) && (email.length() > 0))
+        return (userService.findByMailIgnoreCase(email) == null);     
+        
+        // just in case default to
+        return false;
     }
 
     @CrossOrigin(origins = "*")
     @PutMapping(value = "/{userId}", produces = "application/json")
     public ResponseEntity<UserResponse> updateUser(@RequestBody @Valid final User userInput, HttpServletRequest httpRequest) throws Exception {
-        User user = userService.findById(userInput.getId());
+        
+    	log.info("*** PUT Update User ("+userInput.getId()+") ***");
+    	
+    	User user = userService.findById(userInput.getId());
         if (user == null) throw new Exception("NOT FOUND user(" + userInput.getId() + ")");
 
-        // check if other user exists with name / email
-        User byMail = userService.findByMailIgnoreCase(userInput.getEMail());
-        if (byMail != null && byMail.getId() != userInput.getId()) {
-            return new ResponseEntity("Another user exists with this email : '" + userInput.getEMail() + "'", HttpStatus.BAD_REQUEST);
-        }
-        User byName = userService.findByName(userInput.getName());
-        if (byName != null
-                && byName.getId() != userInput.getId()
-                && userInput.getName().length() > 0
-                ) {
-            return new ResponseEntity("Another user exists with this name : '" + userInput.getName() + "'", HttpStatus.BAD_REQUEST);
-        }
+       	log.info("check if user is allowed to read");
 
         // check if user is allowed to read
         if (httpRequest.getHeader("X-CLIENT-ID") != null) {
@@ -315,27 +335,51 @@ public class UserController {
 
             // B) check if email got changed
             boolean firstTimeMailSet = (user.getEMail() == null) || (user.getEMail().trim().length() == 0);
-            if ((userInput.getEMail() != null) && (!userInput.getEMail().equals(user.getEMail()))) {
-                user.setEMail(userInput.getEMail());
+            if ((userInput.getEMail() != null) && (userInput.getEMail().trim().length()>3) && (!userInput.getEMail().equals(user.getEMail()))) {
+                
+            	// check that new eMail is not used by other user
+            	String newMail = userInput.getEMail().trim();
+                User byMail = userService.findByMailIgnoreCase(newMail);
+                if (byMail != null && byMail.getId() != userInput.getId()) {
+                    return new ResponseEntity("Another user exists with this email : '" + newMail + "'", HttpStatus.BAD_REQUEST);
+                }
+            	
+            	// set new email and send email with automated password
+            	user.setEMail(newMail);
                 String pass = RandomUtil.generadeCodeNumber() + "";
                 user.setPassword(Helper.hashPassword(this.passwordSalt, pass));
                 if (firstTimeMailSet) {
                 	String locale =  user.decideWichLanguageForUser();
                 	String subject = messageSource.getMessage("email.account.headline", new String[]{}, Locale.forLanguageTag(locale));
                     String body = messageSource.getMessage("email.account.body", new String[]{user.getEMail(), pass}, Locale.forLanguageTag(locale));
-                	mailService.sendMail(userInput.getEMail(), subject, body, null);
+                	mailService.sendMail(newMail, subject, body, null);
                 }
             }
-
+            
+            // C) Check if name got changed
+            if ((userInput.getName()!=null) && (userInput.getName().trim().length()>0) && (!userInput.equals(user.getName()))) {
+            	
+            	// check that new name is not used by other user
+            	String newName = userInput.getName().trim();
+                User byName = userService.findByName(newName);
+                if (byName != null && byName.getId() != userInput.getId() && userInput.getName().length() > 0 ) {
+                    return new ResponseEntity("Another user exists with this name : '" + userInput.getName() + "'", HttpStatus.BAD_REQUEST);
+                }
+         
+                // set new name
+            	user.setName(newName);
+            }
+            
+            log.info("PushData active("+userInput.getPushActive()+") system("+userInput.getPushSystem()+") id("+userInput.getPushID()+")");
+           
             // transfer selective values from input to existing user
-            user.setEMail(userInput.getEMail());
             user.setImageMediaID(userInput.getImageMediaID());
-            user.setName(userInput.getName());
             user.setPushActive(userInput.getPushActive());
             user.setPushSystem(userInput.getPushSystem());
             user.setPushID(userInput.getPushID());
             user.setSpokenLangs(userInput.getSpokenLangs());
             user.setLastActivityTS(System.currentTimeMillis());
+            
         } else {
             // B) check for trusted application with administrator privilege
             controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
@@ -344,9 +388,6 @@ public class UserController {
         }
         // update user in persistence
         userService.update(user);
-
-        // keep password hash just on server side
-        user.setPassword("");
 
         return new ResponseEntity(userMapper.fromUserToUserResponse(user), HttpStatus.OK);
     }
@@ -360,6 +401,8 @@ public class UserController {
                                  @RequestParam(value = "email", defaultValue = "") String email,
                                  @RequestParam(value = "locale", defaultValue = "en") String locale,
                                  HttpServletRequest httpRequest) throws Exception {
+    	
+    	log.info("*** GET Generate Konfetti Coupons for Party ("+partyId+") ***");
 
         checkEmailConfiguration();
 
@@ -420,6 +463,7 @@ public class UserController {
     }
 
     private void checkEmailConfiguration() throws Exception {
+    	    	
         if (StringUtils.isEmpty(mailHost) && mailEnabled) {
             throw new Exception("eMail is not configured in properties file - cannot generate/send coupons");
         }
@@ -432,6 +476,8 @@ public class UserController {
                                            @RequestParam(value = "amount", defaultValue = "0") Integer amount,
                                            HttpServletRequest httpRequest) throws Exception {
 
+    	log.info("*** GET Generate Admin Coupons for Party ("+partyId+") ***");
+    	
         // validate inputs
         if (count <= 0) throw new Exception("must be more than 0 coupons");
         if (amount <= 0) throw new Exception("must be more than 0 per coupon");
@@ -460,6 +506,8 @@ public class UserController {
                                            @RequestParam(value = "count", defaultValue = "1") Integer count,
                                            @RequestParam(value = "type", defaultValue = "admin") String type,
                                            HttpServletRequest httpRequest) throws Exception {
+    	
+    	log.info("*** GET Generate Admin Codes for Party ("+partyId+") ***");
 
         // validate inputs
         if (count <= 0) throw new Exception("must be more than 0");
@@ -493,7 +541,7 @@ public class UserController {
                                              @RequestParam(value = "locale", defaultValue = "en") String locale,
                                              HttpServletRequest httpRequest) throws Exception {
 
-        log.info("*** SEND KONFETTI *** partyId(" + partyId + ") amount(" + amount + ") to(" + address + ")");
+        log.info("*** GET Send Konfetti partyId(" + partyId + ") amount(" + amount + ") to(" + address + ") ***");
 
         // get eMail config
         checkEmailConfiguration();
@@ -605,7 +653,7 @@ public class UserController {
                 throw new Exception("Was not able to transfere amount(" + amount + ") from(" + accountName + ") to(" + toAccountName + ")");
             }
 
-            this.notificationManager.sendNotification_SendTRANSFER();
+            this.notificationManager.sendNotification_SendTRANSFER(user, party, amount);
             
         }
         log.info("OK SENDING KONFETTI");
@@ -615,6 +663,9 @@ public class UserController {
     @CrossOrigin(origins = "*")
     @GetMapping(value = "/zip2gps/{country}/{code}", produces = "application/json")
     public ResponseZip2Gps zip2Gps(@PathVariable String country, @PathVariable String code) throws Exception {
+    	
+        log.info("*** GET ZIP 2 GPS country("+country+") code("+code+") ***");
+    	
         GpsConverter gpsConverter = new GpsConverter();
         return gpsConverter.fromZipCode(country, code);
     }
@@ -622,7 +673,10 @@ public class UserController {
     @CrossOrigin(origins = "*")
     @GetMapping(value = "/redeem/{code}", produces = "application/json")
     public RedeemResponse redeemCode(@PathVariable String code, @RequestParam(value = "locale", defaultValue = "en") String locale, HttpServletRequest httpRequest) throws Exception {
-        if (StringUtils.isEmpty(code)) throw new Exception("code is not valid");
+        
+        log.info("*** GET Redeem Code ("+code+") ***");
+    	
+    	if (StringUtils.isEmpty(code)) throw new Exception("code is not valid");
 
         // get user from HTTP request
         Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(httpRequest, clientService);

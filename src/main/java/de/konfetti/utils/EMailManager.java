@@ -93,7 +93,7 @@ public class EMailManager {
         MimeMessage mail = javaMailSender.createMimeMessage();
         try {
             log.info("EMailManager - sending eMail to(" + toAddress + ") ...");
-            MimeMessageHelper helper = new MimeMessageHelper(mail, true);
+            MimeMessageHelper helper = new MimeMessageHelper(mail, true, CharEncoding.UTF_8);
             helper.setTo(toAddress);
             helper.setReplyTo(replyToAddress);
             helper.setFrom(fromEmailAddress);
