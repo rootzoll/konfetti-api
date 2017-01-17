@@ -23,12 +23,12 @@ public class PushManager {
 	private static PushManager singleton = null;
 
 	// TODO: Bug https://github.com/rootzoll/konfetti-app/issues/84
-	//@Value("${konfetti.pushID}")
-	private String pushId = "0f63dc61-4629-4f63-a8fb-339485fd9a35";
+	@Value("${konfetti.pushID}")
+	private String pushId = "";
 
 	// TODO: Bug https://github.com/rootzoll/konfetti-app/issues/84
-	//@Value("${konfetti.pushAuth}")
-	private String pushAuth = "NWM3YTM2MDYtMjlhZS00NmU2LTg5ZWUtZTJiZDFhMzAxZjY5";
+	@Value("${konfetti.pushAuth}")
+	private String pushAuth = "";
 	
 	public static PushManager getInstance() {
 		if (singleton==null) singleton = new PushManager();
