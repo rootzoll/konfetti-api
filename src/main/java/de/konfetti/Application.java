@@ -1,5 +1,6 @@
 package de.konfetti;
 
+import org.apache.commons.lang3.CharEncoding;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -51,6 +52,7 @@ public class Application extends SpringBootServletInitializer {
         ResourceBundleMessageSource source = new ResourceBundleMessageSource();
         source.setBasenames("i18n/messages");  // name of the resource bundle
         source.setUseCodeAsDefaultMessage(true);
+        source.setDefaultEncoding(CharEncoding.UTF_8);
         return source;
     }
 
