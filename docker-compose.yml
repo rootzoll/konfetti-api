@@ -13,8 +13,8 @@ services:
     image: konfetti/api
     container_name: konfettiApi
     restart: unless-stopped
-    expose:
-      - "8280"
+#    expose:
+#      - "8280"
     networks:
       - konfettiNetwork
     depends_on:
@@ -30,8 +30,8 @@ services:
     image: konfetti/app
     container_name: konfettiApp
     restart: unless-stopped
-    expose:
-      - "2001"
+#    expose:
+#      - "2001"
     networks:
       - konfettiNetwork
     depends_on:
@@ -41,8 +41,8 @@ services:
     image: konfetti/admin
     container_name: konfettiAdmin
     restart: unless-stopped
-    expose:
-      - "80"
+#    expose:
+#      - "80"
     networks:
       - konfettiNetwork
     depends_on:
@@ -61,8 +61,8 @@ services:
     image: konfetti/spring-boot-admin
     container_name: konfettiBootAdmin
     restart: unless-stopped
-    expose:
-      - "8180"
+#    expose:
+#      - "8180"
     networks:
       - konfettiNetwork
     env_file:
