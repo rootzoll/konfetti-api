@@ -64,10 +64,10 @@ public class NotificationManager {
     		List<User> reviewer = request.getParty().getReviewerUser();
     		
     		// if a party has no dedicated reviewers - use admin
-    		if (reviewer.size()==0) reviewer = request.getParty().getAdminUsers();
+    		if (reviewer.isEmpty()) reviewer = request.getParty().getAdminUsers();
     		
     		// logic check
-    		if (reviewer.size()==0) log.warn("sendNotification_ReviewWAITING: party("+request.getParty().getId()+") has no admin user");
+    		if (reviewer.isEmpty()) log.warn("sendNotification_ReviewWAITING: party("+request.getParty().getId()+") has no admin user");
     		
     		// if more than 3 reviewers - TODO: find the last three active reviews
     		if (reviewer.size()>3) {

@@ -398,7 +398,7 @@ public class PartyController {
             // force add parties the user is member of (if not already in list)
             User user = userService.findById(client.getUser().getId());
             if (user != null) {
-                if (user.getActiveParties().size() > 0) {
+                if (!user.getActiveParties().isEmpty()) {
                     // TODO: implement
                     log.warn("PartyController getAllParties(): TODO: mustHaveParty to add to partylist");
                 }
@@ -863,8 +863,7 @@ public class PartyController {
                             List<Long> ids = new ArrayList<Long>();
                             try {
                                 List<Integer> idsInts = (new ObjectMapper()).readValue(json, ids.getClass());
-                                int nInts = idsInts.size();
-                                for (int i = 0; i < nInts; ++i) {
+                                for (int i = 0; i < idsInts.size(); ++i) {
                                     ids.add(idsInts.get(i).longValue());
                                 }
                             } catch (Exception e) {
