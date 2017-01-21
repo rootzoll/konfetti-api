@@ -40,7 +40,7 @@ public class User {
     // IDs of parties the user has an konfetti balance on
     @ManyToMany
     @JoinTable(
-            name = "user_party_review",
+            name = "user_party_active",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "party_id", referencedColumnName = "id"))
     private List<Party> activeParties = new ArrayList<>();
@@ -117,6 +117,6 @@ public class User {
     	return result;
     	
     }
-    
+
 }
 

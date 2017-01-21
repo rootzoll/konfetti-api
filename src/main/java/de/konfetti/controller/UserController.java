@@ -109,7 +109,7 @@ public class UserController {
     	log.info("*** POST Create User (Guest) ***");
 
         // create new user
-        User user = userService.createGuest(locale);
+        User user = userService.registerGuest(locale);
 
         log.info("mapping user response");
         UserResponse userResponse = userMapper.fromUserToUserResponse(user);
@@ -144,7 +144,7 @@ public class UserController {
         }
 
         // create new user
-        User user = userService.create(email, pass, locale);
+        User user = userService.registerUser(email, pass, locale);
 
         // TODO --> email multi lang by lang set in user
         try {
@@ -198,9 +198,7 @@ public class UserController {
 
             // update activity on user
             if (!user.wasUserActiveInLastMinutes(1)) {
-                log.info("Updating ActivityTS of user(" + user.getId() + ")");
-                user.setLastActivityTS(System.currentTimeMillis());
-                userService.update(user);
+                userService.updateActivity(user);
             }
         } else {
             // B) check for trusted application with administrator privilege
@@ -244,9 +242,7 @@ public class UserController {
         user.getClients().add(client);
 
         // update activity on user
-        log.info("Updating ActivityTS of user(" + user.getId() + ")");
-        user.setLastActivityTS(System.currentTimeMillis());
-        userService.update(user);
+        userService.updateActivity(user);
 
         UserResponse userResponse = userMapper.fromUserToUserResponse(user);
         // set client data on user and return
