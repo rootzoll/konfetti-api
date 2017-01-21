@@ -66,7 +66,7 @@ To run with a different profile, start with environment variable spring.profiles
 
 existing Profiles at the moment:
 dev
-    -> using mysql for persistenc, adjust values for your mysql server accordingly in file application-dev.properties (spring.datasource.user and spring.datasource.password)
+    -> using mysql for persistence, adjust values for your mysql server accordingly in file application-dev.properties (spring.datasource.user and spring.datasource.password)
 test
     -> using H2 inMemory Database
 
@@ -76,6 +76,15 @@ for your local environment
 to test if the server is running correctly, call the URL http://localhost:8280/konfetti/api/account
 
 should return something like this "{"clientId":"1","secret":"3915478b-f51d-4306-ab3b-fa7762f4c6bc","userId":"1"}"
+
+# Application routes
+NGINX is configured to bundle the various administration interfaces to be accessible via https, when deployed, the services are not reachable individually. Instead use these routes to access them ([:port/outside_route]->[docker-internal_address]):
+
+/ -> http://konfettiApp:80/ (this is the main application)
+:80,:443/admin/ -> http://konfettiAdmin:80/
+:80,:443/coupongenerator/ -> http://konfettiCouponGenerator:2342/
+:80,:443/bootadmin/ -> http://konfettiBootAdmin:8180/
+:80,:443,:8280/konfetti/api/ -> http://konfettiApi:8280/konfetti/api/
 
 # Swagger Api Documentation
 For dev profile the swagger api documentation is build, accessable by 
