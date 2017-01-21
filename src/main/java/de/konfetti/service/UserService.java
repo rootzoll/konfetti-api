@@ -8,11 +8,13 @@ import java.util.stream.Stream;
 
 public interface UserService {
 
-    User create(String email, String password, String locale);
+    User registerUser(String email, String password, String locale);
 
-    User createGuest(String locale);
+    User registerGuest(String locale);
 
 	User update(User user);
+
+	User updateActivity(User user);
     
     User findById(long userId);
 

@@ -32,7 +32,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public User create(String email, String password, String locale) {
+    public User registerUser(String email, String password, String locale) {
         User user = new User();
         user.setEMail(email.toLowerCase().trim());
         String passMD5 = Helper.hashPassword(this.passwordSalt, password.trim());
@@ -51,11 +51,12 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public User createGuest(String locale) {
+    public User registerGuest(String locale) {
         User user = new User();
 
         // set default spoken lang
         log.info("set default spoken lang");
+        locale = locale == null? "en": locale;
         String[] langs = {locale};
         user.setSpokenLangs(langs);
         user.setLastActivityTS(System.currentTimeMillis());
@@ -79,6 +80,13 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     @Override
     public User update(User user) {
+        return userRepository.saveAndFlush(user);
+    }
+
+    @Override
+    public User updateActivity(User user) {
+        log.info("Updating ActivityTS of user(" + user.getId() + ")");
+        user.setLastActivityTS(System.currentTimeMillis());
         return userRepository.saveAndFlush(user);
     }
 

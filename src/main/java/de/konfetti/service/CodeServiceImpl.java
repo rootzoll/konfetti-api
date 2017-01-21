@@ -80,6 +80,7 @@ public class CodeServiceImpl extends BaseService implements CodeService {
 
     @Override
     public RedeemResponse processCodeCoupon(User user, Code coupon, String locale) {
+        log.info("processCodeCoupon for user '" + user.getName() + "' with couponCode '" + coupon.getCode() + "'");
     	
         RedeemResponse result = new RedeemResponse();
         Party foundParty = partyService.findById(coupon.getPartyID());
@@ -152,6 +153,7 @@ public class CodeServiceImpl extends BaseService implements CodeService {
 
     private List<ClientAction> makeUserAdminOnParty(User user, Party party, List<ClientAction> actions) {
         Objects.nonNull(party);
+        log.info("make user '" + user.getName() + "' admin on party  '" + party.getName() + "'");
 
         user.setReviewerParties(new ArrayList<>());
         List<Party> adminParties = user.getAdminParties();
@@ -169,6 +171,8 @@ public class CodeServiceImpl extends BaseService implements CodeService {
 
     private List<ClientAction> makeUserReviewerOnParty(User user, Party party, List<ClientAction> actions) {
         Objects.nonNull(party);
+        log.info("make user '" + user.getName() + "' reviewer on party  '" + party.getName() + "'");
+
 
         user.setAdminParties(new ArrayList<>());
         if (user.getReviewerParties().contains(party)){
@@ -189,6 +193,8 @@ public class CodeServiceImpl extends BaseService implements CodeService {
 
     private List<ClientAction> makeUserNormaloOnParty(User user, Party party, List<ClientAction> actions) {
         Objects.nonNull(party);
+        log.info("make user '" + user.getName() + "' normalo on party  '" + party.getName() + "'");
+
 
         // remove admin und reviewer from user
         user.setAdminParties(new ArrayList<>());

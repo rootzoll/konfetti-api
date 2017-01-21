@@ -216,8 +216,7 @@ public class PartyController {
                 // update activity on user
                 if (!user.wasUserActiveInLastMinutes(1)) {
                     log.debug("Updating ActivityTS of user(" + user.getId() + ")");
-                    user.setLastActivityTS(System.currentTimeMillis());
-                    userService.update(user);
+                    userService.updateActivity(user);
                 } else {
                     log.debug("user was active within last minute - no need to update last acivity TS");
                 }
@@ -407,9 +406,7 @@ public class PartyController {
 
             // update activity on user
             if (!user.wasUserActiveInLastMinutes(1)) {
-                log.info("Updating ActivityTS of user(" + user.getId() + ")");
-                user.setLastActivityTS(System.currentTimeMillis());
-                userService.update(user);
+                userService.updateActivity(user);
             }
 
 
