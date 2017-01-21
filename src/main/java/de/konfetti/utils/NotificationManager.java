@@ -1,40 +1,19 @@
 package de.konfetti.utils;
 
+import de.konfetti.data.*;
+import de.konfetti.data.enums.MediaItemTypeEnum;
+import de.konfetti.service.NotificationService;
+import de.konfetti.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.Gson;
-
-import de.konfetti.data.Chat;
-import de.konfetti.data.Client;
-import de.konfetti.data.Code;
-import de.konfetti.data.MediaItem;
-import de.konfetti.data.Message;
-import de.konfetti.data.Notification;
-import de.konfetti.data.NotificationType;
-import de.konfetti.data.Party;
-import de.konfetti.data.Request;
-import de.konfetti.data.User;
-import de.konfetti.data.enums.MediaItemTypeEnum;
-import de.konfetti.service.NotificationService;
-import de.konfetti.service.UserService;
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Service;
-import static de.konfetti.data.NotificationType.PAYBACK;
-import static de.konfetti.data.NotificationType.REVIEW_FAIL;
-import static de.konfetti.data.NotificationType.REVIEW_WAITING;
-import static de.konfetti.data.NotificationType.REWARD_GOT;
-import static de.konfetti.data.NotificationType.SUPPORT_WIN;
-import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
-
 import java.util.List;
 import java.util.Locale;
 
+import static de.konfetti.data.NotificationType.*;
 import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
 
 /*
@@ -293,10 +272,10 @@ public class NotificationManager {
 
 		boolean wasSend = false;
 
-		if (PushManager.getInstance().isAvaliable()) log.warn("Pushnotification Provider is NOT available. Check Server Config.");
+		if (pushManager.isAvaliable()) log.warn("Pushnotification Provider is NOT available. Check Server Config.");
 
         // check for push notification works for user
-        if ((user.getPushActive()) && (PushManager.getInstance().isAvaliable())) {
+        if ((user.getPushActive()) && (pushManager.isAvaliable())) {
         	wasSend = sendPushPush(user,textShort,textLong,metaJSON,locale);
         }
 
@@ -315,7 +294,6 @@ public class NotificationManager {
     /**
      * sending push by email
      *
-     * @param notification
      * @return
      */
     private boolean sendPushMail(User user, String subject, String body, String locale ) {
@@ -336,7 +314,6 @@ public class NotificationManager {
     /**
      * sending push by push
      *
-     * @param notification
      * @return
      */
     private boolean sendPushPush(User user, String textShort, String textLong, String meta, String locale) {
