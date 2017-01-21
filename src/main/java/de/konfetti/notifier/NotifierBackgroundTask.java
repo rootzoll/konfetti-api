@@ -16,6 +16,7 @@ import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -27,8 +28,8 @@ import java.util.stream.Stream;
 
 /*
  * DEPRECATED: IS NOT IN USE ANYMORE - KEEP CODE JUST IN CASE
- * 
- * A task that is scheduled to check in short periods 
+ *
+ * A task that is scheduled to check in short periods
  * if there is any notification to be delivered by email or push. 
  * 
  * Is designed to run as a scheduled singleton process with access to database.
@@ -55,6 +56,9 @@ public class NotifierBackgroundTask {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PushManager pushManager;
 
     //CACHE 1 "Pushed Users" - make sure just one/push/user all 15min max
     private Cache spamBlockerPerUserCache;
@@ -305,7 +309,7 @@ public class NotifierBackgroundTask {
         User user = userService.findById(notification.getUser().getId());
 
         // check for push notification
-        if ((user.getPushActive()) && (PushManager.getInstance().isAvaliable())) {
+        if ((user.getPushActive()) && (pushManager.isAvaliable())) {
             // just push the following notifications
             if (NotificationType.REVIEW_WAITING.equals(notification.getType())) return PUSHTYPE_PUSH;
             if (NotificationType.REVIEW_OK.equals(notification.getType())) return PUSHTYPE_PUSH;
@@ -347,7 +351,7 @@ public class NotifierBackgroundTask {
     private boolean sendPushPush(Notification notification) {
         User user = userService.findById(notification.getUser().getId());
         // TODO multi lang --- see user setting
-        PushManager.getInstance().sendNotification(
+        pushManager.sendNotification(
                 PushManager.PLATFORM_ANDROID,
                 user.getPushID(),
                 "new events in your neighborhood",

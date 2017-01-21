@@ -19,21 +19,13 @@ public class PushManager {
 
 	public static final int PLATFORM_ANDROID = 1;
 	public static final int PLATFORM_IOS = 1; 
-	
-	private static PushManager singleton = null;
 
-	// TODO: Bug https://github.com/rootzoll/konfetti-app/issues/84
 	@Value("${konfetti.pushID}")
 	private String pushId = "";
 
 	// TODO: Bug https://github.com/rootzoll/konfetti-app/issues/84
 	@Value("${konfetti.pushAuth}")
 	private String pushAuth = "";
-	
-	public static PushManager getInstance() {
-		if (singleton==null) singleton = new PushManager();
-		return singleton;
-	}
 
 	public static int mapUserPlatform(String pushSystem) {
 		// TODO map user.pushSystem values to this class finals
@@ -41,7 +33,7 @@ public class PushManager {
 	}
 		
 	public boolean isAvaliable() {
-		log.info("PushManager: isAvaliable pushId("+this.pushId+") pushAuth("+this.pushAuth+")"); 
+		log.info("PushManager: isAvaliable pushId("+this.pushId+") pushAuth("+this.pushAuth+")");
 		if (this.pushId==null) return false;
 		if (this.pushId.trim().length()==0) return false;
 		if (this.pushAuth==null) return false;
@@ -93,9 +85,6 @@ public class PushManager {
 			e.printStackTrace();
 			return false;
 		}
-
-
 	}
-	
-	
+
 }
