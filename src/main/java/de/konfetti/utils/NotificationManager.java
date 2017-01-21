@@ -272,12 +272,17 @@ public class NotificationManager {
 
 		boolean wasSend = false;
 
-		if (pushManager.isAvaliable()) log.warn("Pushnotification Provider is NOT available. Check Server Config.");
-
         // check for push notification works for user
-        if ((user.getPushActive()) && (pushManager.isAvaliable())) {
-        	wasSend = sendPushPush(user,textShort,textLong,metaJSON,locale);
-        }
+		if (pushManager.isAvaliable()) {
+	        if (user.getPushActive()) {
+	        	log.info("Try sending Notification by Push ...");
+	        	wasSend = sendPushPush(user,textShort,textLong,metaJSON,locale);
+	        } else {
+	        	log.info("PushService is Available - but user("+user.getId()+").getPushActive() --> FALSE");
+	        }
+		} else {
+			log.warn("Pushnotification Provider is NOT available. Check Server Config.");
+		}
 
         // check for eMail email works for user
         if ((!wasSend) && (user.getEMail() != null) && (user.getEMail().trim().length() >= 4)) {
