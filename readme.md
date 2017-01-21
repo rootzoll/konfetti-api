@@ -86,6 +86,15 @@ NGINX is configured to bundle the various administration interfaces to be access
 :80,:443/bootadmin/ -> http://konfettiBootAdmin:8180/
 :80,:443,:8280/konfetti/api/ -> http://konfettiApi:8280/konfetti/api/
 
+# SSL
+ssl is done via letsencrypt.org and certbot (ubuntu package https://certbot.eff.org/#ubuntuxenial-nginx).
+Inital certificate aquisition: Adapt and run the following command on the host system (everything is mounted into docker)
+`$ letsencrypt certonly --webroot -w {pathToProjectFolder}/nginx/letsencrypt -d konfettiapp.de -d www.konfettiapp.de -d test.konfettiapp.de´
+This should generate the certificates.
+Afterwards run `letsencrypt renew --dry-run --agree-tos´ to prepare automatic renewal.
+Then place this into root's cron (renews the certificates every 2 month and makes nginx reload the files):
+`* * * */2 * letsencrypt renew && pkill -HUP nginx´
+
 # Swagger Api Documentation
 For dev profile the swagger api documentation is build, accessable by 
 
