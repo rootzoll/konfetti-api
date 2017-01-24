@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -73,7 +74,17 @@ public class PushManager {
 				log.warn("FAIL HTTP REQUEST POST https://onesignal.com/api/v1/notifications");
 				log.warn(json);
 				log.warn("(" + resultCode + ") '" + resultMessage + "'");
-				  return false;
+				try {
+					 // read the output from the server
+					  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+					  StringBuilder stringBuilder = new StringBuilder();
+				      String line = null;
+				      while ((line = reader.readLine()) != null) {stringBuilder.append(line + "\n");}
+					  log.warn("ERROR BODY --> "+stringBuilder.toString());
+				} catch (Exception e) {
+					  log.warn("ERROR BODY EXCEPTION --> "+e.getMessage());
+				}
+				return false;
 			  } else {
 				log.info("OK PushNotification -> https://onesignal.com/api/v1/notifications");
 			  }

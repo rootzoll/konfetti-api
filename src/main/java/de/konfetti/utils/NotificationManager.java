@@ -161,7 +161,8 @@ public class NotificationManager {
         	Locale locale = Locale.forLanguageTag(localeStr);
     		String subject = messageSource.getMessage("chat.message.new.head", new String[]{request.getTitle(), message.getTime()+""}, locale); // TODO: dateformat with locale
     		String body = messageSource.getMessage("chat.message.new.body", new String[]{fromUserName, messageTextPreview}, locale);
-    		String metaJSON = "{\"type\": \"CHAT_NEW\",\"partyID\": "+chat.getPartyId()+",\"chatID\": "+chat.getId()+",\"messageID\": "+message.getId()+"}";
+    		String metaJSON = "{\"type\": \"CHAT_NEW\",\"partyID\": "+chat.getPartyId()+",\"chatID\": "+chat.getId()+",\"messageID\": "+message.getId()+",requestID: "+chat.getRequestId()+
+    				"}";
 
     		// PUSH NOTIFICATION
     		sendPushAuto(user, subject, body, metaJSON, localeStr);
