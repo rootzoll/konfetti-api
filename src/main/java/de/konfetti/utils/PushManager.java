@@ -77,7 +77,7 @@ public class PushManager {
 				log.warn("(" + resultCode + ") => '" + resultMessage + "'");
 				try {
 					 // read the output from the server
-					  BufferedReader reader = new BufferedReader(new InputStreamReader(httpCon.getInputStream()));
+					  BufferedReader reader = new BufferedReader(new InputStreamReader(httpCon.getErrorStream()));
 					  StringBuilder stringBuilder = new StringBuilder();
 				      String line = null;
 				      while ((line = reader.readLine()) != null) {stringBuilder.append(line + "\n");}
