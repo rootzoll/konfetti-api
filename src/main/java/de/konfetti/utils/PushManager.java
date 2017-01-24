@@ -74,7 +74,7 @@ public class PushManager {
 			if (resultCode!=200) {
 				log.warn("FAIL HTTP REQUEST POST https://onesignal.com/api/v1/notifications");
 				log.warn(json);
-				log.warn("(" + resultCode + ") '" + resultMessage + "'");
+				log.warn("(" + resultCode + ") => '" + resultMessage + "'");
 				try {
 					 // read the output from the server
 					  BufferedReader reader = new BufferedReader(new InputStreamReader(httpCon.getInputStream()));
