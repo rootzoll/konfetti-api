@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -76,7 +77,7 @@ public class PushManager {
 				log.warn("(" + resultCode + ") '" + resultMessage + "'");
 				try {
 					 // read the output from the server
-					  BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+					  BufferedReader reader = new BufferedReader(new InputStreamReader(httpCon.getInputStream()));
 					  StringBuilder stringBuilder = new StringBuilder();
 				      String line = null;
 				      while ((line = reader.readLine()) != null) {stringBuilder.append(line + "\n");}
