@@ -90,6 +90,8 @@ services:
     container_name: konfettiHomepage
     expose:
       - "80"
+    networks:
+      - konfettiNetwork
   konfettiLoadbalancer:
     image: nginx
     ports:
