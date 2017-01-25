@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+    <!--http://logging.paluch.biz/examples/logback.html-->
+    <appender name="loggly" class="ch.qos.logback.ext.loggly.LogglyAppender">
+        <endpointUrl>https://logs-01.loggly.com/inputs/dc0bcb30-0770-4ef4-8431-3698b485db8b/tag/logback</endpointUrl>
+        <pattern>%d{"ISO8601", UTC}  %p %t %c %M - %m%n</pattern>
+    </appender>
+</included>
