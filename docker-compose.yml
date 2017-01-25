@@ -85,6 +85,10 @@ services:
       - konfettiDb:/var/lib/mysql
 #    env_file:
 #      - /konfetti/config/database.env
+  konfettiHomepage:
+    image: konfetti/homepage
+    expose:
+      - "80"
   konfettiLoadbalancer:
     image: nginx
     ports:
@@ -103,7 +107,8 @@ services:
       - "konfettiAdmin:konfettiAdmin"
       - "konfettiCouponGenerator:konfettiCouponGenerator"
       - "konfettiBootAdmin:konfettiBootAdmin"
-    volumes: # its a good idea to (re-)generate and store the Certificates outside of docker and mount in the locations.  config on file-name level is done in ./nginx/nginx.conf. everything else here: https://certbot.eff.org/#ubuntuxenial-nginx 
+      - "konfettiHomepage:konfettiHomepage"
+    volumes: # its a good idea to (re-)generate and store the Certificates outside of docker and mount in the locations.  config on file-name level is done in ./nginx/nginx.conf. everything else here: https://certbot.eff.org/#ubuntuxenial-nginx
       - ./nginx:/etc/nginx
 #      - /etc/letsencrypt:/etc/letsencrypt
     container_name: konfettiLoadbalancer

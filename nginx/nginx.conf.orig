@@ -11,7 +11,11 @@ http {
         listen 8280 ssl;
         listen [::]:8280;
 
+<<<<<<< HEAD
         server_name konfettiapp.de www.konfettiapp.de test.konfettiapp.de ssl;
+=======
+        server_name localhost konfettiapp.de www.konfettiapp.de test.konfettiapp.de ssl;
+>>>>>>> add nginx as konfettiLoadbalancer (not configured yet)
 #        ssl_certificate /etc/letsencrypt/live/konfettiapp.de/fullchain.pem;
 #        ssl_certificate_key /etc/letsencrypt/live/konfettiapp.de/privkey.pem;
 
@@ -19,10 +23,16 @@ http {
         ssl_prefer_server_ciphers on;
         ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';
 
+<<<<<<< HEAD
         location /admin/ {
 #            proxy_redirect http:// https://;
             rewrite ^/admin/(.*)$ /$1 break;
             proxy_pass http://konfettiAdmin:80/;
+=======
+        location ^~ /admin {
+#            proxy_redirect http:// https://;
+            proxy_pass http://konfettiAdmin:8080;
+>>>>>>> add nginx as konfettiLoadbalancer (not configured yet)
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection 'upgrade';
@@ -30,10 +40,16 @@ http {
             proxy_set_header X-Real-IP $remote_addr;
             proxy_cache_bypass $http_upgrade;
         }
+<<<<<<< HEAD
         location /coupongenerator/ {
 #            proxy_redirect http:// https://;
             rewrite ^/coupongenerator/(.*)$ /$1 break;
             proxy_pass http://konfettiCouponGenerator:2342/;
+=======
+        location ~* /coupongenerator {
+#            proxy_redirect http:// https://;
+            proxy_pass http://konfettiCouponGenerator:2342;
+>>>>>>> add nginx as konfettiLoadbalancer (not configured yet)
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection 'upgrade';
@@ -41,10 +57,16 @@ http {
             proxy_set_header X-Real-IP $remote_addr;
             proxy_cache_bypass $http_upgrade;
         }
+<<<<<<< HEAD
         location /bootadmin/ {
 #            proxy_redirect http:// https://;
             rewrite ^/bootadmin/(.*)$ /$1 break;
             proxy_pass http://konfettiBootAdmin:8180/;
+=======
+        location ~* /bootadmin {
+#            proxy_redirect http:// https://;
+            proxy_pass http://konfettiBootAdmin:8180;
+>>>>>>> add nginx as konfettiLoadbalancer (not configured yet)
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection 'upgrade';
@@ -52,24 +74,15 @@ http {
             proxy_set_header X-Real-IP $remote_addr;
             proxy_cache_bypass $http_upgrade;
         }
+<<<<<<< HEAD
         location /konfetti/api/ {
 #            proxy_redirect http:// https://;
             proxy_pass http://konfettiApi:8280/konfetti/api/;
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_cache_bypass $http_upgrade;
-        }
-        # this is needed by letsencrypt's webroot-plugin'
-        location /.well_known/ {
-            root /etc/nginx/letsencrypt/;
-        }
-        location /homepage/ {
+=======
+        location ~* /konfetti/api {
 #            proxy_redirect http:// https://;
-            rewrite ^/homepage/(.*)$ /$1 break;
-            proxy_pass http://konfettiHomepage:80/;
+            proxy_pass http://konfettiApi:8280;
+>>>>>>> add nginx as konfettiLoadbalancer (not configured yet)
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection 'upgrade';
@@ -77,9 +90,15 @@ http {
             proxy_set_header X-Real-IP $remote_addr;
             proxy_cache_bypass $http_upgrade;
         }
+<<<<<<< HEAD
         location / {
 #            proxy_redirect http:// https://;
             proxy_pass http://konfettiApp:80/;
+=======
+        location ~* / {
+#            proxy_redirect http:// https://;
+            proxy_pass http://konfettiApp:80;
+>>>>>>> add nginx as konfettiLoadbalancer (not configured yet)
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection 'upgrade';
