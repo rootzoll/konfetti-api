@@ -33,7 +33,7 @@ public class Request {
 	
 	private Long[] mediaItemIds = {};
 
-	@OneToMany(mappedBy = "request", fetch = FetchType.EAGER, cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+	@OneToMany(mappedBy = "request", fetch = FetchType.LAZY, cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     private Set<Chat> chats;
     
     /*

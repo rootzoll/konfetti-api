@@ -21,7 +21,8 @@ import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
 
 import static de.konfetti.data.enums.MediaItemReviewEnum.REVIEWED_PRIVATE;
-import static de.konfetti.data.enums.MediaItemTypeEnum.*;
+import static de.konfetti.data.enums.MediaItemTypeEnum.TYPE_IMAGE;
+import static de.konfetti.data.enums.MediaItemTypeEnum.TYPE_MULTILANG;
 
 @Slf4j
 @CrossOrigin
@@ -123,17 +124,22 @@ public class MediaItemController {
     	if (!item.getType().equals(TYPE_IMAGE)) throw new Exception("media("+mediaId+") is not image");
     	
     	// get base64 string
-    	String base64 = item.getData();
-    	int startIndex = base64.indexOf("base64,");
-    	if (startIndex<=0) throw new Exception("no BASE64 start index found");
-    	startIndex = startIndex + 7;
-    		
-    	// get mime type
-    	String mimeType = base64.substring(5, base64.indexOf(';'));
+    	String rawData = item.getData();
+		String base64Matcher = "base64,";
+		int base64Index = rawData.indexOf(base64Matcher);
+
+    	if (base64Index <= 0) throw new Exception("no BASE64 start index found");
+    	int startIndex = base64Index + base64Matcher.length();
+		String base64String = rawData.substring(startIndex);
+
+		// get mime type
+		String dataMatcher = "data:";
+		int dataIndex = rawData.indexOf(dataMatcher);
+    	String mimeType = rawData.substring(dataIndex + dataMatcher.length(), rawData.indexOf(';'));
 		log.info("READ IMAGE(" + mediaId + ") with MIMETYPE(" + mimeType + ")");
 
 		// convert to binary
-    	byte[] data = javax.xml.bind.DatatypeConverter.parseBase64Binary(base64.substring(startIndex));
+		byte[] data = javax.xml.bind.DatatypeConverter.parseBase64Binary(base64String);
 
     	// return response
     	return ResponseEntity
