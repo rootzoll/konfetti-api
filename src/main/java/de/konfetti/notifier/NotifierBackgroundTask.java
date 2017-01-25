@@ -350,6 +350,8 @@ public class NotifierBackgroundTask {
      */
     private boolean sendPushPush(Notification notification) {
         User user = userService.findById(notification.getUser().getId());
+        
+        	/*
         // TODO multi lang --- see user setting
         pushManager.sendNotification(
                 PushManager.PLATFORM_ANDROID,
@@ -357,8 +359,9 @@ public class NotifierBackgroundTask {
                 "new events in your neighborhood",
                 "en", // locale
                 "{}");
-        log.info("OK - PUSH SEND BY PUSH (" + user.getPushID() + ")");
-        return true;
+        log.info("OK - PUSH SEND BY PUSH (" + user.getPushID() + ")");#
+        */
+        return false;
     }
 
 }

@@ -82,11 +82,12 @@ public class NotificationManager {
 			String locale = user.decideWichLanguageForUser();
 
 			String textShort = messageSource.getMessage("push.reviewer.short", new String[]{}, Locale.forLanguageTag(locale));
+			String textShortEn = messageSource.getMessage("push.reviewer.short", new String[]{}, Locale.ENGLISH);
 			String textLong = messageSource.getMessage("push.reviewer.long", new String[]{request.getParty().getName()}, Locale.forLanguageTag(locale));
 			String metaJSON = "{\"type\": \"REVIEW_WAITING\",\"partyID\": " + request.getParty().getId() + ",\"taskID\": " + request.getId() + "}";
 
 			// push notification
-			sendPushAuto(user, textShort, textLong, metaJSON, locale);
+			sendPushAuto(user, textShort, textLong, metaJSON, locale, textShortEn);
 		}
 
 	}
@@ -105,11 +106,12 @@ public class NotificationManager {
 		String locale = request.getUser().decideWichLanguageForUser();
 
 		String textShort = messageSource.getMessage("push.review.ok.short", new String[]{}, Locale.forLanguageTag(locale));
+		String textShortEn = messageSource.getMessage("push.review.ok.short", new String[]{}, Locale.ENGLISH);
 		String textLong = messageSource.getMessage("push.review.ok.long", new String[]{request.getTitle()}, Locale.forLanguageTag(locale));
 		String metaJSON = "{\"type\": \"REVIEW_OK\",\"partyID\": "+request.getParty().getId()+",\"requestID\": "+request.getId()+",\"notificationID\": "+notification.getId()+"}";
 
 		// PUSH NOTIFICATION
-		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale);
+		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale, textShortEn);
 
     }
     
@@ -126,11 +128,12 @@ public class NotificationManager {
 		String locale = request.getUser().decideWichLanguageForUser();
 
 		String textShort = messageSource.getMessage("push.review.fail.short", new String[]{}, Locale.forLanguageTag(locale));
+		String textShortEn = messageSource.getMessage("push.review.fail.short", new String[]{}, Locale.ENGLISH);
 		String textLong = messageSource.getMessage("push.review.fail.long", new String[]{request.getTitle()}, Locale.forLanguageTag(locale));
 		String metaJSON = "{\"type\": \"REVIEW_FAIL\",\"partyID\": "+request.getParty().getId()+",\"requestID\": "+request.getId()+",\"notificationID\": "+notification.getId()+"}";
 
 		// PUSH NOTIFICATION
-		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale);
+		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale, textShortEn);
 
     }
     
@@ -152,12 +155,13 @@ public class NotificationManager {
     		String localeStr = user.decideWichLanguageForUser();
         	Locale locale = Locale.forLanguageTag(localeStr);
     		String subject = messageSource.getMessage("chat.message.new.head", new String[]{request.getTitle(), message.getTime()+""}, locale); // TODO: dateformat with locale
+    		String subjectEn = messageSource.getMessage("chat.message.new.head", new String[]{request.getTitle(), message.getTime()+""}, Locale.ENGLISH); // TODO: dateformat with locale
     		String body = messageSource.getMessage("chat.message.new.body", new String[]{fromUserName, messageTextPreview}, locale);
-    		String metaJSON = "{\"type\": \"CHAT_NEW\",\"partyID\": "+chat.getPartyId()+",\"chatID\": "+chat.getId()+",\"messageID\": "+message.getId()+",requestID: "+chat.getRequestId()+
+    		String metaJSON = "{\"type\": \"CHAT_NEW\",\"partyID\": "+chat.getPartyId()+",\"chatID\": "+chat.getId()+",\"messageID\": "+message.getId()+",requestID: "+chat.getRequest().getId()+
     				"}";
 
     		// PUSH NOTIFICATION
-    		sendPushAuto(user, subject, body, metaJSON, localeStr);
+    		sendPushAuto(user, subject, body, metaJSON, localeStr, subjectEn);
 
 		}
 
@@ -172,11 +176,12 @@ public class NotificationManager {
 		String locale = request.getUser().decideWichLanguageForUser();
 
 		String textShort = messageSource.getMessage("push.task.reward.short", new String[]{}, Locale.forLanguageTag(locale));
+		String textShortEn = messageSource.getMessage("push.task.reward.short", new String[]{}, Locale.ENGLISH);
 		String textLong = messageSource.getMessage("push.task.reward.long", new String[]{amount+"", request.getTitle()}, Locale.forLanguageTag(locale));
 		String metaJSON = "{\"type\": \"REWARD_GOT\",\"partyID\": "+request.getParty().getId()+",\"requestID\": "+request.getId()+",\"notificationID\": "+notification.getId()+"}";
 
 		// PUSH NOTIFICATION
-		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale);
+		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale, textShortEn);
 
     }
 
@@ -189,11 +194,12 @@ public class NotificationManager {
 		String locale = request.getUser().decideWichLanguageForUser();
 
 		String textShort = messageSource.getMessage("push.vote.payback.short", new String[]{}, Locale.forLanguageTag(locale));
+		String textShortEn = messageSource.getMessage("push.vote.payback.short", new String[]{}, Locale.ENGLISH);
 		String textLong = messageSource.getMessage("push.vote.payback.long", new String[]{request.getTitle()}, Locale.forLanguageTag(locale));
 		String metaJSON = "{\"type\": \"PAYBACK\",\"partyID\": "+request.getParty().getId()+",\"requestID\": "+request.getId()+",\"notificationID\": "+notification.getId()+"}";
 
 		// PUSH NOTIFICATION
-		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale);
+		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale, textShortEn);
 
     }
     
@@ -207,11 +213,12 @@ public class NotificationManager {
 		String locale = request.getUser().decideWichLanguageForUser();
 
 		String textShort = messageSource.getMessage("push.vote.done.short", new String[]{}, Locale.forLanguageTag(locale));
+		String textShortEn = messageSource.getMessage("push.vote.done.short", new String[]{}, Locale.ENGLISH);
 		String textLong = messageSource.getMessage("push.vote.done.long", new String[]{request.getTitle()}, Locale.forLanguageTag(locale));
 		String metaJSON = "{\"type\": \"SUPPORT_WIN\",\"partyID\": "+request.getParty().getId()+",\"requestID\": "+request.getId()+",\"notificationID\": "+notification.getId()+"}";
 
 		// PUSH NOTIFICATION
-		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale);
+		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale, textShortEn);
 
     }
     
@@ -236,11 +243,12 @@ public class NotificationManager {
         Notification notification = notificationService.create(NotificationType.TRANSFER_RECEIVED, user, party, new Long(amount));
 		
 		String textShort = messageSource.getMessage("email.konfetti.transfer.head", new String[]{amount+""}, Locale.forLanguageTag(locale));
+		String textShortEn = messageSource.getMessage("email.konfetti.transfer.head", new String[]{amount+""}, Locale.ENGLISH);
 		String textLong = messageSource.getMessage("email.konfetti.transfer.body", new String[]{amount+"", party.getName()}, Locale.forLanguageTag(locale));
 		String metaJSON = "{\"type\": \"TRANSFER_RECEIVED\",\"partyID\": "+party.getId()+",\"amount\": "+amount+",\"notificationID\": "+notification.getId()+"}";
 
 		// PUSH NOTIFICATION
-		sendPushAuto(user, textShort, textLong, metaJSON, locale);
+		sendPushAuto(user, textShort, textLong, metaJSON, locale, textShortEn);
 
 	}
 	
@@ -261,7 +269,7 @@ public class NotificationManager {
      * tries to send push or email - what ever works best if available
      * @param user
      */
-	private boolean sendPushAuto(User user, String textShort, String textLong, String metaJSON, String locale) {
+	private boolean sendPushAuto(User user, String textShort, String textLong, String metaJSON, String locale, String textShortEn) {
 
 		boolean wasSend = false;
 
@@ -269,7 +277,7 @@ public class NotificationManager {
 		if (pushManager.isAvaliable()) {
 	        if (user.getPushActive()) {
 	        	log.info("Try sending Notification by Push ...");
-	        	wasSend = sendPushPush(user,textShort,textLong,metaJSON,locale);
+	        	wasSend = sendPushPush(user,textShort,textLong,metaJSON,locale, textShortEn);
 	        } else {
 	        	log.info("PushService is Available - but user("+user.getId()+").getPushActive() --> FALSE");
 	        }
@@ -314,13 +322,14 @@ public class NotificationManager {
      *
      * @return
      */
-    private boolean sendPushPush(User user, String textShort, String textLong, String meta, String locale) {
+    private boolean sendPushPush(User user, String textShort, String textLong, String meta, String locale, String textShortEn) {
         
        if (pushManager.sendNotification(
                 PushManager.PLATFORM_ANDROID,
                 user.getPushID(),
                 textShort,
                 locale,
+                textShortEn,
                 meta)) {
 
            log.info("OK - PUSH SEND BY PUSH (" + user.getPushID() + ")");
@@ -335,5 +344,4 @@ public class NotificationManager {
 
     }
 
-    
 }

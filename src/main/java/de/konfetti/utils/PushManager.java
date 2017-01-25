@@ -42,8 +42,8 @@ public class PushManager {
 		if (this.pushAuth.trim().length()==0) return false;
 		return true;
 	}
-
-	public boolean sendNotification(int platformUSEFINALS, String userPushID, String textShort, String locale, String meta) {
+	
+	public boolean sendNotification(int platformUSEFINALS, String userPushID, String textShort, String locale, String textDefaultEn, String meta) {
 
 		if (!isAvaliable()) {
 			log.warn("PushManager not configured - not possible");
@@ -53,8 +53,9 @@ public class PushManager {
 		try {
 			// PREPARE JSON DATA
 
-			String json = "{\"app_id\": \""+this.pushId +"\",\"include_player_ids\":[\""+userPushID+"\"],\"data\": "+meta+",\"contents\": {\""+locale+"\": \""+textShort+"\"}}";
-
+			String defaultEnglish = "";
+			if (!"en".equals(locale)) defaultEnglish = ", \"en\": \""+textDefaultEn+"\"";
+			String json = "{\"app_id\": \""+this.pushId +"\",\"include_player_ids\":[\""+userPushID+"\"],\"data\": "+meta+",\"contents\": {\""+locale+"\": \""+textShort+"\""+defaultEnglish+"}}";
 
 			// HTTP REQUEST --> ONESIGNAL REST API
 			URL url = new URL("https://onesignal.com/api/v1/notifications");
