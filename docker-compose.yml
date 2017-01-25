@@ -86,7 +86,7 @@ services:
 #    env_file:
 #      - /konfetti/config/database.env
   konfettiHomepage:
-    image: konfetti/homepage
+    image: konfettiapp/homepage
     container_name: konfettiHomepage
     expose:
       - "80"
