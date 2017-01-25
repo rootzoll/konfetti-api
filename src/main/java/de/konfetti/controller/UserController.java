@@ -149,8 +149,8 @@ public class UserController {
         // TODO --> email multi lang by lang set in user
         try {
         	String subject = messageSource.getMessage("email.account.headline", new String[]{}, Locale.forLanguageTag(locale));
-        	String body = messageSource.getMessage("email.account.body", new String[]{user.getEMail(), user.getPassword()}, Locale.forLanguageTag(locale));
-            if (!mailService.sendMail(email, body ,subject , null)) {
+        	String body = messageSource.getMessage("email.account.body", new String[]{user.getEMail()}, Locale.forLanguageTag(locale));
+            if (!mailService.sendMail(email, subject, body, null)) {
                 log.warn("was not able to send eMail on account creation to(" + email + ")");
             }
         } catch (Exception e) {

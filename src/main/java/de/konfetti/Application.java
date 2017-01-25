@@ -55,9 +55,4 @@ public class Application extends SpringBootServletInitializer {
         source.setDefaultEncoding(CharEncoding.UTF_8);
         return source;
     }
-
-//    @Override
-//    public void addInterceptors(InterceptorRegistry registry) {
-//        registry.addInterceptor(localeChangeInterceptor());
-//    }
 }
