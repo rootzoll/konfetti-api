@@ -49,6 +49,9 @@ public class ChatController {
     private NotificationManager notificationManager;
 
     @Autowired
+	private ChatMapper chatMapper;
+
+    @Autowired
     public ChatController(final UserService userService, final ClientService clientService, final ChatService chatService, final MessageService messageService, final RequestService requestService, final MediaService mediaService) {
         this.userService = userService;
         this.clientService = clientService;
@@ -83,7 +86,7 @@ public class ChatController {
     public ResponseEntity<ChatDto> createChat(@RequestBody @Valid final ChatDto template, HttpServletRequest httpRequest) throws Exception {
 
         log.info("*** POST Create Chat ***");
-		
+
     	// check if user is allowed to create
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
 
@@ -118,7 +121,6 @@ public class ChatController {
 			if (memberUser==null) throw new Exception("member("+memberId+") on new chat does NOT EXIST");
 		}
     	// create new chat
-		ChatMapper chatMapper = new ChatMapper();
     	Chat chat = chatService.create(chatMapper.fromChatDto(template));
 
     	ChatDto chatDto = chatMapper.toChatDto(chat);
@@ -138,7 +140,7 @@ public class ChatController {
     public ResponseEntity<ChatDto> getChat(@PathVariable Long chatId, @RequestParam(value="lastTS",defaultValue="0") Long lastTS, HttpServletRequest httpRequest) throws Exception {
 
         log.info("*** GET Chat ("+chatId+") ***");
-    	
+
     	// try to load message and chat
     	Chat chat = chatService.findById(chatId);
     	if (chat==null) throw new Exception("chat("+chatId+") not found");
@@ -173,7 +175,6 @@ public class ChatController {
         	}
 
 			// C) add transient chat partner info
-			ChatMapper chatMapper = new ChatMapper();
 			chatDto =  chatMapper.toChatDto(chat);
 			chatDto.setMessages(messages);
 
@@ -204,7 +205,7 @@ public class ChatController {
     public Message addMessage(@PathVariable Long chatId, @RequestBody @Valid final Message template, HttpServletRequest httpRequest) throws Exception {
     	
         log.info("*** POST Message on Chat ("+chatId+") ***");
-    	
+
     	Set<Long> receivers = null;
     	long messageTS = System.currentTimeMillis();
     	
@@ -212,7 +213,7 @@ public class ChatController {
     	if (chat==null) throw new Exception("chat("+chatId+") not found");
     	
     	Client client = null;
-    	
+
     	// check if user is allowed to create
     	if (httpRequest.getHeader("X-CLIENT-ID")!=null) {
     		
@@ -281,9 +282,9 @@ public class ChatController {
 			User u = userService.findById(userId);
 			if (u!=null) receivingUsers.add(u);
 		}
-    	    	
+
     	// send notification
-    	this.notificationManager.sendNotification_TaskCHAT(chat, message, this.mediaService.findById(template.getItemId()), receivingUsers, client, requestService.findById(chat.getRequestId()));
+    	this.notificationManager.sendNotification_TaskCHAT(chat, message, this.mediaService.findById(template.getItemId()), receivingUsers, client, requestService.findById(chat.getRequest().getId()));
     	
         return message;
     }
@@ -293,7 +294,7 @@ public class ChatController {
     public Message actionMessage(@PathVariable Long chatId, @PathVariable Long messageId, HttpServletRequest httpRequest) throws Exception {
         
         log.info("*** GET Message ("+messageId+") on Chat ("+chatId+") ***");
-    	
+
     	// try to load message and chat
     	Chat chat = chatService.findById(chatId);
     	if (chat==null) throw new Exception("chat("+chatId+") not found");

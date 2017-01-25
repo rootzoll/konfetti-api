@@ -86,6 +86,9 @@ public class PartyController {
     @Autowired
     private RequestMapper requestMapper;
 
+    @Autowired
+    private ChatMapper chatMapper;
+
     private PartyMapper partyMapper;
 
     @Autowired
@@ -282,7 +285,7 @@ public class PartyController {
                         Notification noti = new Notification();
                         noti.setId(-System.currentTimeMillis());
                         noti.setParty(party);
-                        noti.setRef(chat.getRequestId());
+                        noti.setRef(chat.getRequest().getId());
                         noti.setType(NotificationType.CHAT_NEW);
                         noti.setUser(client.getUser());
                         noti.setTimeStamp(System.currentTimeMillis());
@@ -656,7 +659,6 @@ public class PartyController {
         if (chats == null) chats = new ArrayList<Chat>();
         List<ChatDto> relevantChats = new ArrayList<ChatDto>();
         ChatDto chatDto = new ChatDto();
-        ChatMapper chatMapper = new ChatMapper();
         for (Chat chat : chats) {
             if (!chat.chatContainsMessages()) continue;
             chatDto = chatMapper.toChatDto(chat);
@@ -955,7 +957,7 @@ public class PartyController {
                                 // try load chat
                                 Chat chat = chatService.findById(chatId);
                                 if (chat == null) throw new Exception("chat(" + chatId + ") not found");
-                                if (!chat.getRequestId().equals(request.getId()))
+                                if (!chat.getRequest().getId().equals(request.getId()))
                                     throw new Exception("chat(" + chatId + ") not on request(" + requestId + ")");
 
                                 // check if admin or author

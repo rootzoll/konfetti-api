@@ -111,7 +111,6 @@ public class RequestServiceImpl extends BaseService implements RequestService {
     public Request findById(long requestId) {
         return requestRepository.findOne(requestId);
     }
-    
 
 	@Override
 	public Long getNumberOfRequests() {

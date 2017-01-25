@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import static de.konfetti.data.NotificationType.*;
 import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
@@ -49,57 +50,48 @@ public class NotificationManager {
     /*
      * USE THE FOLLOWING PUBLIC METHODS FOR DOING NOTIFICATIONS
      */
-        
-    public void sendNotification_ReviewWAITING(Request request) {
-    	
-    	try {
-    	
-        	// check if this party needs a review process
-    		if (request.getParty().getReviewLevel() == REVIEWLEVEL_NONE) {
-    			log.info("sendNotification_ReviewWAITING: no notification because party has no review process");
-    			return;
-    		}
-        	
-        	// find all reviewer for this 
-    		List<User> reviewer = request.getParty().getReviewerUser();
-    		
-    		// if a party has no dedicated reviewers - use admin
-    		if (reviewer.isEmpty()) reviewer = request.getParty().getAdminUsers();
-    		
-    		// logic check
-    		if (reviewer.isEmpty()) log.warn("sendNotification_ReviewWAITING: party("+request.getParty().getId()+") has no admin user");
-    		
-    		// if more than 3 reviewers - TODO: find the last three active reviews
-    		if (reviewer.size()>3) {
-    			log.warn("TODO: reviewer list is bigger than 3 - sort by last active and just use the lastest 3 active");
-    			reviewer = reviewer.subList(0, 2);
-    		}
 
-    		// send notification to all reviewers
-    		for (User user : reviewer) {
-    			
-    			// TODO: decide to persist a party notification and link id in metaJSON
-    			
-    			// set text by locale of user
-    			String locale = user.decideWichLanguageForUser();
-    			
-    			String textShort = messageSource.getMessage("push.reviewer.short", new String[]{}, Locale.forLanguageTag(locale));
-    			String textLong = messageSource.getMessage("push.reviewer.long", new String[]{request.getParty().getName()}, Locale.forLanguageTag(locale));
-    			String metaJSON = "{\"type\": \"REVIEW_WAITING\",\"partyID\": "+request.getParty().getId()+",\"taskID\": "+request.getId()+"}";
+	public void sendNotification_ReviewWAITING(Request request) {
 
-				// push notification
-				sendPushAuto(user, textShort, textLong, metaJSON, locale);
+		// check if this party needs a review process
+		if (request.getParty().getReviewLevel() == REVIEWLEVEL_NONE) {
+			log.info("sendNotification_ReviewWAITING: no notification because party has no review process");
+			return;
+		}
 
-			}
-    		
-    		
-    	} catch (Exception e) {
-    		log.error("sendNotification_ReviewWAITING: FAILED TO PROCESS", e);
-    	}
-    	    	
-    }
-    
-    public void sendNotification_ReviewOK(Request request) {
+		// find all reviewer for this
+		List<User> reviewer = request.getParty().getReviewerUser();
+
+		// if a party has no dedicated reviewers - use admin
+		if (reviewer.isEmpty()) reviewer = request.getParty().getAdminUsers();
+
+		// get the last 3 active reviewers / admins
+		reviewer = reviewer.stream()
+				.sorted((o1, o2) -> Long.compare(o2.getLastActivityTS(), o1.getLastActivityTS()))
+				.limit(3)
+				.collect(Collectors.toList());
+
+		if (reviewer.isEmpty())
+			log.warn("sendNotification_ReviewWAITING: party(" + request.getParty().getId() + ") has no admin user");
+
+		// send notification to all reviewers
+		for (User user : reviewer) {
+			// TODO: decide to persist a party notification and link id in metaJSON
+
+			// set text by locale of user
+			String locale = user.decideWichLanguageForUser();
+
+			String textShort = messageSource.getMessage("push.reviewer.short", new String[]{}, Locale.forLanguageTag(locale));
+			String textLong = messageSource.getMessage("push.reviewer.long", new String[]{request.getParty().getName()}, Locale.forLanguageTag(locale));
+			String metaJSON = "{\"type\": \"REVIEW_WAITING\",\"partyID\": " + request.getParty().getId() + ",\"taskID\": " + request.getId() + "}";
+
+			// push notification
+			sendPushAuto(user, textShort, textLong, metaJSON, locale);
+		}
+
+	}
+
+	public void sendNotification_ReviewOK(Request request) {
 
     	log.info("sendNotification_ReviewOK to user");
 

@@ -4,6 +4,7 @@ import de.konfetti.data.enums.RequestStateEnum;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Data
@@ -30,7 +31,10 @@ public class Request {
     
 	private Long time;
 	
-	private Long[] mediaItemIds = {}; 
+	private Long[] mediaItemIds = {};
+
+	@OneToMany(mappedBy = "request", fetch = FetchType.LAZY, cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    private Set<Chat> chats;
     
     /*
      * Hard Copy
