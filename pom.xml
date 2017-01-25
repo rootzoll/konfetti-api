@@ -185,9 +185,9 @@
         </dependency>
 
         <dependency>
-            <groupId>biz.paluch.logging</groupId>
-            <artifactId>logstash-gelf</artifactId>
-            <version>1.10.0</version>
+            <groupId>org.logback-extensions</groupId>
+            <artifactId>logback-ext-loggly</artifactId>
+            <version>0.1.2</version>
         </dependency>
 
         <!--Testing Dependencies-->

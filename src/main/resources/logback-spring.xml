@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    <!--<springProfile name="docker">-->
-        <!--<include resource="./paluchGelfAppender.xml"/>-->
-    <!--</springProfile>-->
+    <springProfile name="docker">
+        <include resource="./logglyAppender.xml"/>
+    </springProfile>
     <jmxConfigurator/>
     <root level="info">
-        <!--<springProfile name="docker">-->
-            <!--<appender-ref ref="PALUCH_GELF_APPENDER" />-->
-        <!--</springProfile>-->
+        <springProfile name="docker">
+            <appender-ref ref="loggly" />
+        </springProfile>
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />
     </root>
