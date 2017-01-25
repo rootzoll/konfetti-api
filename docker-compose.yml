@@ -3,8 +3,6 @@ version: '2'
 networks:
   konfettiNetwork:
     external: false
-  graylogNetwork:
-    external: true
 
 volumes:
   konfettiDb:
@@ -21,7 +19,6 @@ services:
 #      - "8181:8181"
     networks:
       - konfettiNetwork
-      - graylogNetwork
     depends_on:
       - database
     volumes:
