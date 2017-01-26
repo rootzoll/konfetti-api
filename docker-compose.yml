@@ -27,7 +27,7 @@ services:
       - /konfetti/config/api.env
 
   konfettiApp:
-    image: konfetti/app
+    image: konfettiapp/app
     container_name: konfettiApp
     restart: unless-stopped
     expose:
