@@ -3,6 +3,11 @@ sudo: required
 services:
   - docker
 
+language: java
+
+jdk:
+  - oraclejdk8
+
 env:
   global:
     - secure: "pgf4j9JZzl0Ojf5iw9/cMY3qPLH7/poY2+Jelhvc1+h2AFEMQ5kOAz2eAEOhoZNMpJv2uO6EUEUWe7GKPCA693PzD6QmBefz9UzDX2Dr8yL18O/brdv6igNssvMySmhFqxVVhBeMEn8+pPO/tQtSVXPxVdr1YmLzwP7TpAllAs6JoFJPO4CfE+or0Bm6Ah2jer21imeFKDYbcI1PaYkyJFDV4NpUOzNFt0oRw9Awb2d0p5Fxnb78jkCJlVrb7zUmbdRrZOKxXkT5YIDAnonpwjPQuRAgFGJkOOk063pvmjackIKmr0tITy8e/hI8GmV44cfqos8D/MLak8tXwf86+ahdQTIqUqkiWspGLVTCeRUxKvW2AkZ7zQz0kOS7bgFjKQz0ydQhunDADA9qLwhHRlevJDb3JomzKX1Bm8D5agKMZjewYSr/Wgj9zO122JsGNgg0nUwHnxSJCWAmCubnM/ys+//Moa3Aun1qWDq/bTwGutNYUM1w23nTT4UopDZaYGCZNPIp3ywi22YxbMxAL05Cf9bJecGU/3fxrwUMYN/KiIbFxP63fV2MpmY/SlBTNrWWjam2YjO7ixRd7UZQN7LtV1bV2oyLMHft46kjnsB2XmKBvm+yecQYY7WRu+IxGU8EiZ3nI+v8OZKr3cM3ZWObe13zTC6ydX8HKxVQrs0="
