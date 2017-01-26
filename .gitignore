@@ -111,6 +111,10 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+# node_modules
 node
 node_modules
 src/main/resources/static/bower_components
+
+# docker-compose.override.yml / development or instance-specific confiruations
+docker-compose.override.yml
