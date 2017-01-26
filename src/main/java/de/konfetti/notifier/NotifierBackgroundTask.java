@@ -16,7 +16,6 @@ import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -152,7 +151,7 @@ public class NotifierBackgroundTask {
                             // do push notification
                         } else if (PUSHTYPE_PUSH.equals(typeOfPush)) {
                             log.info(" -> SEND PUSH");
-                            sendPushPush(notification);
+                            //sendPushPush(notification);
 
                             log.info(" -> OK - PUSH SEND BY EMAIL");
                             markNotificationAsPushed(notification, typeOfPush);
@@ -342,16 +341,11 @@ public class NotifierBackgroundTask {
         }
     }
 
-    /**
-     * sending push by push
-     *
-     * @param notification
-     * @return
-     */
+    /*
     private boolean sendPushPush(Notification notification) {
         User user = userService.findById(notification.getUser().getId());
         
-        	/*
+    
         // TODO multi lang --- see user setting
         pushManager.sendNotification(
                 PushManager.PLATFORM_ANDROID,
@@ -360,8 +354,9 @@ public class NotifierBackgroundTask {
                 "en", // locale
                 "{}");
         log.info("OK - PUSH SEND BY PUSH (" + user.getPushID() + ")");#
-        */
+ 
         return false;
     }
+    */
 
 }

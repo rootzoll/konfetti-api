@@ -157,7 +157,7 @@ public class NotificationManager {
     		String subject = messageSource.getMessage("chat.message.new.head", new String[]{request.getTitle(), message.getTime()+""}, locale); // TODO: dateformat with locale
     		String subjectEn = messageSource.getMessage("chat.message.new.head", new String[]{request.getTitle(), message.getTime()+""}, Locale.ENGLISH); // TODO: dateformat with locale
     		String body = messageSource.getMessage("chat.message.new.body", new String[]{fromUserName, messageTextPreview}, locale);
-    		String metaJSON = "{\"type\": \"CHAT_NEW\",\"partyID\": "+chat.getPartyId()+",\"chatID\": "+chat.getId()+",\"messageID\": "+message.getId()+",requestID: "+chat.getRequest().getId()+
+    		String metaJSON = "{\"type\": \"CHAT_NEW\",\"partyID\": "+chat.getPartyId()+",\"chatID\": "+chat.getId()+",\"messageID\": "+message.getId()+",\"requestID\": "+chat.getRequest().getId()+
     				"}";
 
     		// PUSH NOTIFICATION
