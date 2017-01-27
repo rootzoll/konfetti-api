@@ -1,4 +1,5 @@
 
+![alt tag](https://api.travis-ci.org/rootzoll/konfetti-api.svg?branch=master)
 
 # To start server with docker-compose
 
