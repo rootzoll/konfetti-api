@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <!--  
     <springProfile name="docker">
         <include resource="./logglyAppender.xml"/>
     </springProfile>
+    -->
     <jmxConfigurator/>
     <root level="warn">
+    	     <!--  
         <springProfile name="docker">
             <appender-ref ref="loggly" />
         </springProfile>
+        -->
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />
     </root>
