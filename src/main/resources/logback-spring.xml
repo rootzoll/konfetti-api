@@ -5,7 +5,7 @@
         <include resource="./logglyAppender.xml"/>
     </springProfile>
     <jmxConfigurator/>
-    <root level="info">
+    <root level="warn">
         <springProfile name="docker">
             <appender-ref ref="loggly" />
         </springProfile>
