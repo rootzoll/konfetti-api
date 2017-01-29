@@ -12,6 +12,7 @@ import de.konfetti.controller.vm.NotificationDto;
 import de.konfetti.controller.vm.PartyResponse;
 import de.konfetti.controller.vm.RequestVm;
 import de.konfetti.data.*;
+import de.konfetti.data.enums.PartyVisibilityEnum;
 import de.konfetti.data.mediaitem.MultiLang;
 import de.konfetti.service.*;
 import de.konfetti.utils.AccountingTools;
@@ -339,13 +340,15 @@ public class PartyController {
     
         // TODO: improve later by filter on GPS per search index
 
+    	// TODO: cache this (10sec) later - because its same for all users
         List<Party> foundParties = partyService.findByVisibility(VISIBILITY_PUBLIC);
+        foundParties.addAll(partyService.findByVisibility(PartyVisibilityEnum.VISIBILITY_PRIVATE));
+        
         List<Party> resultParties = new ArrayList<Party>();
 
         // TODO: fix this if it works again, at the moment no filtering by geo coordinates, does not work on server
 
-
-//		if ((latStr.equals("0.0")) && (lonStr.equals("0.0"))) {
+        // if ((latStr.equals("0.0")) && (lonStr.equals("0.0"))) {
 
         // return all parties when lat & lon not given
         log.info("return all parties");
@@ -398,12 +401,20 @@ public class PartyController {
         Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(request, clientService);
 
         if (client != null) {
+        	
             // force add parties the user is member of (if not already in list)
             User user = userService.findById(client.getUser().getId());
             if (user != null) {
-                if (!user.getActiveParties().isEmpty()) {
-                    // TODO: implement
-                    log.warn("PartyController getAllParties(): TODO: mustHaveParty to add to partylist");
+            	List<Party> partysUserIsActive = user.getActiveParties();
+                for (Party activeParty : partysUserIsActive) {
+                	boolean found = false;
+                    for (Party party : resultParties) {
+                    	if (party.getId().equals(activeParty.getId())) {
+                    		found = true;
+                    		break;
+                    	}
+            		}
+                    if (!found) resultParties.add(activeParty);
                 }
             }
 
