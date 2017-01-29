@@ -181,7 +181,7 @@ public class NotificationManager {
 		String metaJSON = "{\"type\": \"REWARD_GOT\",\"partyID\": "+request.getParty().getId()+",\"requestID\": "+request.getId()+",\"notificationID\": "+notification.getId()+"}";
 
 		// PUSH NOTIFICATION
-		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale, textShortEn);
+		sendPushAuto(user, textShort, textLong, metaJSON, locale, textShortEn);
 
     }
 

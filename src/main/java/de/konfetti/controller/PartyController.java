@@ -825,9 +825,8 @@ public class PartyController {
 
                 if (fromReview) {
                     // send notification to author
-                	log.info("set to open - from review (before)");
+                	log.info("set to open - from review");
                 	notificationManager.sendNotification_ReviewOK(request);
-                	log.info("set to open - from review (after)");
                 } else {
                 	log.info("set to open - not from review");
                 }
@@ -922,7 +921,7 @@ public class PartyController {
                                     if (!accountingService.transferBetweenAccounts(TransactionType.TASK_REWARD, requestAccountName, rewardeeAccountName, rewardPerPerson)) {
                                         log.error("FAIL payout reward(" + rewardPerPerson + ") from(" + requestAccountName + ") to " + rewardeeAccountName);
                                     } else {
-                                        log.info("OK payout reward(" + rewardPerPerson + ") from(" + requestAccountName + ") to " + rewardeeAccountName);
+                                        log.info("OK payout rewardPerPerson(" + rewardPerPerson + ") from requestAccount(" + requestAccountName + ") to rewardeeAccount(" + rewardeeAccountName+")");
                                         // send notification to author
                                         User userReward = userService.findById(userRewardId);
                                         notificationManager.sendNotification_TaskREWARD(userReward, request, rewardPerPerson);
@@ -934,8 +933,8 @@ public class PartyController {
                                     if ((payIn.getType() == TransactionType.TASK_SUPPORT) && (!AccountingTools.getAccountNameFromUserAndParty(request.getUser().getId(), request.getParty().getId()).equals(payIn.getFromAccount()))) {
                                         Long userIdFromAccountName = AccountingTools.getUserIdFromAccountName(payIn.getFromAccount());
                                         User user = userService.findById(userIdFromAccountName);
-                                        Long partyIdFromAccountName = AccountingTools.getPartyIdFromAccountName(payIn.getFromAccount());
-                                        Party party = partyService.findById(partyIdFromAccountName);
+                                        //Long partyIdFromAccountName = AccountingTools.getPartyIdFromAccountName(payIn.getFromAccount());
+                                        //Party party = partyService.findById(partyIdFromAccountName);
                                         notificationManager.sendNotification_VoteDONE(user, request);
                                     }
                                 }
