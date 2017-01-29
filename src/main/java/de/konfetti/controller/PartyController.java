@@ -286,7 +286,7 @@ public class PartyController {
                         Notification noti = new Notification();
                         noti.setId(-System.currentTimeMillis());
                         noti.setParty(party);
-                        noti.setRef(chat.getRequest().getId());
+                        noti.setRef(chat.getId());
                         noti.setType(NotificationType.CHAT_NEW);
                         noti.setUser(client.getUser());
                         noti.setTimeStamp(System.currentTimeMillis());
