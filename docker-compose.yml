@@ -57,16 +57,16 @@ services:
     networks:
       - konfettiNetwork
 
-  konfettiBootAdmin:
-    image: konfetti/spring-boot-admin
-    container_name: konfettiBootAdmin
-    restart: unless-stopped
-    expose:
-      - "8180"
-    networks:
-      - konfettiNetwork
-    env_file:
-      - /konfetti/config/spring-boot-admin.env
+#  konfettiBootAdmin:
+#    image: konfetti/spring-boot-admin
+#    container_name: konfettiBootAdmin
+#    restart: unless-stopped
+#    expose:
+#      - "8180"
+#    networks:
+#      - konfettiNetwork
+#    env_file:
+#      - /konfetti/config/spring-boot-admin.env
 
   database:
     image: mysql:5.7.12
@@ -109,11 +109,10 @@ services:
       - "konfettiApp:konfettiApp"
       - "konfettiAdmin:konfettiAdmin"
       - "konfettiCouponGenerator:konfettiCouponGenerator"
-      - "konfettiBootAdmin:konfettiBootAdmin"
+      # - "konfettiBootAdmin:konfettiBootAdmin"
       - "konfettiHomepage:konfettiHomepage"
-    volumes: # its a good idea to (re-)generate and store the Certificates outside of docker and mount in the locations.  config on file-name level is done in ./nginx/nginx.conf. everything else here: https://certbot.eff.org/#ubuntuxenial-nginx
+    volumes:
       - ./nginx:/etc/nginx
-      - /etc/letsencrypt:/etc/letsencrypt
     container_name: konfettiLoadbalancer
     networks:
       - konfettiNetwork

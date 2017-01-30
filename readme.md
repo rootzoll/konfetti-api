@@ -15,12 +15,44 @@ Install docker: https://www.digitalocean.com/community/tutorials/how-to-install-
 
 Install docker-compose: https://www.digitalocean.com/community/tutorials/how-to-install-docker-compose-on-ubuntu-16-04
 
-Install letsencrypt using `apt-get i letsencrypt`
+You need the konfetti-api repository for now, to bring up the services the same way as deployment but without SSL.
+For a deployment-setup complete with SSL see https://github.com/rootzoll/konfetti-serversetup .
 
-You will need the konfetti-api repository for now, to bring up the services.
+If you have docker and docker-compose on your system, the following command should be enough to set up the services:
 
-Run service with docker-compose in console
 `docker-compose up`
+
+# Application routes
+NGINX is configured to bundle the services to be accessible via https when deployed. In a development-context, access the applications on these adresses ([:port/0.0.0.0]->[docker-internal_address]):
+
+`:80/ -> http://konfettiHomepage:80/`
+
+`:80/app/ -> http://konfettiApp:80/`
+
+`:80/admin/ -> http://konfettiAdmin:80/`
+
+`:80/coupongenerator/ -> http://konfettiCouponGenerator:2342/`
+
+`:80,:8280/konfetti/api/ -> http://konfettiApi:8280/konfetti/api/`
+
+If you prefer other adresses, please place a docker-compose.override.yml in the project root directory to overwrite keys defined in docker-compose.yml like this:
+
+```
+version: '2'
+
+networks:
+  konfettiNetwork:
+    external: false
+  graylogNetwork:
+    external: false
+services:
+  konfettiApi:
+    ports: # ports will be reachable from outside docker
+      - "8000:8000"
+      - "8181:8181"
+    networks:
+      - konfettiNetwork
+```
 
 ## Troubleshooting
 
@@ -77,30 +109,6 @@ for your local environment
 to test if the server is running correctly, call the URL http://localhost:8280/konfetti/api/account
 
 should return something like this "{"clientId":"1","secret":"3915478b-f51d-4306-ab3b-fa7762f4c6bc","userId":"1"}"
-
-# Application routes
-NGINX is configured to bundle the various administration interfaces to be accessible via https, when deployed, the services are not reachable individually. Instead use these routes to access them ([:port/outside_route]->[docker-internal_address]):
-
-`:80,:443/ -> http://konfettiHomepage:80/`
-
-`:80,:443/app/ -> http://konfettiApp:80/`
-
-`:80,:443/admin/ -> http://konfettiAdmin:80/`
-
-`:80,:443/coupongenerator/ -> http://konfettiCouponGenerator:2342/`
-
-`:80,:443/bootadmin/ -> http://konfettiBootAdmin:8180/`
-
-`:80,:443,:8280/konfetti/api/ -> http://konfettiApi:8280/konfetti/api/`
-
-# SSL
-ssl is done via letsencrypt.org and certbot (ubuntu package https://certbot.eff.org/#ubuntuxenial-nginx).
-Inital certificate aquisition: Adapt and run the following command on the host system (everything is mounted into docker - the ngninx container will not start, if defined mounts or cert-files are not available. Uncomment if necessary)
-`$ letsencrypt certonly --webroot -w {pathToProjectFolder}/nginx/letsencrypt -d konfettiapp.de -d www.konfettiapp.de -d test.konfettiapp.de`
-This should generate the certificates.
-Afterwards run `letsencrypt renew --dry-run --agree-tos` to prepare automatic renewal.
-Then place this into root's cron (renews the certificates every 2 month and makes nginx reload the files):
-`* * * */2 * letsencrypt renew && pkill -HUP nginx`
 
 # Swagger Api Documentation
 For dev profile the swagger api documentation is build, accessable by
