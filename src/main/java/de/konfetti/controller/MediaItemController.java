@@ -111,7 +111,7 @@ public class MediaItemController {
     }
     
     @CrossOrigin(origins = "*")
-    @RequestMapping(value="/{mediaId}/image", method = RequestMethod.GET, produces = "image/*")
+    @RequestMapping(value="/{mediaId}/image", method = RequestMethod.GET)
     public ResponseEntity<InputStreamResource> getMediaAsImage(@PathVariable Long mediaId, HttpServletRequest httpRequest) throws Exception {
         
         log.info("*** GET Media As Image ***");
