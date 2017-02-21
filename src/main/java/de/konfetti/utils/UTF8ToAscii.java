@@ -9,7 +9,7 @@ public class UTF8ToAscii {
     public static String unicodeEscape(String s) {
     	
     	
-    return "?utf-8?b?"+org.apache.commons.codec.binary.Base64.encodeBase64String(s.getBytes())+"?=";
+    return "?utf-8?b?"+"W0tvbmZldHRpXSBIw6TDpMOkbG8gZU1haWwg"+"?=";
     	
     //return org.apache.commons.lang3.StringEscapeUtils.escapeJava(s);
     	
