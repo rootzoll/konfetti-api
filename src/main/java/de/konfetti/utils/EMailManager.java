@@ -98,7 +98,7 @@ public class EMailManager {
             helper.setReplyTo(replyToAddress);
             helper.setFrom(fromEmailAddress);
             helper.setText(bodyText);
-            mail.setSubject(subjectText, CharEncoding.UTF_8); //EMAIL_SUBJECT_TAG + " " + 
+            mail.setSubject(EMAIL_SUBJECT_TAG + " " + subjectText, CharEncoding.UTF_8);
             if (urlAttachment != null)
                 helper.addAttachment("KonfettiCoupons.pdf", new URLDataSource(new URL(urlAttachment)));
             javaMailSender.send(mail);
@@ -137,7 +137,8 @@ public class EMailManager {
             message.setTo(to);
             message.setReplyTo(replyToAddress);
             message.setFrom(fromEmailAddress);
-            message.setSubject(EMAIL_SUBJECT_TAG+" "+subject);
+            //message.setSubject(EMAIL_SUBJECT_TAG+" "+subject);
+            mimeMessage.setSubject(EMAIL_SUBJECT_TAG + " " + subject, CharEncoding.UTF_8);
             message.setText(content, isHtml);
             javaMailSender.send(mimeMessage);
             log.debug("Sent e-mail to User '{}'", to);
