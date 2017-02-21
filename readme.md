@@ -124,5 +124,3 @@ http://localhost:8280/swagger-ui.html
 Open Eclipse (tested with NEON). "File > New > Other" .. then select "Maven > Maven Project". Choose the path were you did the check-out from GIT.
 
 If you see Errors about missing log and getter/setters: The Java code uses the Lombok Lib (see pom.xml for version) https://projectlombok.org/download.html - you need to download the lombok.jar, close eclipse and start the JAR (double click) or "java -jar lombok.jar" - make sure to set the correct eclipse path with lombok install dialog.
-
-#this is a test
