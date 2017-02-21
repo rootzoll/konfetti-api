@@ -136,10 +136,12 @@ public class UserControllerTest extends BaseControllerTest {
                 .post(UserController.REST_API_MAPPING + "/reset_password/init")
                 .then().statusCode(200);
         
+        /*
         assertReceivedMessage(wiser)
                 .from(emailFrom)
                 .to(user.getEMail())
                 .withSubject(UTF8ToAscii.unicodeEscape(EMailManager.EMAIL_SUBJECT_TAG+" "+messageSource.getMessage("email.reset.title", null, Locale.ENGLISH)));
+    	*/
     }
 
     @Test
