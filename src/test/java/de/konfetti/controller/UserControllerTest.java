@@ -11,6 +11,7 @@ import de.konfetti.data.UserRepository;
 import de.konfetti.service.ClientService;
 import de.konfetti.service.PartyService;
 import de.konfetti.utils.EMailManager;
+import de.konfetti.utils.UTF8ToAscii;
 import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import org.junit.After;
@@ -134,11 +135,11 @@ public class UserControllerTest extends BaseControllerTest {
                 .body(user.getEMail())
                 .post(UserController.REST_API_MAPPING + "/reset_password/init")
                 .then().statusCode(200);
-
+        
         assertReceivedMessage(wiser)
                 .from(emailFrom)
                 .to(user.getEMail())
-                .withSubject(EMailManager.EMAIL_SUBJECT_TAG+" "+messageSource.getMessage("email.reset.title", null, Locale.ENGLISH));
+                .withSubject(UTF8ToAscii.unicodeEscape(EMailManager.EMAIL_SUBJECT_TAG+" "+messageSource.getMessage("email.reset.title", null, Locale.ENGLISH)));
     }
 
     @Test

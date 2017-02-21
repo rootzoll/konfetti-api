@@ -1,9 +1,5 @@
 package de.konfetti.utils;
 
-/**
- * Reads file in UTF-8 encoding and output to STDOUT in ASCII with unicode
- * escaped sequence for characters outside of ASCII.
- */
 public class UTF8ToAscii {
 	
     private static final char[] hexChar = {
@@ -11,6 +7,10 @@ public class UTF8ToAscii {
     };
 
     public static String unicodeEscape(String s) {
+    	
+    return org.apache.commons.lang3.StringEscapeUtils.escapeJava(s);
+    	
+    /*
 	StringBuilder sb = new StringBuilder();
 	for (int i = 0; i < s.length(); i++) {
 	    char c = s.charAt(i);
@@ -26,5 +26,7 @@ public class UTF8ToAscii {
 	    }
 	}
 	return sb.toString();
+	 */
+	
     }
 }
