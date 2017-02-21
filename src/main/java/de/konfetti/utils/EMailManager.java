@@ -98,7 +98,7 @@ public class EMailManager {
             helper.setReplyTo(replyToAddress);
             helper.setFrom(fromEmailAddress);
             helper.setText(bodyText);
-            mail.setSubject(EMAIL_SUBJECT_TAG + " " + subjectText, CharEncoding.UTF_8);
+            mail.setSubject(subjectText, CharEncoding.UTF_8); //EMAIL_SUBJECT_TAG + " " + 
             if (urlAttachment != null)
                 helper.addAttachment("KonfettiCoupons.pdf", new URLDataSource(new URL(urlAttachment)));
             javaMailSender.send(mail);
