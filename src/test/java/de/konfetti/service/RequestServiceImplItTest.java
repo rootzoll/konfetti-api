@@ -93,7 +93,7 @@ public class RequestServiceImplItTest {
         createdRequest.setTitle(modiefiedTitle);
         Long modifiedImageUrl = new Long(1234);
         createdRequest.setImageMediaID(modifiedImageUrl);
-        Request updatedRequest = requestService.update(createdRequest);
+        Request updatedRequest = requestService.updateDatabaseEntity(createdRequest);
 
         // assert all values correctly stored
         assertTrue("Party updated successfully", testHelper.equalRequests(updatedRequest, createdRequest));

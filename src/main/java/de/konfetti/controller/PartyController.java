@@ -586,7 +586,7 @@ public class PartyController {
     	
     	log.debug("updateRequest");
         controllerSecurityHelper.checkAdminLevelSecurity(httpRequest);
-        Request updateRequestEntity = requestService.update(requestMapper.fromRequestVm(request));
+        Request updateRequestEntity = requestService.updateOutsideEntity(requestMapper.fromRequestVm(request));
         RequestVm requestVm = requestMapper.toRequestVm(updateRequestEntity);
         requestVm.setKonfettiAmountReward(request.getKonfettiAmountReward());
         requestVm.setKonfettiAmountSupport(request.getKonfettiAmountSupport());
@@ -820,7 +820,7 @@ public class PartyController {
 
                 // set open & persists
                 request.setState(STATE_OPEN);
-                requestService.update(request);
+                requestService.updateDatabaseEntity(request);
                 log.info("request(" + requestId + ") set STATE to " + STATE_OPEN);
 
                 if (fromReview) {
@@ -846,7 +846,7 @@ public class PartyController {
 
                     // set processing & persists
                     request.setState(STATE_PROCESSING);
-                    requestService.update(request);
+                    requestService.updateDatabaseEntity(request);
                     log.info("request(" + requestId + ") set STATE to " + STATE_PROCESSING);
                 } else
                     // set rejected (by admin and reviewer)
@@ -857,7 +857,7 @@ public class PartyController {
 
                         // set processing & persists
                         request.setState(STATE_REJECTED);
-                        requestService.update(request);
+                        requestService.updateDatabaseEntity(request);
                         log.info("request(" + requestId + ") set STATE to " + STATE_REJECTED);
 
                         // publish info about update on public channel
@@ -942,7 +942,7 @@ public class PartyController {
 
                             // set processing & persists
                             request.setState(STATE_DONE);
-                            request = requestService.update(request);
+                            request = requestService.updateDatabaseEntity(request);
                             log.info("request(" + requestId + ") set STATE to " + STATE_DONE);
 
                             // publish info about update on public channel
@@ -1004,7 +1004,7 @@ public class PartyController {
 
                                     // remove media
                                     request.setMediaItemIds(Helper.remove(request.getMediaItemIds(), mediaId));
-                                    request = requestService.update(request);
+                                    request = requestService.updateDatabaseEntity(request);
                                     log.info("mediaItem(" + mediaId + ") removed from request(" + requestId + ")");
                                 } else
                                     // add media item to request
@@ -1032,7 +1032,7 @@ public class PartyController {
                                         Long[] itemIds = request.getMediaItemIds();
                                         itemIds = Helper.append(itemIds, mediaId);
                                         request.setMediaItemIds(itemIds);
-                                        request = requestService.update(request);
+                                        request = requestService.updateDatabaseEntity(request);
                                         log.info("mediaItem(" + mediaId + ") add to request(" + requestId + ")");
 
                                         // TODO Implement send notification to reviewer if media item still needs review

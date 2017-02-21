@@ -48,19 +48,26 @@ public class RequestServiceImpl extends BaseService implements RequestService {
     }
 
     @Override
-    public Request update(@NotNull Request request) {
+    public Request updateOutsideEntity(@NotNull Request request) {
         Objects.nonNull(request);
 
         Party dbParty = getPartyOrThrowError(request.getParty().getId());
 
         Request dbRequest = getRequestOrThrowError(dbParty.getId(), request.getId());
 
-        // update the fields TODO: could be done with entityManager merge??
         dbRequest.setTitle(request.getTitle());
         dbRequest.setImageMediaID(request.getImageMediaID());
         dbRequest.setTime(request.getTime());
+        dbRequest.setState(request.getState());
+        dbRequest.setSpokenLangs(request.getSpokenLangs());
 
         return requestRepository.saveAndFlush(dbRequest);
+    }
+    
+    @Override
+    public Request updateDatabaseEntity(@NotNull Request request) {
+        Objects.nonNull(request);
+        return requestRepository.saveAndFlush(request);
     }
 
     @Override

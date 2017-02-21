@@ -10,7 +10,11 @@ public interface RequestService {
 
     Request create(@NotNull Request request);
 
-    Request update(@NotNull Request request);
+    // use when updating a former request loaded from database
+    Request updateDatabaseEntity(@NotNull Request request);
+    
+    // use when updating a request generated from JSON or similar
+    Request updateOutsideEntity(@NotNull Request request);
 
     Request delete(@NotNull long requestId);
     
