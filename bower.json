@@ -1,7 +1,7 @@
 {
   "version": "0.0.0",
   "name": "konfetti-application",
-  "appPath": "src/main/resources/static/",
+  "appPath": "src/main/resources/static/konfetti/api/static/",
   "testPath": "src/test/javascript/spec",
   "dependencies": {
     "angular": "1.5.8",

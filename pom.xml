@@ -27,7 +27,7 @@
         <!--Used for CrossOrigin-->
   	    <docker.image.prefix>konfettiapp</docker.image.prefix>
         <spring-cloud.version>Brixton.RELEASE</spring-cloud.version>
-        <bower.components.path>src/main/resources/static/bower_components</bower.components.path>
+        <bower.components.path>src/main/resources/static/konfetti/api/static/bower_components</bower.components.path>
     </properties>
 
     <dependencyManagement>

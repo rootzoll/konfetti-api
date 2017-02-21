@@ -3,7 +3,7 @@ var gulp = require('gulp'),
 
 gulp.task('connect', function() {
     connect.server({
-        root: 'src/main/resources/static',
+        root: 'src/main/resources/static/konfetti/api/static',
         livereload: true,
         port: 3000
     });

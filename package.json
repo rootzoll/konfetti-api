@@ -5,7 +5,7 @@
   "private": true,
   "cacheDirectories": [
     "node_modules",
-    "src/main/resources/static/bower_components"
+    "src/main/resources/static/konfetti/api/static/bower_components"
   ],
   "devDependencies": {
     "bower": "1.7.9",
