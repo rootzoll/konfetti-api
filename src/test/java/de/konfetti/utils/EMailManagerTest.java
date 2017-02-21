@@ -48,7 +48,7 @@ public class EMailManagerTest extends BaseTest {
         assertReceivedMessage(wiser)
                 .from(eMailManager.getFromEmailAddress())
                 .to(toEmail)
-                .withSubject(EMailManager.EMAIL_SUBJECT_TAG+" test");
+                .withSubject(UTF8ToAscii.unicodeEscape(EMailManager.EMAIL_SUBJECT_TAG+" test"));
     }
 
 }
