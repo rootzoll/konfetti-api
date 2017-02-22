@@ -61,16 +61,16 @@
                 getColor: function (s) {
 
                     var idx;
-                    if (s <= 10) {
+                    if (s <= 5) {
                         idx = 0;
                     }
-                    else if (s <= 20) {
+                    else if (s <= 10) {
                         idx = 1;
                     }
-                    else if (s <= 30) {
+                    else if (s <= 15) {
                         idx = 2;
                     }
-                    else if (s <= 40) {
+                    else if (s <= 20) {
                         idx = 3;
                     }
                     else {
