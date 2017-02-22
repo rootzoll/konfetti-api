@@ -8,8 +8,7 @@
     PasswordResetFinish.$inject = ['$resource'];
 
     function PasswordResetFinish($resource) {
-        var service = $resource('konfetti/api/account/reset_password/finish', {}, {});
-
+        var service = $resource('../../../konfetti/api/account/reset_password/finish', {}, {});
         return service;
     }
 })();
