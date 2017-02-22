@@ -138,7 +138,7 @@ public class EMailManager {
             message.setReplyTo(replyToAddress);
             message.setFrom(fromEmailAddress);
             mimeMessage.setSubject(UTF8ToAscii.escapeDeutscheUmlaute(EMAIL_SUBJECT_TAG + " " + subject), CharEncoding.UTF_8);
-            message.setText(content);
+            message.setText(content, isHtml);
             javaMailSender.send(mimeMessage);
             log.debug("Sent e-mail to User '{}'", to);
         } catch (Exception e) {
