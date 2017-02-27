@@ -215,7 +215,7 @@ public class UserController {
     public UserResponse login(@RequestParam(value = "mail", defaultValue = "") String email,
                               @RequestParam(value = "pass", defaultValue = "") String pass) throws Exception {
 
-    	log.info("*** GET Login User ("+email+") ***");
+    	log.info("*** GET Login User ("+email+") ****");
     	
         pass = pass != null ? pass.trim() : pass;
 
