@@ -122,7 +122,8 @@ public class UserController {
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "*")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	@CrossOrigin(origins = "*")
     @PostMapping(produces = "application/json")
     public ResponseEntity<UserResponse> createUser(
             @RequestParam(value = "mail", defaultValue = "") String email,
@@ -310,7 +311,8 @@ public class UserController {
         return false;
     }
 
-    @CrossOrigin(origins = "*")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	@CrossOrigin(origins = "*")
     @PutMapping(value = "/{userId}", produces = "application/json")
     public ResponseEntity<UserResponse> updateUser(@RequestBody @Valid final User userInput, HttpServletRequest httpRequest) throws Exception {
         

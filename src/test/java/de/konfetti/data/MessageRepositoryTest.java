@@ -23,6 +23,7 @@ public class MessageRepositoryTest extends BaseTest {
     @Test
     public void findByEMail() throws Exception {
 		final Message message1 = createMessage(chatIdOne, 0L);
+		@SuppressWarnings("unused")
 		final Message message2 = createMessage(chatIdTwo, 0L);
 
 		List<Message> list = messageRepository.findByChatId(chatIdOne);
@@ -32,6 +33,7 @@ public class MessageRepositoryTest extends BaseTest {
 
     @Test
     public void findByChatAndTime() throws Exception {
+		@SuppressWarnings("unused")
 		final Message message1 = createMessage(chatIdOne, 1000L);
 		final Message message2 = createMessage(chatIdOne, 10000L);
 

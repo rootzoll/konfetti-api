@@ -44,7 +44,6 @@ public class RequestVmMaker {
         @Override
         public RequestVm instantiate(PropertyLookup<RequestVm> propertyLookup) {
             Long nullLongValue = null;
-            MediaItem nullMediaItem = null;
 
             RequestVm requestVm = new RequestVm();
             requestVm.setId(propertyLookup.valueOf(id, nullLongValue));

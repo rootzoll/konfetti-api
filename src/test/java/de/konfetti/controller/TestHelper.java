@@ -18,19 +18,22 @@ public class TestHelper {
     public TestHelper() {
     }
 
-    public User getUser(String username){
+    @SuppressWarnings("unchecked")
+	public User getUser(String username){
         String email = username + "@test.de";
         return make(an(ExampleUser).but(with(name, username), with(UserMaker.email, email.toLowerCase())));
     }
 
 
     public Party getParty(String partyName){
-        Party party = make(an(ExampleParty).but(with(PartyMaker.name, partyName)));
+        @SuppressWarnings("unchecked")
+		Party party = make(an(ExampleParty).but(with(PartyMaker.name, partyName)));
         party.setId(null);
         return party;
     }
 
-    public MediaItem getMediaItem(){
+    @SuppressWarnings("unchecked")
+	public MediaItem getMediaItem(){
         return make(an(ExampleMediaItem));
     }
 

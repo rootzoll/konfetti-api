@@ -1,8 +1,5 @@
 package de.konfetti.controller;
 
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,21 +21,21 @@ public class ServiceController {
     private Integer minimumAppVersionIos;
 
     public static final String REST_API_MAPPING = "konfetti/api/service";
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    //private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @GetMapping(value = "/health")
     ResponseEntity<?> health(){
-        return new ResponseEntity("UP", HttpStatus.OK);
+        return new ResponseEntity<String>("UP", HttpStatus.OK);
     }
 
     @GetMapping(value = "/minimumAppVersionAndroid")
     ResponseEntity<Integer> minimumAppVersionAndroid(){
-        return new ResponseEntity(minimumAppVersionAndroid, HttpStatus.OK);
+        return new ResponseEntity<Integer>(minimumAppVersionAndroid, HttpStatus.OK);
     }
 
     @GetMapping(value = "/minimumAppVersionIos")
     ResponseEntity<Integer> minimumAppVersionIos(){
-        return new ResponseEntity(minimumAppVersionIos, HttpStatus.OK);
+        return new ResponseEntity<Integer>(minimumAppVersionIos, HttpStatus.OK);
     }
 
 }

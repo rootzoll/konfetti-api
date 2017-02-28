@@ -148,7 +148,8 @@ public class UserControllerTest extends BaseControllerTest {
         String resetKey = "123456";
         user.setResetKey(resetKey);
         user.setResetDate(ZonedDateTime.now());
-        User persistedUser = userRepository.save(user);
+        @SuppressWarnings("unused")
+		User persistedUser = userRepository.save(user);
         KeyAndPasswordVM keyAndPasswordVM = new KeyAndPasswordVM(resetKey, "newPassword");
 
         myGiven()

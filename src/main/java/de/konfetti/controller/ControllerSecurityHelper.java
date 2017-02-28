@@ -143,9 +143,8 @@ public class ControllerSecurityHelper {
 			log.trace("CLIENT NOT FOUND");
 			try {
 				Thread.sleep(300); // security delay against brute force
-			} finally {
-				throw new IllegalArgumentException("ControllerSecurityHelper: No client found with id ("+clientId+") from IP("+req.getRemoteAddr()+")");
-			}
+			} catch (Exception e) {}
+			throw new IllegalArgumentException("ControllerSecurityHelper: No client found with id ("+clientId+") from IP("+req.getRemoteAddr()+")");
 		}
 		
 		// check if client has correct secret
@@ -153,9 +152,8 @@ public class ControllerSecurityHelper {
 			log.trace("WRONG SECRET");
 			try {
 				Thread.sleep(300); // security delay against brute force
-			} finally {
-				throw new IllegalArgumentException("ControllerSecurityHelper: Client(" + clientId + ") wrong secretGiven(" + clientSecret + ") should be secretIs(" + client.getSecret() + ") from IP(" + req.getRemoteAddr() + ")");
-			}
+			} catch (Exception e) {}
+			throw new IllegalArgumentException("ControllerSecurityHelper: Client(" + clientId + ") wrong secretGiven(" + clientSecret + ") should be secretIs(" + client.getSecret() + ") from IP(" + req.getRemoteAddr() + ")");
 		}
 
 		log.info("Check Client Security ... OK");

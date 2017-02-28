@@ -3,13 +3,11 @@ package de.konfetti.service;
 import de.konfetti.data.KonfettiTransaction;
 import de.konfetti.data.KonfettiTransactionRepository;
 import de.konfetti.data.TransactionType;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Slf4j
 @Service
 public class KonfettiTransactionServiceImpl extends BaseService implements KonfettiTransactionService {
 

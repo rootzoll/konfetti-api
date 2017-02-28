@@ -40,11 +40,14 @@ public class ChatControllerTest extends BaseControllerTest {
         UserResponse user = createUser("createChat@test.de", "test1234");
         UserResponse chatPartner = createUser("createChatPartner@test.de", "test1234");
 
-        PartyResponse party = createParty(make(an(ExamplePartyResponse).but(with(name, testName))));
-        RequestVm requestVm = make(an(ExampleRequestVm).but(with(userId, user.getId()), with(RequestVmMaker.partyId, party.getId())));
+        @SuppressWarnings("unchecked")
+		PartyResponse party = createParty(make(an(ExamplePartyResponse).but(with(name, testName))));
+        @SuppressWarnings("unchecked")
+		RequestVm requestVm = make(an(ExampleRequestVm).but(with(userId, user.getId()), with(RequestVmMaker.partyId, party.getId())));
         RequestVm requestResponse = createRequest(requestVm, user);
 
-        ChatDto chatDto = make(an(ExampleChatDto)
+        @SuppressWarnings("unchecked")
+		ChatDto chatDto = make(an(ExampleChatDto)
                 .but(with(hostId, user.getId()),
                         with(partyId, party.getId()),
                         with(requestId, requestResponse.getId()),

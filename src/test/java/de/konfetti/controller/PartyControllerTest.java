@@ -54,7 +54,8 @@ public class PartyControllerTest extends BaseControllerTest {
 
     @Test
     public void createParty() throws Exception {
-        PartyResponse party = make(an(ExamplePartyResponse).but(with(PartyResponseMaker.name, "createParty")));
+        @SuppressWarnings("unchecked")
+		PartyResponse party = make(an(ExamplePartyResponse).but(with(PartyResponseMaker.name, "createParty")));
         ValidatableResponse validatableResponse = myGiven()
                 .contentType(ContentType.JSON)
                 .body(party)
@@ -87,11 +88,13 @@ public class PartyControllerTest extends BaseControllerTest {
 
     @Test
     public void createRequest() throws IOException {
-        PartyResponse party = make(an(ExamplePartyResponse).but(with(PartyResponseMaker.name, "createRequest")));
+        @SuppressWarnings("unchecked")
+		PartyResponse party = make(an(ExamplePartyResponse).but(with(PartyResponseMaker.name, "createRequest")));
         PartyResponse partyResponse = createParty(party);
         UserResponse userResponse = createUser("createRequest", "createRequestPassword");
 
-        RequestVm requestToSend = make(an(ExampleRequestVm)
+        @SuppressWarnings("unchecked")
+		RequestVm requestToSend = make(an(ExampleRequestVm)
                 .but(with(userId, userResponse.getId()))
                 .but(with(partyId, partyResponse.getId()))
         );
@@ -112,11 +115,13 @@ public class PartyControllerTest extends BaseControllerTest {
 
     @Test
     public void updateRequest() throws IOException {
-        PartyResponse party = make(an(ExamplePartyResponse).but(with(PartyResponseMaker.name, "updateRequest")));
+        @SuppressWarnings("unchecked")
+		PartyResponse party = make(an(ExamplePartyResponse).but(with(PartyResponseMaker.name, "updateRequest")));
         PartyResponse partyResponse = createParty(party);
         UserResponse userResponse = createUser("updateRequest", "updateRequestPassword");
 
-        RequestVm requestToSend = make(an(ExampleRequestVm)
+        @SuppressWarnings("unchecked")
+		RequestVm requestToSend = make(an(ExampleRequestVm)
                 .but(with(userId, userResponse.getId()))
                 .but(with(partyId, partyResponse.getId()))
         );

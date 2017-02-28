@@ -111,7 +111,7 @@ public class RequestServiceImplItTest {
         Request testRequest = testHelper.getTestRequest1(party, user);
         Request createdRequest = requestService.create(testRequest);
 
-        Request deletedRequest = requestService.delete(createdRequest.getId());
+        requestService.delete(createdRequest.getId());
 
         // assert all values correctly stored
         // assertTrue("Request deleted successfully", testHelper.equalRequests(deletedRequest, testRequest));
@@ -123,12 +123,14 @@ public class RequestServiceImplItTest {
 
 
     private Party persistParty(String testName) {
-        Party testParty = make(an(ExampleParty).but(with(PartyMaker.name, testName)));
+        @SuppressWarnings("unchecked")
+		Party testParty = make(an(ExampleParty).but(with(PartyMaker.name, testName)));
         return partyService.create(testParty);
     }
 
     private User persistUser(String testName) {
-        User testUser = make(an(ExampleUser).but(with(name, testName)));
+        @SuppressWarnings("unchecked")
+		User testUser = make(an(ExampleUser).but(with(name, testName)));
         return userRepository.save(testUser);
     }
 

@@ -41,7 +41,7 @@ public class RequestServiceImplUnitTest {
         Party testParty1 = testHelper.getTestParty1();
         User user = testHelper.getUser("test");
         testParty1.setId(Long.MAX_VALUE);
-        Request createdRequest = requestService.create(testHelper.getTestRequest1(testParty1, user));
+        requestService.create(testHelper.getTestRequest1(testParty1, user));
     }
 
     @Test(expected = ServiceException.class)
@@ -52,7 +52,7 @@ public class RequestServiceImplUnitTest {
         when(partyRepository.findOne(testParty1.getId())).thenReturn(testParty1);
         Request testRequest1 = testHelper.getTestRequest1(testParty1, user);
         testRequest1.setId((long) 1);
-        Request createdRequest = requestService.create(testRequest1);
+        requestService.create(testRequest1);
     }
 
 }

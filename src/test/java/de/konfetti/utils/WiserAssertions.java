@@ -61,7 +61,7 @@ public class WiserAssertions {
         return unchecked(wiserMessage::getMimeMessage);
     }
 
-    private static Supplier<AssertionError> assertionError(String errorMessage, String... args) {
+    private static Supplier<AssertionError> assertionError(String errorMessage, String args) {
         return () -> new AssertionError(MessageFormat.format(errorMessage, args));
     }
 

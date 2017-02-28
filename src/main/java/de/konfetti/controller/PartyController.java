@@ -635,8 +635,8 @@ public class PartyController {
                     accountingService.transferBetweenAccounts(TransactionType.TASK_SUPPORT, AccountingTools.getAccountNameFromRequest(requestId), payIn.getFromAccount(), payIn.getAmount());
                     Long userIdFromAccountName = AccountingTools.getUserIdFromAccountName(payIn.getFromAccount());
                     User user = userService.findById(userIdFromAccountName);
-                    Long partyIdFromAccountName = AccountingTools.getPartyIdFromAccountName(payIn.getFromAccount());
-                    Party party = partyService.findById(partyIdFromAccountName);
+                    //Long partyIdFromAccountName = AccountingTools.getPartyIdFromAccountName(payIn.getFromAccount());
+                    //Party party = partyService.findById(partyIdFromAccountName);
                     this.notificationManager.sendNotification_VotePAYBACK(user, result, payIn.getAmount());
                 }
             }
