@@ -218,7 +218,7 @@ public class NotificationManager {
 		String metaJSON = "{\"type\": \"SUPPORT_WIN\",\"partyID\": "+request.getParty().getId()+",\"requestID\": "+request.getId()+",\"notificationID\": "+notification.getId()+"}";
 
 		// PUSH NOTIFICATION
-		sendPushAuto(request.getUser(), textShort, textLong, metaJSON, locale, textShortEn);
+		sendPushAuto(user, textShort, textLong, metaJSON, locale, textShortEn);
 
     }
     

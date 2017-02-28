@@ -838,8 +838,8 @@ public class PartyController {
                 msg.setData("{\"party\":" + request.getParty().getId() + ", \"request\":" + request.getId() + " ,\"state\":\"" + request.getState() + "\"}");
                 webSocket.convertAndSend("/out/updates", GSON.toJson(msg));
             } else
-                // set processing (by all)
-                if (action.equals(STATE_PROCESSING.toString())) {
+            // set processing (by all)
+            if (action.equals(STATE_PROCESSING.toString())) {
                     // check if pre-state is valid
                     if (!request.getState().equals(STATE_OPEN))
                         throw new Exception("request(" + requestId + ") with state(" + request.getState() + ") CANNOT set to '" + STATE_PROCESSING + "'");
@@ -848,9 +848,9 @@ public class PartyController {
                     request.setState(STATE_PROCESSING);
                     requestService.updateDatabaseEntity(request);
                     log.info("request(" + requestId + ") set STATE to " + STATE_PROCESSING);
-                } else
-                    // set rejected (by admin and reviewer)
-                    if (action.equals(STATE_REJECTED.toString())) {
+            } else
+            // set rejected (by admin and reviewer)
+            if (action.equals(STATE_REJECTED.toString())) {
                         // check if admin or reviewer
                         if ((!userIsPartyAdmin) && (!userIsPartyReviewer))
                             throw new Exception("request(" + requestId + ") author cannot set to rejected");
@@ -867,9 +867,9 @@ public class PartyController {
                         webSocket.convertAndSend("/out/updates", GSON.toJson(msg));
                         notificationManager.sendNotification_ReviewFAIL(request);
                         
-                    } else
-                        // do reward
-                        if (action.equals("reward")) {
+             } else
+             // do reward
+             if (action.equals("reward")) {
                             // needed json data
                             if ((json == null) || (json.length() == 0)) throw new Exception("minning parameter json");
                             List<Long> ids = new ArrayList<Long>();
@@ -950,9 +950,9 @@ public class PartyController {
                             msg.setCommand(CommandMessage.COMMAND_PARTYUPADTE);
                             msg.setData("{\"party\":" + request.getParty().getId() + ", \"request\":" + request.getId() + " ,\"state\":\"" + request.getState() + "\"}");
                             webSocket.convertAndSend("/out/updates", GSON.toJson(msg));
-                        } else
-                            // mute chat on request
-                            if (action.equals("muteChat")) {
+               } else
+               // mute chat on request
+               if (action.equals("muteChat")) {
                                 // needed json data
                                 if ((json == null) || (json.length() == 0))
                                     throw new Exception("minning parameter json");
@@ -981,9 +981,9 @@ public class PartyController {
 
                                 // TODO Implement send notification to muted chat user or add info as chat message
                                 log.warn("TODO: Implement send notification to muted chat user or add info as chat message");
-                            } else
-                                // delete media item from request
-                                if (action.equals("deleteMedia")) {
+                   } else
+                   // delete media item from request
+                   if (action.equals("deleteMedia")) {
                                     // needed json data --> the id of the media item to add
                                     if ((json == null) || (json.length() == 0))
                                         throw new Exception("missing parameter json");
@@ -1006,9 +1006,9 @@ public class PartyController {
                                     request.setMediaItemIds(Helper.remove(request.getMediaItemIds(), mediaId));
                                     request = requestService.updateDatabaseEntity(request);
                                     log.info("mediaItem(" + mediaId + ") removed from request(" + requestId + ")");
-                                } else
-                                    // add media item to request
-                                    if (action.equals("addMedia")) {
+                   } else
+                   // add media item to request
+                   if (action.equals("addMedia")) {
                                         // needed json data --> the id of the media item to add
                                         if ((json == null) || (json.length() == 0))
                                             throw new Exception("missing parameter json");
@@ -1037,9 +1037,9 @@ public class PartyController {
 
                                         // TODO Implement send notification to reviewer if media item still needs review
                                         log.warn("TODO: Implement send notification to reviewer if media item still needs review");
-                                    } else
-                                        // make a media item public (set as reviewed)
-                                        if (action.equals("publicMedia")) {
+                    } else
+                    // make a media item public (set as reviewed)
+                    if (action.equals("publicMedia")) {
                                             // needed json data --> the id of the media item to add
                                             if ((json == null) || (json.length() == 0))
                                                 throw new Exception("missing parameter json");
@@ -1067,10 +1067,10 @@ public class PartyController {
                                             item.setReviewed(REVIEWED_PUBLIC);
                                             mediaService.update(item);
                                             log.info("mediaItem(" + mediaId + ") is now public");
-                                        } else {
+                  } else {
                                             // unkown action
                                             throw new Exception("unkown action(" + action + ") on request(" + requestId + ")");
-                                        }
+                  }
         } else {
             log.warn("PartyController getRequest(" + requestId + ") --> NULL");
         }
