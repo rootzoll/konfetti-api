@@ -252,10 +252,10 @@ public class NotificationManager {
 
 	}
 	
-    public void sendNotification_PartyWelcome(User user, Party party) {
+    public Notification sendNotification_PartyWelcome(User user, Party party) {
 
     	// no push - just store notification to be displayed on party
-        notificationService.create(NotificationType.PARTY_WELCOME, user, party, 0L);
+        return notificationService.create(NotificationType.PARTY_WELCOME, user, party, 0L);
 
     }
 

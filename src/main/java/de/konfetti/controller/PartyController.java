@@ -12,7 +12,6 @@ import de.konfetti.controller.vm.NotificationDto;
 import de.konfetti.controller.vm.PartyResponse;
 import de.konfetti.controller.vm.RequestVm;
 import de.konfetti.data.*;
-import de.konfetti.data.enums.PartyVisibilityEnum;
 import de.konfetti.data.mediaitem.MultiLang;
 import de.konfetti.service.*;
 import de.konfetti.utils.AccountingTools;
@@ -38,6 +37,8 @@ import static de.konfetti.data.enums.MediaItemTypeEnum.TYPE_MULTILANG;
 import static de.konfetti.data.enums.PartyReviewLevelEnum.REVIEWLEVEL_NONE;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_DEACTIVATED;
 import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_PUBLIC;
+import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_PRIVATE;
+import static de.konfetti.data.enums.PartyVisibilityEnum.VISIBILITY_HIDDEN;
 import static de.konfetti.data.enums.RequestStateEnum.*;
 import static de.konfetti.data.enums.SendKonfettiModeEnum.*;
 
@@ -338,73 +339,89 @@ public class PartyController {
 
     	log.info("*** GET All Parties lat(" + latStr + ") lon(" + lonStr + ") ***");
     
-        // TODO: improve later by filter on GPS per search index
-
-    	// TODO: cache this (10sec) later - because its same for all users
-        List<Party> foundParties = partyService.findByVisibility(VISIBILITY_PUBLIC);
-        foundParties.addAll(partyService.findByVisibility(PartyVisibilityEnum.VISIBILITY_PRIVATE));
+  	
+    	/*
+    	 * Filter Parties by GPS and visibility 
+    	 * TODO: improve later by filter on GPS per search index or special mySQL search
+    	 */
+  
+    	// get all parties from database
+    	// do not cache because some data on party needs to be up to date
+    	List<Party> allParties = partyService.getAllParties();
+    	
+    	// 1. Filter by GPS
+        double lat = Double.parseDouble(latStr);
+		double lon = Double.parseDouble(lonStr);
+		   
+        log.info("Filter parties on GPS lat(" + lat + ") lon(" + lon + ")");
+        log.info("----------------------------------------------------");
+        List<Party> gpsMatchingParties = new ArrayList<Party>();
+        for (Party party : allParties) {
+        	
+        	// if party is not restricted to GPS just add
+        	if ((party.getLat()==null) || (party.getLon()==null) || (party.getMeters()<=0)) {
+    			log.info("party(" + party.getId() + "/"+party.getName()+") not GPS resticted --> IN");
+        		gpsMatchingParties.add(party);
+        		continue;
+        	}
+        	
+			// calculates distance in meters (and set on object)
+			double distanceMetersDouble = Helper.distInMeters(lat, lon, party.getLat(), party.getLon());
+			long distanceMetersLong = Math.round(distanceMetersDouble);
+			if (distanceMetersLong > Integer.MAX_VALUE) distanceMetersLong = Integer.MAX_VALUE;
+			int distanceMeters = (int) distanceMetersLong;
+			log.info("party(" + party.getId() + "/"+party.getName()+") with meterrange(" + party.getMeters() + ") has distance to user of meters(" + distanceMeters + ")");
+        
+			// check if user GPS is within party area or party is global
+			if (distanceMeters <= party.getMeters()) {
+				log.info("--> IN");
+				gpsMatchingParties.add(party);
+			} else {
+				log.info("--> OUT");
+			}      
+        
+        }
+        
+    	// 2. Filter by Visibility
+        log.info("Filter parties on Visibility");
+        log.info("----------------------------");
         
         List<Party> resultParties = new ArrayList<Party>();
+        for (Party party : gpsMatchingParties) {
+        	if (party.getVisibility()==VISIBILITY_PUBLIC) {
+    			log.info("party(" + party.getId() + "/"+party.getName()+") is PUBLIC --> IN");
+    			resultParties.add(party);
+        	} else
+            if (party.getVisibility()==VISIBILITY_PRIVATE) {
+    			log.info("party(" + party.getId() + "/"+party.getName()+") is PRIVATE --> IN");
+    			resultParties.add(party);	
+        	} else
+            if (party.getVisibility()==VISIBILITY_HIDDEN) {
+        		log.info("party(" + party.getId() + "/"+party.getName()+") is HIDDEN --> OUT");
+        	} else
+            if (party.getVisibility()==VISIBILITY_DEACTIVATED) {
+        		log.info("party(" + party.getId() + "/"+party.getName()+") is DEACTIVATED --> OUT");
+            } else {
+        		log.warn("party(" + party.getId() + "/"+party.getName()+") UNKOWN VISIBILITY ("+party.getVisibility()+")");
+            }  	
+        }
+		
 
-        // TODO: fix this if it works again, at the moment no filtering by geo coordinates, does not work on server
-
-        // if ((latStr.equals("0.0")) && (lonStr.equals("0.0"))) {
-
-        // return all parties when lat & lon not given
-        log.info("return all parties");
-
-        resultParties = foundParties;
-
-//		} else {
-//
-//			// filter parties when in reach of GPS
-//
-//			double lat = Double.parseDouble(latStr);
-//			double lon = Double.parseDouble(lonStr);
-//
-//			log.info("filter parties on lat(" + lat + ") lon(" + lon + ")");
-//
-//			for (Party party : allParties) {
-//
-//				// calc distance in meters (and set on object)
-//				double distanceMetersDouble = Helper.distInMeters(lat, lon, party.getLat(), party.getLon());
-//				long distanceMetersLong = Math.round(distanceMetersDouble);
-//				if (distanceMetersLong > Integer.MAX_VALUE) distanceMetersLong = Integer.MAX_VALUE;
-//				int distanceMeters = (int) distanceMetersLong;
-//
-//				log.info("party(" + party.getId() + ") with meterrange(" + party.getMeters() + ") has distance to user of meters(" + distanceMeters + ")");
-//
-//				// check if user GPS is within party area or party is global
-//				log.warn("TODO: Fix this geo filter later ... now just show every party");
-//				if ((distanceMeters <= party.getMeters()) || (party.getMeters() == 0)) {
-//
-//					log.info("--> IN");
-//
-//					// use meters field to set distance for user perspective
-//					party.setDistanceToUser(distanceMeters);
-//
-//					// add to result list
-//					resultParties.add(party);
-//				} else {
-//
-//					log.info("--> OUT");
-//
-//				}
-//
-//			}
-//
-//		}
-
+        /*
+         * Process Parties and package for delivery
+         */
+        
         List<PartyResponse> partyResponses = new ArrayList<>();
+        
         // try to personalize when client/user info is in header
-
         Client client = controllerSecurityHelper.getClientFromRequestWhileCheckAuth(request, clientService);
 
         if (client != null) {
         	
-            // force add parties the user is member of (if not already in list)
             User user = userService.findById(client.getUser().getId());
             if (user != null) {
+            	
+                // force add parties the user is member of (if not already in list)
             	List<Party> partysUserIsActive = user.getActiveParties();
                 for (Party activeParty : partysUserIsActive) {
                 	boolean found = false;
@@ -416,50 +433,61 @@ public class PartyController {
             		}
                     if (!found) resultParties.add(activeParty);
                 }
+                
+                // update activity on user (needed for statistics and services)
+                if (!user.wasUserActiveInLastMinutes(1)) {
+                    userService.updateActivity(user);
+                }
+                
             }
 
-            // update activity on user
-            if (!user.wasUserActiveInLastMinutes(1)) {
-                userService.updateActivity(user);
-            }
-
-
-            // for all parties
+            // process all result parties and put into response
             for (final Party party : resultParties) {
+            	
                 PartyResponse partyResponse = partyMapper.toPartyResponse(party);
-                final String accountName = AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), partyResponse.getId());
+                
+                if (user!=null) {
+                	
+                	final String accountName = AccountingTools.getAccountNameFromUserAndParty(client.getUser().getId(), partyResponse.getId());
 
-                // add accounting info
-                Account userAccountForParty = accountingService.findAccountByName(accountName);
+                	// add accounting info
+                	Account userAccountForParty = accountingService.findAccountByName(accountName);
 
-                // if user is new on party (has no account yet)
-                if (userAccountForParty == null) {
-                    log.info("New User(" + client.getUser().getId() + ") active on Party(" + partyResponse.getId() + ")");
+                	// if user is new on party (has no account yet)
+                	if (userAccountForParty == null) {
+                	
+                		log.info("New User(" + client.getUser().getId() + ") active on Party(" + partyResponse.getId() + ")");
+                	
+                		// create account
+                		if (!accountingService.createAccount(accountName)) {
+                			log.warn("Was not able to create balance account(" + accountName + ")");
+                		}
 
-                    // create account
-                    if (!accountingService.createAccount(accountName)) {
-                        log.warn("Was not able to create balance account(" + accountName + ")");
-                    }
+                        // transfer welcome balance
+                        if (partyResponse.getWelcomeBalance() > 0) {
+                            log.info("Transfer Welcome-Konfetti(" + partyResponse.getWelcomeBalance() + ") on Party(" + partyResponse.getId() + ") to User(" + client.getUser().getId() + ") with accountName(" + accountName + ")");
+                            Long userBalance = accountingService.addBalanceToAccount(TransactionType.USER_WELCOME, accountName, partyResponse.getWelcomeBalance());
+                            log.debug("userBalance(" + userBalance + ")");
+                        }
+                    	
+                        // make user member of party
+                        if (!user.getActiveParties().contains(party)) {
+                            user.getActiveParties().add(party);
+                            userService.update(user);
+                        }
+                    	
+                        // add welcome notification to result
+                        log.info("NOTIFICATION Welcome Paty (" + partyResponse.getId() + ")");
+                        if (party.getNotifications()==null) party.setNotifications(new ArrayList<Notification>());
+                        party.getNotifications().add(notificationManager.sendNotification_PartyWelcome(user, party));
 
-                    // make user member of party
-                    if (!user.getActiveParties().contains(party)) {
-                        user.getActiveParties().add(party);
-                        userService.update(user);
-                    }
-
-                    // welcome user
-                    if (partyResponse.getWelcomeBalance() > 0) {
-                        // transfer welcome konfetti
-                        log.info("Transfer Welcome-Konfetti(" + partyResponse.getWelcomeBalance() + ") on Party(" + partyResponse.getId() + ") to User(" + client.getUser().getId() + ") with accountName(" + accountName + ")");
-                        Long userBalance = accountingService.addBalanceToAccount(TransactionType.USER_WELCOME, accountName, partyResponse.getWelcomeBalance());
-                        log.debug("userBalance(" + userBalance + ")");
-                    }
-                    // show welcome notification
-                    log.info("NOTIFICATION Welcome Paty (" + partyResponse.getId() + ")");
-                    notificationManager.sendNotification_PartyWelcome(user, party);
+                	} else {
+                		log.debug("user known on party");
+                		partyResponse.setKonfettiCount(userAccountForParty.getBalance());
+                	}
+                	
                 } else {
-                    log.debug("user known on party");
-                    partyResponse.setKonfettiCount(userAccountForParty.getBalance());
+                	partyResponse.setKonfettiCount(0);
                 }
 
                 // disable statistics in this level
