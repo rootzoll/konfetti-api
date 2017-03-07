@@ -355,6 +355,7 @@ public class PartyController {
 		   
         log.info("Filter parties on GPS lat(" + lat + ") lon(" + lon + ")");
         log.info("----------------------------------------------------");
+        if (allParties.size()==0) log.info("(NO PARTIES In DB)");
         List<Party> gpsMatchingParties = new ArrayList<Party>();
         for (Party party : allParties) {
         	
@@ -385,6 +386,7 @@ public class PartyController {
     	// 2. Filter by Visibility
         log.info("Filter parties on Visibility");
         log.info("----------------------------");
+        if (gpsMatchingParties.size()==0) log.info("(NO PARTIES FROM GPS MATCH)");
         
         List<Party> resultParties = new ArrayList<Party>();
         for (Party party : gpsMatchingParties) {
@@ -421,7 +423,11 @@ public class PartyController {
             User user = userService.findById(client.getUser().getId());
             if (user != null) {
             	
+                log.info("FORCE ADD PARTIES USER IS ACTIVE ON");
+                log.info("-----------------------------------");
+                
                 // force add parties the user is member of (if not already in list)
+                boolean atLeastOnePartyAdded = false;
             	List<Party> partysUserIsActive = user.getActiveParties();
                 for (Party activeParty : partysUserIsActive) {
                 	boolean found = false;
@@ -431,8 +437,13 @@ public class PartyController {
                     		break;
                     	}
             		}
-                    if (!found) resultParties.add(activeParty);
+                    if (!found) {
+                    	resultParties.add(activeParty);
+                    	atLeastOnePartyAdded = true;
+                		log.info("IN <---- party(" + activeParty.getId() + "/"+activeParty.getName()+") because user in ACTIVE on");
+                    }
                 }
+                if (atLeastOnePartyAdded) log.info("(NO PARTY WAS FORCE ADDED)");
                 
                 // update activity on user (needed for statistics and services)
                 if (!user.wasUserActiveInLastMinutes(1)) {
