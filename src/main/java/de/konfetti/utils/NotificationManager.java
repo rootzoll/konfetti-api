@@ -325,7 +325,7 @@ public class NotificationManager {
     private boolean sendPushPush(User user, String textShort, String textLong, String meta, String locale, String textShortEn) {
         
        if (pushManager.sendNotification(
-                PushManager.PLATFORM_ANDROID,
+                PushManager.PLATFORM_ONESIGNAL,
                 user.getPushID(),
                 textShort,
                 locale,

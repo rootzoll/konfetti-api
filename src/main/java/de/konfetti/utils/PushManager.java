@@ -19,20 +19,13 @@ import java.net.URL;
 @Slf4j
 public class PushManager {
 
-	public static final int PLATFORM_ANDROID = 1;
-	public static final int PLATFORM_IOS = 1; 
+	public static final String PLATFORM_ONESIGNAL = "ONESIGNAL";
 
 	@Value("${konfetti.pushID}")
 	private String pushId = "";
 
-	// TODO: Bug https://github.com/rootzoll/konfetti-app/issues/84
 	@Value("${konfetti.pushAuth}")
 	private String pushAuth = "";
-
-	public static int mapUserPlatform(String pushSystem) {
-		// TODO map user.pushSystem values to this class finals
-		return PLATFORM_ANDROID;
-	}
 		
 	public boolean isAvaliable() {
 		log.info("PushManager: isAvaliable pushId("+this.pushId+") pushAuth("+this.pushAuth+")");
@@ -43,7 +36,7 @@ public class PushManager {
 		return true;
 	}
 	
-	public boolean sendNotification(int platformUSEFINALS, String userPushID, String textShort, String locale, String textDefaultEn, String meta) {
+	public boolean sendNotification(String platformUSEFINALS, String userPushID, String textShort, String locale, String textDefaultEn, String meta) {
 
 		if (!isAvaliable()) {
 			log.warn("PushManager not configured - not possible");
@@ -88,7 +81,7 @@ public class PushManager {
 				}
 				return false;
 			  } else {
-				log.info("OK PushNotification -> https://onesignal.com/api/v1/notifications");
+				log.info("OK PushNotification ("+this.pushId+") -> https://onesignal.com/api/v1/notifications");
 			  }
 
 			return true;

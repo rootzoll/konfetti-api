@@ -66,6 +66,7 @@ public class User {
 
     private Boolean pushActive = false;
     
+    // placeholder to support multiple push systems later on 
     private String pushSystem;
     
     private String pushID;
