@@ -488,7 +488,7 @@ public class PartyController {
                         }
                     	
                         // add welcome notification to result
-                        log.info("NOTIFICATION Welcome Paty (" + partyResponse.getId() + ")");
+                        log.info("NOTIFICATION Welcome Party (" + partyResponse.getId() + ")");
                         if (party.getNotifications()==null) party.setNotifications(new ArrayList<Notification>());
                         party.getNotifications().add(notificationManager.sendNotification_PartyWelcome(user, party));
 

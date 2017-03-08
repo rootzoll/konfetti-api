@@ -667,6 +667,16 @@ public class UserController {
         GpsConverter gpsConverter = new GpsConverter();
         return gpsConverter.fromZipCode(country, code);
     }
+    
+    @CrossOrigin(origins = "*")
+    @GetMapping(value = "/addr2gps", produces = "application/json")
+    public ResponseZip2Gps addr2Gps(@RequestParam(value = "q", defaultValue = "") String q) throws Exception {
+    	
+        log.info("*** GET ADDRESS 2 GPS  query("+q+") ***");
+    	
+        GpsConverter gpsConverter = new GpsConverter();
+        return gpsConverter.fromAddress(q);
+    }
 
     @CrossOrigin(origins = "*")
     @GetMapping(value = "/redeem/{code}", produces = "application/json")

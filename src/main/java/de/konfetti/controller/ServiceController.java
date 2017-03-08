@@ -37,5 +37,5 @@ public class ServiceController {
     ResponseEntity<Integer> minimumAppVersionIos(){
         return new ResponseEntity<Integer>(minimumAppVersionIos, HttpStatus.OK);
     }
-
+  
 }
