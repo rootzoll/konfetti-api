@@ -1,27 +1,26 @@
 sudo: required
-
 services:
-  - docker
-
+- docker
 language: java
-
 jdk:
-  - oraclejdk8
-
+- oraclejdk8
 env:
   global:
-    - secure: "pgf4j9JZzl0Ojf5iw9/cMY3qPLH7/poY2+Jelhvc1+h2AFEMQ5kOAz2eAEOhoZNMpJv2uO6EUEUWe7GKPCA693PzD6QmBefz9UzDX2Dr8yL18O/brdv6igNssvMySmhFqxVVhBeMEn8+pPO/tQtSVXPxVdr1YmLzwP7TpAllAs6JoFJPO4CfE+or0Bm6Ah2jer21imeFKDYbcI1PaYkyJFDV4NpUOzNFt0oRw9Awb2d0p5Fxnb78jkCJlVrb7zUmbdRrZOKxXkT5YIDAnonpwjPQuRAgFGJkOOk063pvmjackIKmr0tITy8e/hI8GmV44cfqos8D/MLak8tXwf86+ahdQTIqUqkiWspGLVTCeRUxKvW2AkZ7zQz0kOS7bgFjKQz0ydQhunDADA9qLwhHRlevJDb3JomzKX1Bm8D5agKMZjewYSr/Wgj9zO122JsGNgg0nUwHnxSJCWAmCubnM/ys+//Moa3Aun1qWDq/bTwGutNYUM1w23nTT4UopDZaYGCZNPIp3ywi22YxbMxAL05Cf9bJecGU/3fxrwUMYN/KiIbFxP63fV2MpmY/SlBTNrWWjam2YjO7ixRd7UZQN7LtV1bV2oyLMHft46kjnsB2XmKBvm+yecQYY7WRu+IxGU8EiZ3nI+v8OZKr3cM3ZWObe13zTC6ydX8HKxVQrs0="
-    - secure: "jgNfet/rL6VTuHIyMapf7TOUvbJVoR9tSTBGIMhouWz4O/a7rP7ivjm4qZIz5g+P1t42G75aYy5dDO3J6DHadioBao1HFnMLzfdQSgZp/Lv9edf/dksSkPBJiwuHNh8PzEPEX10E5++YHYSZTtl9MlJLCOv90uf4BOBoLA6mKlAkSPJAZvF46HWUhO0RcS+pSkDjBeTVViclH3xnvP7jpZRJXgan236fIlqhoZvw5TuI4J8w5OVJMT6+jHCIIPN6HkGOGZ6EsHSujXPqmUY+RUDXHt4gBYnxx+vsZ2Gx9X8Ahi3a7SyF5ekB/f9x9DtyuTSnP8tSXTZD7gRkRDi+5ofICFJRy4I3PPPXPgkohAkdsxJtzX0zFnSoe8JlbeF/iHcMi8JLC/ixbDYQUfT+ND4j63G8Sbmr6Yk7PtyyxcJX/VjfrRIl0gLvU5/q7AabCeLRxKIdXacEU8mR2iXnGzkcXcaZq/SpSPtosH912wEENDAUmbF68HlAXOUifWrGQlAyDxv04KzK1VGXqASzuz3XjLIPo06sVE/DclD30AY7XCft5ZPQGoD66b6pyRbUUrIFVdrgq1TaC9Wwp+xDVnyRTMMmTMGg93FR/I+8gnHWCUW3UuEbXeOB+ZMl9khAWvyDSwGzMvlDBOonti1goDI4rgtU1Oq2Dyn72dPqQoA="
-    - COMMIT=${TRAVIS_COMMIT::8}
-    - REPO=konfettiapp/api
-
+  - secure: pgf4j9JZzl0Ojf5iw9/cMY3qPLH7/poY2+Jelhvc1+h2AFEMQ5kOAz2eAEOhoZNMpJv2uO6EUEUWe7GKPCA693PzD6QmBefz9UzDX2Dr8yL18O/brdv6igNssvMySmhFqxVVhBeMEn8+pPO/tQtSVXPxVdr1YmLzwP7TpAllAs6JoFJPO4CfE+or0Bm6Ah2jer21imeFKDYbcI1PaYkyJFDV4NpUOzNFt0oRw9Awb2d0p5Fxnb78jkCJlVrb7zUmbdRrZOKxXkT5YIDAnonpwjPQuRAgFGJkOOk063pvmjackIKmr0tITy8e/hI8GmV44cfqos8D/MLak8tXwf86+ahdQTIqUqkiWspGLVTCeRUxKvW2AkZ7zQz0kOS7bgFjKQz0ydQhunDADA9qLwhHRlevJDb3JomzKX1Bm8D5agKMZjewYSr/Wgj9zO122JsGNgg0nUwHnxSJCWAmCubnM/ys+//Moa3Aun1qWDq/bTwGutNYUM1w23nTT4UopDZaYGCZNPIp3ywi22YxbMxAL05Cf9bJecGU/3fxrwUMYN/KiIbFxP63fV2MpmY/SlBTNrWWjam2YjO7ixRd7UZQN7LtV1bV2oyLMHft46kjnsB2XmKBvm+yecQYY7WRu+IxGU8EiZ3nI+v8OZKr3cM3ZWObe13zTC6ydX8HKxVQrs0=
+  - secure: jgNfet/rL6VTuHIyMapf7TOUvbJVoR9tSTBGIMhouWz4O/a7rP7ivjm4qZIz5g+P1t42G75aYy5dDO3J6DHadioBao1HFnMLzfdQSgZp/Lv9edf/dksSkPBJiwuHNh8PzEPEX10E5++YHYSZTtl9MlJLCOv90uf4BOBoLA6mKlAkSPJAZvF46HWUhO0RcS+pSkDjBeTVViclH3xnvP7jpZRJXgan236fIlqhoZvw5TuI4J8w5OVJMT6+jHCIIPN6HkGOGZ6EsHSujXPqmUY+RUDXHt4gBYnxx+vsZ2Gx9X8Ahi3a7SyF5ekB/f9x9DtyuTSnP8tSXTZD7gRkRDi+5ofICFJRy4I3PPPXPgkohAkdsxJtzX0zFnSoe8JlbeF/iHcMi8JLC/ixbDYQUfT+ND4j63G8Sbmr6Yk7PtyyxcJX/VjfrRIl0gLvU5/q7AabCeLRxKIdXacEU8mR2iXnGzkcXcaZq/SpSPtosH912wEENDAUmbF68HlAXOUifWrGQlAyDxv04KzK1VGXqASzuz3XjLIPo06sVE/DclD30AY7XCft5ZPQGoD66b6pyRbUUrIFVdrgq1TaC9Wwp+xDVnyRTMMmTMGg93FR/I+8gnHWCUW3UuEbXeOB+ZMl9khAWvyDSwGzMvlDBOonti1goDI4rgtU1Oq2Dyn72dPqQoA=
+  - COMMIT=${TRAVIS_COMMIT::8}
+  - REPO=konfettiapp/api
 script:
-  - ./mvnw clean compile
-  - ./mvnw verify
-  - docker build -t $REPO .
-  - docker login -u $DOCKER_USER -p $DOCKER_PASS
-  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
-  - docker build -f Dockerfile -t $REPO:$COMMIT .
-  - docker tag $REPO:$COMMIT $REPO:$TAG
-  - docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
-  - docker push $REPO
+- ./mvnw clean compile
+- ./mvnw verify
+- docker build -t $REPO .
+- docker login -u $DOCKER_USER -p $DOCKER_PASS
+- export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH;
+  fi`
+- docker build -f Dockerfile -t $REPO:$COMMIT .
+- docker tag $REPO:$COMMIT $REPO:$TAG
+- docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
+- docker push $REPO
+notifications:
+  slack:
+    secure: AUtOcsKAy51HW7v/glG6w4+Ig8XscHalAPNzfVCMWLgozsJ23up+U+U7wuWFsM0knEOBR8dsNqHbLKYArI8yfhApEXf7HBwN/Ddg4NGzynVLtohuJscs3w+rQV/qHE2HClDkJfZgK2RmFCKqICwuysZfQegDCRe9RWnD8vjjpxA3m2zlaEb1Ejs4+1WwIj6nhS0auE2obIpxQ2+HWFXWxEGFvcP8nQUIzgmolXjr0aTdBVPwmPY6mxwasGGcfSXtZ38zHUT6J8C7Wd2LjncISjdcYw55a2LZBR+flD5jvq30qVd1ixnLWs3j+z8FffA+GOdaXf146Jo6Sk4mE9Pt54bE+7Q0U8j91kQu7GmlReioAUPFSD0r5aNEAPKmPWaaPVk/anrwaqO4yZiOV/2n5EetMviPIUT9WBv65JyhlmOsuJ2yfykxgVnTZEG8eIBn8Gru4mCXxLGHkAskTYm6aUxmXYuOLK7UpkAxP3yVu6dx0Y9RCaacN0okUXKOmmQRh1buV1qGHdBFTDlfZ/rq9I9IMkcBNgzQjqwp6ZpNSHLETwmkrtdVgA58amQya8UhISY/eTS8P0THvnfJwWHh8EJ3K5jQ0oHEw5d3ke/dM4cmenCB++HUJP0OP4vZKoeXbrjqwLijKFR9sRstj2riOvd8gc1K2pzO5uVTgYYlasA=
