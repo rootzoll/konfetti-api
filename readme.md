@@ -18,11 +18,15 @@ Install docker-compose: https://www.digitalocean.com/community/tutorials/how-to-
 You need the konfetti-api repository for now, to bring up the services the same way as deployment but without SSL.
 For a deployment-setup complete with SSL see https://github.com/rootzoll/konfetti-serversetup .
 
-If you have docker and docker-compose on your system, the following command should be enough to set up the services:
+Additionally, you will need to have maven set up on your system, to be able to compile the api-container (if you do not want to build the api-container, you can change docker-compose.yml to get the latest image instead).
+
+If you have the necessary tools on your system, the following two commands should be enough to set up the services:
+
+`./mvnw clean package -DskipTests`
 
 `docker-compose up`
 
-# Application routes
+## Application routes
 NGINX is configured to bundle the services to be accessible via https when deployed. In a development-context, access the applications on these adresses ([:port/0.0.0.0]->[docker-internal_address]):
 
 `:80/ -> http://konfettiHomepage:80/`
@@ -35,15 +39,13 @@ NGINX is configured to bundle the services to be accessible via https when deplo
 
 `:80,:8280/konfetti/api/ -> http://konfettiApi:8280/konfetti/api/`
 
-If you prefer other adresses, please place a docker-compose.override.yml in the project root directory to overwrite keys defined in docker-compose.yml like this:
+If you prefer other addresses, please place a docker-compose.override.yml in the project root directory to overwrite keys defined in docker-compose.yml like this:
 
 ```
 version: '2'
 
 networks:
   konfettiNetwork:
-    external: false
-  graylogNetwork:
     external: false
 services:
   konfettiApi:

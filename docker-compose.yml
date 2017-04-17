@@ -9,8 +9,9 @@ volumes:
     external: false
 
 services:
-  konfettiApi:
-    image: konfetti/api
+  konfettiapi:
+    build: .
+    # image: konfetti/api
     container_name: konfettiApi
     restart: unless-stopped
     expose:
@@ -21,13 +22,15 @@ services:
       - database
     volumes:
       - /konfetti/logs:/logs
+      - ./konfetti/config:/konfetti/config
     environment:
       SPRING_PROFILES_ACTIVE: docker
     env_file:
       - /konfetti/config/api.env
 
-  konfettiApp:
-    image: konfettiapp/app
+  konfettiapp:
+    build: ../konfetti-app/
+#    image: konfettiapp/app
     container_name: konfettiApp
     restart: unless-stopped
     expose:
@@ -35,10 +38,11 @@ services:
     networks:
       - konfettiNetwork
     depends_on:
-      - konfettiApi
+      - konfettiapi
 
-  konfettiAdmin:
-    image: konfetti/admin
+  konfettiadmin:
+    # image: konfetti/admin
+    build: ../konfetti-admin
     container_name: konfettiAdmin
     restart: unless-stopped
     expose:
@@ -46,10 +50,11 @@ services:
     networks:
       - konfettiNetwork
     depends_on:
-      - konfettiApi
+      - konfettiapi
 
-  konfettiCouponGenerator:
-    image: konfetti/couponservice
+  konfetticoupongenerator:
+    build: ../konfetti-coupongenerator/
+#    image: konfetti/couponservice
     container_name: konfettiCouponService
     restart: unless-stopped
     expose:
@@ -85,14 +90,16 @@ services:
       - konfettiDb:/var/lib/mysql
 #    env_file:
 #      - /konfetti/config/database.env
-  konfettiHomepage:
-    image: konfettiapp/homepage
+  konfettihomepage:
+    # image: konfettiapp/homepage
+    build: ../konfetti-homepage
     container_name: konfettiHomepage
     expose:
       - "80"
     networks:
       - konfettiNetwork
-  konfettiLoadbalancer:
+
+  konfettiloadbalancer:
     image: nginx
     ports:
       - "80:80" # legacy
@@ -105,12 +112,12 @@ services:
 #      - "8180:8180" #bootAdmin moved to :443/bootadmin
 #      - "3307:3306" #database only inside compose
     links:
-      - "konfettiApi:konfettiApi"
-      - "konfettiApp:konfettiApp"
-      - "konfettiAdmin:konfettiAdmin"
-      - "konfettiCouponGenerator:konfettiCouponGenerator"
+      - "konfettiapi:konfettiapi"
+      - "konfettiapp:konfettiapp"
+      - "konfettiadmin:konfettiadmin"
+      - "konfetticoupongenerator:konfetticoupongenerator"
       # - "konfettiBootAdmin:konfettiBootAdmin"
-      - "konfettiHomepage:konfettiHomepage"
+      - "konfettihomepage:konfettihomepage"
     volumes:
       - ./nginx:/etc/nginx
     container_name: konfettiLoadbalancer
