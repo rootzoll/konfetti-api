@@ -112,6 +112,16 @@ to test if the server is running correctly, call the URL http://localhost:8280/k
 
 should return something like this "{"clientId":"1","secret":"3915478b-f51d-4306-ab3b-fa7762f4c6bc","userId":"1"}"
 
+## Translations
+
+To work together easily on translations we created this tool: https://github.com/rootzoll/angular-translate-sheet-export
+
+Its a script for a Google Sheet that contains all i18n strings and exports it so that updates and translation extensions can be easily transferred into the konfetti server. See project ReadMe for instructions. 
+
+Link to the Google Translation Sheet (Read Only) : https://docs.google.com/spreadsheets/d/1AO5c7H3h25GyNeIslCLgbcpuxtnJA3stFfu4b4lThRM/edit?usp=sharing
+
+To help on the translations get an invite to the Google Sheet by sending an email to chrtistian@konfettiapp.de
+
 # Swagger Api Documentation
 For dev profile the swagger api documentation is build, accessable by
 
